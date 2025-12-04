@@ -19,7 +19,7 @@ Read all session documents:
 - `specs/[current-session]/spec.md` - Requirements
 - `specs/[current-session]/tasks.md` - Task checklist
 - `specs/[current-session]/implementation-notes.md` - Progress log
-- `.spec_system/state.json` - Current session
+- `state.json` - Current session
 
 ### 2. Run Validation Checks
 

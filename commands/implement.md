@@ -19,7 +19,7 @@ Read the following files:
 - `specs/[current-session]/spec.md` - Full specification
 - `specs/[current-session]/tasks.md` - Task checklist
 - `specs/[current-session]/implementation-notes.md` - Progress log (if exists)
-- `.spec_system/state.json` - Current session
+- `state.json` - Current session
 
 ### 2. Initialize Implementation Notes
 

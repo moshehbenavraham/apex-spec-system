@@ -17,7 +17,7 @@ Create a detailed, sequenced task list (15-30 tasks) for implementing the sessio
 
 Read the current session spec:
 - `specs/[current-session]/spec.md` - Full specification
-- `.spec_system/state.json` - Get current session ID
+- `state.json` - Get current session ID
 
 ### 2. Analyze Requirements
 

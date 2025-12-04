@@ -1,0 +1,240 @@
+---
+name: Apex Spec Workflow
+description: This skill should be used when the user asks about "spec system", "session workflow", "nextsession", "sessionspec", "implement session", "validate session", "phase build", "session scope", "task checklist", or when working in a project containing state.json and specs/ directory. Provides guidance for specification-driven AI development workflows.
+version: 1.0.0
+---
+
+# Apex Spec Workflow
+
+A specification-driven workflow system for AI-assisted development that breaks large projects into manageable 2-4 hour sessions with 15-30 tasks each.
+
+## Core Philosophy
+
+**1 session = 1 spec = 2-4 hours (15-30 tasks)**
+
+Break large projects into manageable, well-scoped implementation sessions that fit within AI context windows and human attention spans.
+
+## The 8-Command Workflow
+
+Execute commands in this sequence:
+
+```
+/init         ->  Set up spec system in project (run once)
+      |
+      v
+/nextsession  ->  Analyze project, recommend next feature
+      |
+      v
+/sessionspec  ->  Convert to formal specification
+      |
+      v
+/tasks        ->  Generate 15-30 task checklist
+      |
+      v
+/implement    ->  AI-guided task-by-task implementation
+      |
+      v
+/validate     ->  Verify session completeness
+      |
+      v
+/updateprd    ->  Sync PRD, mark session complete
+      |
+      v
+/phasebuild   ->  (optional) Create new phase structure
+```
+
+## Directory Structure
+
+Projects using this system follow this layout:
+
+```
+project/
+├── state.json              # Project state tracking
+├── PRD/                    # Product requirements
+│   ├── PRD.md              # Master PRD
+│   └── phase_NN/           # Phase definitions
+├── specs/                  # Implementation specs
+│   └── phaseNN-sessionNN-name/
+│       ├── spec.md
+│       ├── tasks.md
+│       ├── implementation-notes.md
+│       └── validation.md
+├── templates/              # Document templates
+├── scripts/                # Bash automation
+└── archive/                # Completed work
+```
+
+## Session Naming Convention
+
+**Format**: `phaseNN-sessionNN-name`
+
+- `phaseNN`: 2-digit phase number (phase00, phase01)
+- `sessionNN`: 2-digit session number (session01, session02)
+- `name`: lowercase-hyphenated description
+
+**Examples**:
+- `phase00-session01-project-setup`
+- `phase01-session03-user-authentication`
+- `phase02-session08b-refinements`
+
+## Session Scope Rules
+
+### Hard Limits (Reject if Exceeded)
+
+| Limit | Value |
+|-------|-------|
+| Maximum tasks | 30 |
+| Maximum duration | 4 hours |
+| Objectives | Single clear objective |
+
+### Ideal Targets
+
+| Target | Value |
+|--------|-------|
+| Task count | 15-25 (sweet spot: 20-25) |
+| Duration | 2-3 hours |
+| Focus | MVP only |
+
+### MVP vs Full Feature
+
+| Aspect | MVP (Include) | Full (Defer) |
+|--------|---------------|--------------|
+| Core logic | Essential functionality | Edge cases |
+| Error handling | Happy path + basic errors | All edge cases |
+| UI | Functional | Polish, animations |
+| Testing | Happy path + 1 error case | Comprehensive |
+| Config | Hardcoded/simple | Full configurability |
+
+## Task Design
+
+### Task Format
+
+```
+- [ ] TNNN [SNNMM] [P] Action verb + what + where (`path/to/file`)
+```
+
+Components:
+- `TNNN`: Sequential task ID (T001, T002, ...)
+- `[SNNMM]`: Session reference (S0103 = Phase 01, Session 03)
+- `[P]`: Optional parallelization marker
+- Description: Action verb + clear description
+- Path: File being created/modified
+
+### Task Categories
+
+1. **Setup** (2-4 tasks): Environment, directories, config
+2. **Foundation** (4-8 tasks): Core types, interfaces, base classes
+3. **Implementation** (8-15 tasks): Main feature logic
+4. **Testing** (3-5 tasks): Tests, validation, verification
+
+### Parallelization
+
+Mark tasks `[P]` when they:
+- Create independent files
+- Don't depend on each other's output
+- Can be done in any order
+
+## Critical Requirements
+
+### ASCII Encoding (Non-Negotiable)
+
+All files must use ASCII-only characters (0-127):
+- NO Unicode characters
+- NO emoji
+- NO smart quotes - use straight quotes (" ')
+- NO em-dashes - use hyphens (-)
+- Unix LF line endings only (no CRLF)
+
+Validate with:
+```bash
+file filename.txt        # Should show: ASCII text
+grep -P '[^\x00-\x7F]' filename.txt  # Should return nothing
+```
+
+### Over-Arching Rules
+
+- Complete one session at a time before starting next
+- Update task checkboxes immediately as work progresses
+- Follow workflow sequence - resist scope creep
+- Read spec.md and tasks.md before implementing
+
+## State Tracking
+
+The `state.json` file tracks project progress:
+
+```json
+{
+  "version": "2.0",
+  "project_name": "Project Name",
+  "current_phase": 0,
+  "current_session": null,
+  "phases": {
+    "0": {
+      "name": "Foundation",
+      "status": "in_progress",
+      "session_count": 5
+    }
+  },
+  "completed_sessions": [],
+  "next_session_history": []
+}
+```
+
+## Command Quick Reference
+
+| Command | Purpose | Input | Output |
+|---------|---------|-------|--------|
+| `/init` | Initialize spec system | Project info | state.json, PRD/, specs/ |
+| `/nextsession` | Recommend next session | state.json, PRD | NEXT_SESSION.md |
+| `/sessionspec` | Create specification | NEXT_SESSION.md | specs/.../spec.md |
+| `/tasks` | Generate task list | spec.md | specs/.../tasks.md |
+| `/implement` | Guide implementation | spec.md, tasks.md | implementation-notes.md |
+| `/validate` | Verify completeness | All session files | validation.md |
+| `/updateprd` | Mark complete | validation.md | Updated state.json |
+| `/phasebuild` | Create new phase | PRD | PRD/phase_NN/ |
+
+## Additional Resources
+
+### Reference Files
+
+For detailed guidance, consult:
+- **`references/templates.md`** - All document templates with field descriptions
+- **`references/workflow.md`** - Detailed command workflows and decision points
+
+### Templates Directory
+
+Template files at `${CLAUDE_PLUGIN_ROOT}/templates/`:
+- `sessionspec-template.md` - Specification template
+- `tasks-template.md` - Task checklist template
+- `implementation-notes-template.md` - Progress log template
+- `validation-template.md` - Validation report template
+- `nextsession-template.md` - Session recommendation template
+- `prd-phase-template.md` - Phase PRD template
+
+### Scripts Directory
+
+Utility scripts at `${CLAUDE_PLUGIN_ROOT}/scripts/`:
+- `analyze-project.sh` - Project analysis helper
+- `setup-session.sh` - Session setup automation
+- `check-prereqs.sh` - Prerequisites checker
+- `common.sh` - Shared functions
+
+## Best Practices
+
+1. **Start with /nextsession** - Always analyze state before choosing work
+2. **One session at a time** - Complete before starting next
+3. **MVP first** - Defer polish and optimizations
+4. **Validate encoding** - Check ASCII before committing
+5. **Update tasks continuously** - Mark checkboxes immediately
+6. **Trust the system** - Follow workflow, resist scope creep
+7. **Read before implementing** - Review spec.md and tasks.md first
+
+## Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| Scope too large | Split session in PRD before /sessionspec |
+| ASCII validation fails | Run `grep -P '[^\x00-\x7F]'` to find issues |
+| State out of sync | Manually update state.json |
+| Commands not found | Verify plugin is enabled |
+| Tasks taking too long | Reduce scope, defer non-MVP items |

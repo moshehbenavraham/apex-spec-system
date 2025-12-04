@@ -26,7 +26,7 @@ Read `specs/[current-session]/validation.md`:
 
 ### 2. Update State
 
-Update `.spec_system/state.json`:
+Update `state.json`:
 
 ```json
 {
@@ -53,7 +53,7 @@ Update `.spec_system/state.json`:
 
 ### 3. Update Phase README
 
-Update `.spec_system/PRD/phase_NN/README.md`:
+Update `PRD/phase_NN/README.md`:
 - Mark session as Complete
 - Add completion date
 - Update progress percentage
