@@ -24,9 +24,9 @@ Ask the user for (or derive from PRD):
 
 ### 2. Create Phase Directory
 
-Create `.spec_system/PRD/phase_NN/`:
+Create `PRD/phase_NN/`:
 ```
-.spec_system/PRD/phase_NN/
+PRD/phase_NN/
 ├── README.md
 ├── session_01_name.md
 ├── session_02_name.md
@@ -134,7 +134,7 @@ Phase complete when:
 
 ### 4. Create Phase README
 
-Create `.spec_system/PRD/phase_NN/README.md`:
+Create `PRD/phase_NN/README.md`:
 
 ```markdown
 # Phase NN: Phase Name
@@ -230,7 +230,7 @@ For each session, create `session_NN_name.md`:
 
 ### 6. Update State
 
-Update `.spec_system/state.json`:
+Update `state.json`:
 
 ```json
 {
@@ -247,7 +247,7 @@ Update `.spec_system/state.json`:
 
 ### 7. Update Master PRD
 
-Add phase reference to `.spec_system/PRD/PRD.md`:
+Add phase reference to `PRD/PRD.md`:
 
 ```markdown
 ## Phases
@@ -283,7 +283,7 @@ Report to user:
 Phase NN Created: Phase Name
 
 Structure:
-- .spec_system/PRD/phase_NN/
+- PRD/phase_NN/
   - README.md
   - session_01_name.md
   - session_02_name.md

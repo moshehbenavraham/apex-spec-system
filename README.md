@@ -1,6 +1,6 @@
 # Apex Spec System
 
-A lightweight, specification-driven workflow system for AI-assisted development.
+A Claude Code plugin providing a specification-driven workflow system for AI-assisted development.
 
 ## Overview
 
@@ -8,81 +8,78 @@ The Apex Spec System breaks large projects into manageable, well-scoped implemen
 
 **Philosophy**: `1 session = 1 spec = 2-4 hours (15-30 tasks)`
 
+## Installation
+
+```bash
+# Install from local directory
+claude --plugin-dir /path/to/apex-spec-system
+
+# Or copy to your plugins directory
+cp -r apex-spec-system ~/.claude/plugins/
+```
+
+## Quick Start
+
+1. **Install the plugin** (see above)
+
+2. **Initialize in your project**:
+   ```
+   /apex-spec:init
+   ```
+   This creates the spec system structure in your project.
+
+3. **Run the workflow**:
+   ```
+   /apex-spec:nextsession    # Get recommendation for next session
+   /apex-spec:sessionspec    # Create formal specification
+   /apex-spec:tasks          # Generate task checklist
+   /apex-spec:implement      # Start implementation
+   /apex-spec:validate       # Verify completeness
+   /apex-spec:updateprd      # Mark complete
+   ```
+
 ## Features
 
-- **7-Command Workflow**: Structured process from analysis to completion
+- **8-Command Workflow**: Structured process from initialization to completion
 - **Session Scoping**: Keep work manageable with 15-30 tasks per session
 - **Progress Tracking**: State file and checklists track progress
 - **Validation Gates**: Verify completeness before marking done
 - **ASCII Enforcement**: Avoid encoding issues that break code generation
-- **Flexible Templates**: Adapt to any project type
+- **Auto-Activating Skill**: Provides workflow guidance automatically
 
-## Quick Start
+## Plugin Components
 
-### 1. Copy to Your Project
+### Commands (8 total)
 
-```bash
-# Copy the spec system
-cp -r .spec_system /path/to/your/project/
+| Command | Purpose |
+|---------|---------|
+| `/init` | Initialize spec system in current project |
+| `/nextsession` | Analyze project and recommend next session |
+| `/sessionspec` | Create formal technical specification |
+| `/tasks` | Generate 15-30 task checklist |
+| `/implement` | AI-guided task-by-task implementation |
+| `/validate` | Verify session completeness |
+| `/updateprd` | Mark session complete, sync documentation |
+| `/phasebuild` | Create structure for new phase |
 
-# Copy slash commands to Claude Code
-cp .spec_system/commands/*.md /path/to/your/project/.claude/commands/
+### Skill
 
-# Make scripts executable
-chmod +x /path/to/your/project/.spec_system/scripts/*.sh
-```
+The **spec-workflow** skill auto-activates when:
+- Working in projects with `state.json` or `specs/` directory
+- User mentions spec system concepts
+- User asks about session workflow
 
-### 2. Initialize
+### Bundled Resources
 
-Edit `.spec_system/state.json` with your project info:
+- **templates/**: Document templates for specs, tasks, validation
+- **scripts/**: Bash utilities for project analysis
 
-```json
-{
-  "project_name": "Your Project Name",
-  "description": "Project description"
-}
-```
-
-### 3. Create Your PRD
-
-Edit `.spec_system/PRD/PRD.md` with your project requirements.
-
-### 4. Run the Workflow
-
-```bash
-/nextsession    # Get recommendation for next session
-/sessionspec    # Create formal specification
-/tasks          # Generate 15-30 task checklist
-/implement      # AI-guided implementation
-/validate       # Verify completeness
-/updateprd      # Mark complete, update docs
-```
-
-## Directory Structure
+## The Workflow
 
 ```
-your-project/
-├── .spec_system/               # Spec system (copy this)
-│   ├── state.json              # Project state tracking
-│   ├── commands/               # Slash commands (7 total)
-│   ├── scripts/                # Bash automation
-│   ├── templates/              # Document templates
-│   └── PRD/                    # Product requirements
-│       ├── PRD.md              # Master PRD
-│       ├── PRD_phase_00.md     # Phase definitions
-│       └── phase_00/           # Session definitions
-├── specs/                      # Implementation specs
-│   └── phaseNN-sessionNN-name/ # One per session
-│       ├── spec.md
-│       ├── tasks.md
-│       ├── implementation-notes.md
-│       └── validation.md
-└── archive/                    # Completed work
-```
-
-## The 7-Command Workflow
-
-```
+/init         ->  Set up spec system in project
+      |
+      v
 /nextsession  ->  Analyze project, recommend next feature
       |
       v
@@ -101,21 +98,27 @@ your-project/
 /updateprd    ->  Sync PRD, mark session complete
       |
       v
-/phasebuild   ->  (optional) Create new phase structure once previous phase and all sessions completed
+/phasebuild   ->  (optional) Create new phase structure
 ```
 
-## Session Naming
+## Project Structure
 
-**Format**: `phaseNN-sessionNN-name`
+After running `/init`, your project will have:
 
-- `phaseNN`: 2-digit phase number (phase00, phase01)
-- `sessionNN`: 2-digit session number (session01, session02)
-- `name`: lowercase-hyphenated description
-
-**Examples**:
-- `phase00-session01-project-setup`
-- `phase01-session03-user-authentication`
-- `phase02-session08b-refinements`
+```
+your-project/
+├── state.json              # Project state tracking
+├── PRD/                    # Product requirements
+│   ├── PRD.md              # Master PRD
+│   └── phase_00/           # Phase definitions
+├── specs/                  # Implementation specs
+│   └── phaseNN-sessionNN-name/
+│       ├── spec.md
+│       ├── tasks.md
+│       ├── implementation-notes.md
+│       └── validation.md
+└── archive/                # Completed work
+```
 
 ## Session Scope
 
@@ -129,6 +132,14 @@ your-project/
 - 2-3 hours typical
 - MVP focus only
 
+## Session Naming
+
+**Format**: `phaseNN-sessionNN-name`
+
+Examples:
+- `phase00-session01-project-setup`
+- `phase01-session03-user-authentication`
+
 ## Critical Rules
 
 ### ASCII Encoding (Non-Negotiable)
@@ -139,50 +150,13 @@ All files must use ASCII-only characters (0-127):
 - NO smart quotes - use straight quotes
 - Unix LF line endings only
 
-### Over-Arching Rules
-
-- You must only use valid ASCII UTF-8 LF characters and formatting
-- You can't run SUDO - pause and ask the user when needed
-- Never add co-authors or attributions to AI systems
-
-## Documentation
-
-- [System Overview](.spec_system/README_spec-system.md)
-- [Commands Reference](.spec_system/commands/README_spec-system_commands.md)
-- [Scripts Reference](.spec_system/scripts/README_spec-system_scripts.md)
-- [Templates Reference](.spec_system/templates/README_spec-system_templates.md)
-
-## Requirements
-
-- **Bash**: 4.0+ (for scripts)
-- **jq**: For JSON operations (optional but recommended)
-- **Claude Code**: Or compatible AI assistant
-
-Install jq:
-```bash
-# Ubuntu/Debian
-sudo apt install jq
-
-# macOS
-brew install jq
-```
-
 ## Best Practices
 
 1. **One session at a time** - Complete before starting next
 2. **MVP first** - Defer polish and optimizations
 3. **Validate encoding** - Check ASCII before committing
-4. **Update tasks as you go** - Mark checkboxes immediately
+4. **Update tasks continuously** - Mark checkboxes immediately
 5. **Trust the system** - Follow workflow, resist scope creep
-6. **Read before implementing** - Review spec.md and tasks.md first
-
-## Why This Works for AI
-
-- **Clear scope**: 15-30 tasks prevents context window overload
-- **Structured guidance**: Templates provide consistent prompts
-- **Progress tracking**: State and checkboxes enable resumption
-- **Validation gates**: Ensures quality before moving on
-- **ASCII-only**: Removes encoding issues that break generation
 
 ## License
 

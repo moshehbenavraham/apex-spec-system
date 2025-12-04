@@ -16,10 +16,10 @@ Convert the session recommendation into a detailed, actionable specification.
 ### 1. Read Inputs
 
 Read the following:
-- `.spec_system/NEXT_SESSION.md` - Session recommendation
-- `.spec_system/state.json` - Project state
-- `.spec_system/PRD/phase_XX/session_XX.md` - Session definition (if exists)
-- `.spec_system/templates/sessionspec-template.md` - Template reference
+- `NEXT_SESSION.md` - Session recommendation
+- `state.json` - Project state
+- `PRD/phase_XX/session_XX.md` - Session definition (if exists)
+- `templates/sessionspec-template.md` - Template reference
 
 ### 2. Create Session Directory
 
@@ -177,7 +177,7 @@ Move `NEXT_SESSION.md` to `specs/phaseNN-sessionNN-name/NEXT_SESSION_archived.md
 
 ### 5. Update State
 
-Update `.spec_system/state.json`:
+Update `state.json`:
 - Set `current_session` to the session ID
 - Update `next_session_history` status to `spec_created`
 
