@@ -1,6 +1,6 @@
 # Apex Spec System v0.7.0-alpha
 
-**Release Date:** December 2024
+**Release Date:** December 2025
 **Status:** Pre-release (Alpha)
 
 ## Overview
