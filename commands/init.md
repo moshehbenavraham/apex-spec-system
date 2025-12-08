@@ -140,17 +140,25 @@ Create `.spec_system/PRD/phase_00/PRD_phase_00.md`:
 Run `/nextsession` to get the first session recommendation.
 ```
 
-### 7. Copy Templates (Optional)
+### 7. Copy Scripts Locally (Optional)
 
-If the user wants local templates, copy from the plugin:
+Scripts can run from either location:
+- **Plugin** (default): `${CLAUDE_PLUGIN_ROOT}/scripts/` - Always up-to-date with plugin updates
+- **Local**: `.spec_system/scripts/` - Allows per-project customization, isolated from plugin updates
+
+If local scripts exist, commands will use them automatically (local takes precedence).
+
+Ask user: "Do you want to copy scripts locally for customization, or use them from the plugin (recommended)?"
+
+If the user wants local scripts:
 
 ```bash
-cp -r ${CLAUDE_PLUGIN_ROOT}/templates .spec_system/templates
-cp -r ${CLAUDE_PLUGIN_ROOT}/scripts .spec_system/scripts
+mkdir -p .spec_system/scripts
+cp ${CLAUDE_PLUGIN_ROOT}/scripts/*.sh .spec_system/scripts/
 chmod +x .spec_system/scripts/*.sh
 ```
 
-Ask user: "Do you want to copy templates and scripts locally, or use them from the plugin?"
+**Note**: Local scripts won't receive plugin updates automatically. To update, delete `.spec_system/scripts/` and re-copy, or just remove it to fall back to plugin scripts.
 
 ### 8. Report Success
 

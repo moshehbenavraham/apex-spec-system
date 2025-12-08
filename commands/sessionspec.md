@@ -23,7 +23,6 @@ Read the following:
 - `.spec_system/NEXT_SESSION.md` - Session recommendation
 - `.spec_system/state.json` - Project state
 - `.spec_system/PRD/phase_NN/session_NN_name.md` - Session definition (if exists)
-- `${CLAUDE_PLUGIN_ROOT}/templates/sessionspec-template.md` - Template reference
 
 ### 2. Create Session Directory
 

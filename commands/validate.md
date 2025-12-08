@@ -17,15 +17,34 @@ Validate that all session requirements are met before marking the session comple
 
 ## Steps
 
-### 1. Read Session Files
+### 1. Get Deterministic Project State (REQUIRED FIRST STEP)
 
-Read all session documents:
+Run the analysis script to get reliable state facts. Local scripts (`.spec_system/scripts/`) take precedence over plugin scripts if they exist:
+
+```bash
+# Check for local scripts first, fall back to plugin
+if [ -d ".spec_system/scripts" ]; then
+  bash .spec_system/scripts/analyze-project.sh --json
+else
+  bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze-project.sh --json
+fi
+```
+
+This returns structured JSON including:
+- `current_session` - The session to validate
+- `current_session_dir_exists` - Whether specs directory exists
+- `current_session_files` - Files already in the session directory
+
+**IMPORTANT**: Use the `current_session` value from this output. If `current_session` is `null`, inform the user they need to run `/nextsession` first.
+
+### 2. Read Session Files
+
+Using the `current_session` value from the script output, read all session documents:
 - `.spec_system/specs/[current-session]/spec.md` - Requirements
 - `.spec_system/specs/[current-session]/tasks.md` - Task checklist
 - `.spec_system/specs/[current-session]/implementation-notes.md` - Progress log
-- `.spec_system/state.json` - Current session
 
-### 2. Run Validation Checks
+### 3. Run Validation Checks
 
 #### A. Task Completion
 Verify all tasks in tasks.md are marked `[x]`:
@@ -70,7 +89,7 @@ From spec.md success criteria:
 - Verify testing requirements met
 - Confirm quality gates passed
 
-### 3. Generate Validation Report
+### 4. Generate Validation Report
 
 Create `validation.md` in the session directory:
 
@@ -193,7 +212,7 @@ From spec.md:
 [If FAIL]: Address required actions and run `/validate` again.
 ```
 
-### 4. Update State
+### 5. Update State
 
 Update `.spec_system/state.json` based on validation result:
 
@@ -226,7 +245,7 @@ Update `.spec_system/state.json` based on validation result:
 
 - Update `next_session_history` entry status to `validated` or `validation_failed`
 
-### 5. Report Results
+### 6. Report Results
 
 Tell the user:
 - Overall PASS/FAIL status

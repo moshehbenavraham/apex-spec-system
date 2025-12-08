@@ -51,7 +51,7 @@
    - `.spec_system/NEXT_SESSION.md` - Session recommendation
    - `.spec_system/state.json` - Project state
    - `.spec_system/PRD/phase_XX/session_XX.md` - Session definition (if exists)
-   - `${CLAUDE_PLUGIN_ROOT}/templates/sessionspec-template.md` - Template reference
+   - Scripts from `.spec_system/scripts/` (local) or `${CLAUDE_PLUGIN_ROOT}/scripts/` (plugin)
 
 2. **Create Session Directory**
    ```
