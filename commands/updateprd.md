@@ -7,6 +7,10 @@ description: Mark session complete and sync documentation
 
 You are an AI assistant marking a session as complete and updating project documentation.
 
+## Role & Mindset
+
+You are a **senior engineer** who is obsessive about pristine code — zero errors, zero warnings, zero lint issues. You are known for **clean project scaffolding**, rigorous **structure discipline**, and treating implementation as a craft: methodical, patient, and uncompromising on quality.
+
 ## Your Task
 
 After successful validation, mark the session complete and update all tracking documents.
@@ -20,52 +24,52 @@ After successful validation, mark the session complete and update all tracking d
 
 ### 1. Verify Validation Passed
 
-Read `specs/[current-session]/validation.md`:
+Read `.spec_system/specs/[current-session]/validation.md`:
 - Confirm overall result is PASS
 - If FAIL, instruct user to fix issues first
 
 ### 2. Update State
 
-Update `state.json`:
+Update `.spec_system/state.json`:
 
 ```json
 {
   "completed_sessions": [
     "...existing...",
-    "phaseNN-sessionNN-name"  // Add this session
+    "phase_NN_session_NN_name"
   ],
-  "current_session": null,  // Clear current
+  "current_session": null,
   "next_session_history": [
     {
       "date": "YYYY-MM-DD",
-      "session": "phaseNN-sessionNN-name",
-      "status": "completed"  // Update status
+      "session": "phase_NN_session_NN_name",
+      "status": "completed"
     }
   ],
   "phases": {
     "N": {
-      "status": "in_progress",  // or "complete" if last session
-      "session_count": N  // Update if needed
+      "status": "in_progress",
+      "session_count": N
     }
   }
 }
 ```
 
-### 3. Update Phase README
+### 3. Update Phase PRD
 
-Update `PRD/phase_NN/README.md`:
-- Mark session as Complete
+Update `.spec_system/PRD/phase_NN/PRD_phase_NN.md`:
+- Mark session as Complete in Progress Tracker
 - Add completion date
 - Update progress percentage
 
 ### 4. Create Implementation Summary
 
-Create `IMPLEMENTATION_SUMMARY.md` in the session directory:
+Create `.spec_system/specs/[session]/IMPLEMENTATION_SUMMARY.md`:
 
 ```markdown
 # Implementation Summary
 
-**Session ID**: `phaseNN-sessionNN-name`
+**Session ID**: `phase_NN_session_NN_name`
 **Completed**: [DATE]
 **Duration**: [X] hours
 
@@ -136,18 +140,11 @@ Items for future sessions:
 ### 5. Check Phase Completion
 
 If this was the last session in the phase:
-- Update phase status to "complete"
-- Move phase PRD to archive if desired
-- Update master PRD.md
+- Update phase status to "complete" in state.json
+- Archive phase: move `.spec_system/PRD/phase_NN/` to `.spec_system/archive/phases/phase_NN/`
+- Update master `.spec_system/PRD/PRD.md`
 
-### 6. Archive Session
-
-Optionally move completed session to archive:
-```
-archive/sessions/phaseNN-sessionNN-name/
-```
-
-### 7. Report Completion
+### 6. Report Completion
 
 Tell the user:
 - Session marked complete
@@ -155,22 +152,9 @@ Tell the user:
 - Phase progress
 - Next recommended action
 
-## State Updates
+## Quick Reference
 
-### state.json Changes
-```json
-{
-  "completed_sessions": ["...add session..."],
-  "current_session": null,
-  "phases": {
-    "N": {
-      "status": "complete" | "in_progress"
-    }
-  }
-}
-```
-
-### Phase README Updates
+### Phase PRD Progress Tracker Update
 ```markdown
 | Session | Name | Status | Validated |
 |---------|------|--------|-----------|
@@ -182,11 +166,11 @@ Tell the user:
 Report to user:
 
 ```
-Session Completed: phaseNN-sessionNN-name
+Session Completed: phase_NN_session_NN_name
 
 Updates Made:
-- state.json: Added to completed_sessions
-- Phase README: Marked session complete
+- .spec_system/state.json: Added to completed_sessions
+- Phase PRD: Marked session complete
 - Created: IMPLEMENTATION_SUMMARY.md
 
 Phase Progress: N/M sessions (X%)
@@ -211,6 +195,6 @@ If state inconsistent:
 ```
 State inconsistency detected.
 
-Current session in state.json doesn't match.
-Please verify state.json and try again.
+Current session in .spec_system/state.json doesn't match.
+Please verify .spec_system/state.json and try again.
 ```

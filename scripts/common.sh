@@ -13,7 +13,7 @@ set -euo pipefail
 
 SPEC_SYSTEM_DIR="${SPEC_SYSTEM_DIR:-.spec_system}"
 STATE_FILE="${SPEC_SYSTEM_DIR}/state.json"
-SPECS_DIR="${SPECS_DIR:-specs}"
+SPECS_DIR="${SPECS_DIR:-${SPEC_SYSTEM_DIR}/specs}"
 
 # =============================================================================
 # COLORS AND LOGGING

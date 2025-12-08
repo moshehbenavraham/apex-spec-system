@@ -9,9 +9,9 @@
 **Steps**:
 
 1. **Read Project State**
-   - Read `state.json` for current phase and completed sessions
-   - Read `PRD/PRD.md` for master project requirements
-   - Read `PRD/phase_XX/` for current phase session definitions
+   - Read `.spec_system/state.json` for current phase and completed sessions
+   - Read `.spec_system/PRD/PRD.md` for master project requirements
+   - Read `.spec_system/PRD/phase_XX/` for current phase session definitions
 
 2. **Analyze Progress**
    - Determine current phase status
@@ -26,7 +26,7 @@
    - Consider logical flow
 
 4. **Generate Recommendation**
-   - Create `NEXT_SESSION.md` with full recommendation
+   - Create `.spec_system/NEXT_SESSION.md` with full recommendation
    - Include session ID, objectives, deliverables
    - List alternatives if primary is blocked
 
@@ -48,14 +48,14 @@
 **Steps**:
 
 1. **Read Inputs**
-   - `NEXT_SESSION.md` - Session recommendation
-   - `state.json` - Project state
-   - `PRD/phase_XX/session_XX.md` - Session definition (if exists)
-   - `templates/sessionspec-template.md` - Template reference
+   - `.spec_system/NEXT_SESSION.md` - Session recommendation
+   - `.spec_system/state.json` - Project state
+   - `.spec_system/PRD/phase_XX/session_XX.md` - Session definition (if exists)
+   - `${CLAUDE_PLUGIN_ROOT}/templates/sessionspec-template.md` - Template reference
 
 2. **Create Session Directory**
    ```
-   specs/phaseNN-sessionNN-name/
+   .spec_system/specs/phaseNN-sessionNN-name/
    └── spec.md
    ```
 
@@ -66,7 +66,7 @@
    - Document technical approach
 
 4. **Archive Recommendation**
-   - Move `NEXT_SESSION.md` to session directory
+   - Move `.spec_system/NEXT_SESSION.md` to session directory
 
 5. **Update State**
    - Set `current_session` to session ID
@@ -86,8 +86,8 @@
 **Steps**:
 
 1. **Read Specification**
-   - Read `specs/[session]/spec.md`
-   - Get session ID from `state.json`
+   - Read `.spec_system/specs/[session]/spec.md`
+   - Get session ID from `.spec_system/state.json`
 
 2. **Analyze Requirements**
    - Identify deliverables
@@ -112,15 +112,15 @@
 
 ### /implement Workflow
 
-**Purpose**: Guide task-by-task implementation with progress tracking.
+**Purpose**: Execute task-by-task implementation with progress tracking.
 
 **Steps**:
 
 1. **Read Session Context**
-   - `spec.md` - Full specification
-   - `tasks.md` - Task checklist
-   - `implementation-notes.md` - Progress log (if exists)
-   - `state.json` - Current session
+   - `.spec_system/specs/[session]/spec.md` - Full specification
+   - `.spec_system/specs/[session]/tasks.md` - Task checklist
+   - `.spec_system/specs/[session]/implementation-notes.md` - Progress log (if exists)
+   - `.spec_system/state.json` - Current session
 
 2. **Initialize Notes**
    - Create `implementation-notes.md` if not exists
@@ -240,7 +240,7 @@
 
 2. **Create Directory Structure**
    ```
-   PRD/phase_NN/
+   .spec_system/PRD/phase_NN/
    ├── README.md
    ├── session_01_name.md
    ├── session_02_name.md
@@ -290,12 +290,12 @@
 
 If session abandoned mid-way:
 1. Run `/implement` to resume from last task
-2. Or manually update `state.json` to clear session
+2. Or manually update `.spec_system/state.json` to clear session
 
 ### State Corruption
 
-If `state.json` becomes invalid:
-1. Check completed sessions against `specs/` directory
+If `.spec_system/state.json` becomes invalid:
+1. Check completed sessions against `.spec_system/specs/` directory
 2. Reconstruct state from existing files
 3. Validate with phase README files
 

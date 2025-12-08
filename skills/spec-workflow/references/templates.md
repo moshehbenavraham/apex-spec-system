@@ -4,7 +4,7 @@ This document provides quick reference for all templates used in the Apex Spec S
 
 ## Session Specification (spec.md)
 
-**Location**: `specs/phaseNN-sessionNN-name/spec.md`
+**Location**: `.spec_system/specs/phaseNN-sessionNN-name/spec.md`
 
 ### Header Fields
 
@@ -32,7 +32,7 @@ This document provides quick reference for all templates used in the Apex Spec S
 
 ## Task Checklist (tasks.md)
 
-**Location**: `specs/phaseNN-sessionNN-name/tasks.md`
+**Location**: `.spec_system/specs/phaseNN-sessionNN-name/tasks.md`
 
 ### Header Fields
 
@@ -83,7 +83,7 @@ This document provides quick reference for all templates used in the Apex Spec S
 
 ## Implementation Notes (implementation-notes.md)
 
-**Location**: `specs/phaseNN-sessionNN-name/implementation-notes.md`
+**Location**: `.spec_system/specs/phaseNN-sessionNN-name/implementation-notes.md`
 
 ### Header Fields
 
@@ -149,7 +149,7 @@ This document provides quick reference for all templates used in the Apex Spec S
 
 ## Validation Report (validation.md)
 
-**Location**: `specs/phaseNN-sessionNN-name/validation.md`
+**Location**: `.spec_system/specs/phaseNN-sessionNN-name/validation.md`
 
 ### Header Fields
 
@@ -183,7 +183,7 @@ This document provides quick reference for all templates used in the Apex Spec S
 
 ## Next Session Recommendation (NEXT_SESSION.md)
 
-**Location**: `NEXT_SESSION.md` (project root)
+**Location**: `.spec_system/NEXT_SESSION.md`
 
 ### Header Fields
 
@@ -205,7 +205,7 @@ This document provides quick reference for all templates used in the Apex Spec S
 
 ## Phase PRD (PRD_phase_NN.md)
 
-**Location**: `PRD/PRD_phase_NN.md`
+**Location**: `.spec_system/PRD/PRD_phase_NN.md`
 
 ### Header Fields
 
@@ -230,7 +230,7 @@ This document provides quick reference for all templates used in the Apex Spec S
 
 ## Phase README (README.md)
 
-**Location**: `PRD/phase_NN/README.md`
+**Location**: `.spec_system/PRD/phase_NN/README.md`
 
 ### Header Fields
 
@@ -251,7 +251,7 @@ This document provides quick reference for all templates used in the Apex Spec S
 
 ## Session Stub (session_NN_name.md)
 
-**Location**: `PRD/phase_NN/session_NN_name.md`
+**Location**: `.spec_system/PRD/phase_NN/session_NN_name.md`
 
 ### Header Fields
 
@@ -274,7 +274,7 @@ This document provides quick reference for all templates used in the Apex Spec S
 
 ## Implementation Summary (IMPLEMENTATION_SUMMARY.md)
 
-**Location**: `specs/phaseNN-sessionNN-name/IMPLEMENTATION_SUMMARY.md`
+**Location**: `.spec_system/specs/phaseNN-sessionNN-name/IMPLEMENTATION_SUMMARY.md`
 
 ### Header Fields
 
