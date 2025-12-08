@@ -7,18 +7,22 @@ description: Initialize the Apex Spec System in the current project
 
 Initialize the Apex Spec System in the current project directory.
 
+## Role & Mindset
+
+You are a **senior engineer** who is obsessive about pristine code — zero errors, zero warnings, zero lint issues. You are known for **clean project scaffolding**, rigorous **structure discipline**, and treating implementation as a craft: methodical, patient, and uncompromising on quality.
+
 ## Your Task
 
-Set up the complete spec system directory structure and initial files for a new or existing project.
+Set up the complete spec system directory structure and initial files for a new or existing project. All spec system files are stored in the `.spec_system/` directory to keep the project root clean.
 
 ## Steps
 
 ### 1. Check Current State
 
 First, check if the spec system is already initialized:
-- Look for `state.json` in the project root
-- Check for `PRD/` directory
-- Check for `specs/` directory
+- Look for `.spec_system/state.json`
+- Check for `.spec_system/PRD/` directory
+- Check for `.spec_system/specs/` directory
 
 If already initialized, ask the user if they want to reinitialize (this will reset state).
 
@@ -34,17 +38,17 @@ Ask the user for:
 Create the following directories:
 
 ```bash
-mkdir -p PRD/phase_00
-mkdir -p specs
-mkdir -p archive/backups
-mkdir -p archive/sessions
-mkdir -p archive/planning
-mkdir -p archive/PRD
+mkdir -p .spec_system/PRD/phase_00
+mkdir -p .spec_system/specs
+mkdir -p .spec_system/archive/backups
+mkdir -p .spec_system/archive/sessions
+mkdir -p .spec_system/archive/planning
+mkdir -p .spec_system/archive/PRD
 ```
 
 ### 4. Create state.json
 
-Create the initial state file:
+Create `.spec_system/state.json`:
 
 ```json
 {
@@ -67,7 +71,7 @@ Create the initial state file:
 
 ### 5. Create PRD Template
 
-Create `PRD/PRD.md` with a starter template:
+Create `.spec_system/PRD/PRD.md` with a starter template:
 
 ```markdown
 # [PROJECT_NAME] - Product Requirements Document
@@ -112,7 +116,7 @@ Use `/nextsession` to get recommendations for sessions to implement.
 
 ### 6. Create Phase README
 
-Create `PRD/phase_00/README.md`:
+Create `.spec_system/PRD/phase_00/README.md`:
 
 ```markdown
 # Phase 00: [PHASE_NAME]
@@ -140,9 +144,9 @@ Run `/nextsession` to get the first session recommendation.
 If the user wants local templates, copy from the plugin:
 
 ```bash
-cp -r ${CLAUDE_PLUGIN_ROOT}/templates ./templates
-cp -r ${CLAUDE_PLUGIN_ROOT}/scripts ./scripts
-chmod +x ./scripts/*.sh
+cp -r ${CLAUDE_PLUGIN_ROOT}/templates .spec_system/templates
+cp -r ${CLAUDE_PLUGIN_ROOT}/scripts .spec_system/scripts
+chmod +x .spec_system/scripts/*.sh
 ```
 
 Ask user: "Do you want to copy templates and scripts locally, or use them from the plugin?"
@@ -155,21 +159,22 @@ Tell the user:
 Apex Spec System initialized!
 
 Created:
-- state.json (project state tracking)
-- PRD/PRD.md (product requirements document)
-- PRD/phase_00/README.md (phase tracker)
-- specs/ (implementation specs directory)
-- archive/ (completed work archive)
+- .spec_system/state.json (project state tracking)
+- .spec_system/PRD/PRD.md (product requirements document)
+- .spec_system/PRD/phase_00/README.md (phase tracker)
+- .spec_system/specs/ (implementation specs directory)
+- .spec_system/archive/ (completed work archive)
 
 Next Steps:
-1. Edit PRD/PRD.md with your project requirements
-2. Run /nextsession to get your first session recommendation
+1. Edit .spec_system/PRD/PRD.md with your project requirements
+2. Run /phasebuild to build out the starting phase OR /nextsession to get your first session recommendation
 3. Follow the workflow: /nextsession -> /sessionspec -> /tasks -> /implement -> /validate -> /updateprd
+    Until all 'Sessions' of the 'Phase' are complete, then run /phasebuild
 ```
 
 ## Rules
 
-1. **Never overwrite existing state.json** without user confirmation
+1. **Never overwrite existing .spec_system/state.json** without user confirmation
 2. **Use ASCII-only characters** in all generated files
 3. **Unix LF line endings** only
 4. **Create minimal structure** - don't over-engineer initial setup

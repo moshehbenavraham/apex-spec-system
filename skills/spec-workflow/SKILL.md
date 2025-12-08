@@ -1,6 +1,6 @@
 ---
 name: Apex Spec Workflow
-description: This skill should be used when the user asks about "spec system", "session workflow", "nextsession", "sessionspec", "implement session", "validate session", "phase build", "session scope", "task checklist", or when working in a project containing state.json and specs/ directory. Provides guidance for specification-driven AI development workflows.
+description: This skill should be used when the user asks about "spec system", "session workflow", "nextsession", "sessionspec", "implement session", "validate session", "phase build", "session scope", "task checklist", or when working in a project containing .spec_system/ directory. Provides guidance for specification-driven AI development workflows.
 version: 1.0.0
 ---
 
@@ -31,7 +31,7 @@ Execute commands in this sequence:
 /tasks        ->  Generate 15-30 task checklist
       |
       v
-/implement    ->  AI-guided task-by-task implementation
+/implement    ->  AI-led task-by-task implementation
       |
       v
 /validate     ->  Verify session completeness
@@ -40,7 +40,7 @@ Execute commands in this sequence:
 /updateprd    ->  Sync PRD, mark session complete
       |
       v
-/phasebuild   ->  (optional) Create new phase structure
+/phasebuild   ->  (optional, when ready to start a new phase) Create new phase structure
 ```
 
 ## Directory Structure
@@ -49,19 +49,21 @@ Projects using this system follow this layout:
 
 ```
 project/
-├── state.json              # Project state tracking
-├── PRD/                    # Product requirements
-│   ├── PRD.md              # Master PRD
-│   └── phase_NN/           # Phase definitions
-├── specs/                  # Implementation specs
-│   └── phaseNN-sessionNN-name/
-│       ├── spec.md
-│       ├── tasks.md
-│       ├── implementation-notes.md
-│       └── validation.md
-├── templates/              # Document templates
-├── scripts/                # Bash automation
-└── archive/                # Completed work
+├── .spec_system/               # All spec system files
+│   ├── state.json              # Project state tracking
+│   ├── PRD/                    # Product requirements
+│   │   ├── PRD.md              # Master PRD
+│   │   └── phase_NN/           # Phase definitions
+│   ├── specs/                  # Implementation specs
+│   │   └── phaseNN-sessionNN-name/
+│   │       ├── spec.md
+│   │       ├── tasks.md
+│   │       ├── implementation-notes.md
+│   │       └── validation.md
+│   ├── templates/              # Document templates (if copied locally)
+│   ├── scripts/                # Bash automation (if copied locally)
+│   └── archive/                # Completed work
+└── (project source files)
 ```
 
 ## Session Naming Convention
@@ -160,7 +162,7 @@ grep -P '[^\x00-\x7F]' filename.txt  # Should return nothing
 
 ## State Tracking
 
-The `state.json` file tracks project progress:
+The `.spec_system/state.json` file tracks project progress:
 
 ```json
 {
@@ -184,11 +186,11 @@ The `state.json` file tracks project progress:
 
 | Command | Purpose | Input | Output |
 |---------|---------|-------|--------|
-| `/init` | Initialize spec system | Project info | state.json, PRD/, specs/ |
+| `/init` | Initialize spec system | Project info | .spec_system/ structure |
 | `/nextsession` | Recommend next session | state.json, PRD | NEXT_SESSION.md |
 | `/sessionspec` | Create specification | NEXT_SESSION.md | specs/.../spec.md |
 | `/tasks` | Generate task list | spec.md | specs/.../tasks.md |
-| `/implement` | Guide implementation | spec.md, tasks.md | implementation-notes.md |
+| `/implement` | Code implementation | spec.md, tasks.md | implementation-notes.md |
 | `/validate` | Verify completeness | All session files | validation.md |
 | `/updateprd` | Mark complete | validation.md | Updated state.json |
 | `/phasebuild` | Create new phase | PRD | PRD/phase_NN/ |
@@ -235,6 +237,6 @@ Utility scripts at `${CLAUDE_PLUGIN_ROOT}/scripts/`:
 |---------|----------|
 | Scope too large | Split session in PRD before /sessionspec |
 | ASCII validation fails | Run `grep -P '[^\x00-\x7F]'` to find issues |
-| State out of sync | Manually update state.json |
+| State out of sync | Manually update .spec_system/state.json |
 | Commands not found | Verify plugin is enabled |
 | Tasks taking too long | Reduce scope, defer non-MVP items |

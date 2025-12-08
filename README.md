@@ -57,7 +57,7 @@ cp -r apex-spec-system ~/.claude/plugins/
 | `/nextsession` | Analyze project and recommend next session |
 | `/sessionspec` | Create formal technical specification |
 | `/tasks` | Generate 15-30 task checklist |
-| `/implement` | AI-guided task-by-task implementation |
+| `/implement` | AI-led task-by-task implementation |
 | `/validate` | Verify session completeness |
 | `/updateprd` | Mark session complete, sync documentation |
 | `/phasebuild` | Create structure for new phase |
@@ -65,7 +65,7 @@ cp -r apex-spec-system ~/.claude/plugins/
 ### Skill
 
 The **spec-workflow** skill auto-activates when:
-- Working in projects with `state.json` or `specs/` directory
+- Working in projects with `.spec_system/` directory
 - User mentions spec system concepts
 - User asks about session workflow
 
@@ -89,7 +89,7 @@ The **spec-workflow** skill auto-activates when:
 /tasks        ->  Generate 15-30 task checklist
       |
       v
-/implement    ->  AI-guided task-by-task implementation
+/implement    ->  AI-led task-by-task implementation
       |
       v
 /validate     ->  Verify session completeness
@@ -107,17 +107,19 @@ After running `/init`, your project will have:
 
 ```
 your-project/
-├── state.json              # Project state tracking
-├── PRD/                    # Product requirements
-│   ├── PRD.md              # Master PRD
-│   └── phase_00/           # Phase definitions
-├── specs/                  # Implementation specs
-│   └── phaseNN-sessionNN-name/
-│       ├── spec.md
-│       ├── tasks.md
-│       ├── implementation-notes.md
-│       └── validation.md
-└── archive/                # Completed work
+├── .spec_system/               # All spec system files
+│   ├── state.json              # Project state tracking
+│   ├── PRD/                    # Product requirements
+│   │   ├── PRD.md              # Master PRD
+│   │   └── phase_00/           # Phase definitions
+│   ├── specs/                  # Implementation specs
+│   │   └── phaseNN-sessionNN-name/
+│   │       ├── spec.md
+│   │       ├── tasks.md
+│   │       ├── implementation-notes.md
+│   │       └── validation.md
+│   └── archive/                # Completed work
+└── (your project source files)
 ```
 
 ## Session Scope

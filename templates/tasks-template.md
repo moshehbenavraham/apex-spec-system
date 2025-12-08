@@ -101,4 +101,4 @@ Complete tasks in order unless marked `[P]`. Foundation tasks must complete befo
 
 ## Next Steps
 
-Run `/implement` to begin AI-guided task implementation.
+Run `/implement` to begin AI-led task implementation.
