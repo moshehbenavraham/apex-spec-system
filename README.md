@@ -1,5 +1,7 @@
 # Apex Spec System
 
+**Version: 0.11.1-alpha**
+
 A Claude Code plugin providing a specification-driven workflow system for AI-assisted development.
 
 ## Overview
