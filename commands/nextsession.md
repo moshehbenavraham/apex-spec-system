@@ -22,7 +22,7 @@ Analyze the current project state and recommend the most appropriate next sessio
 Read the following files to understand current progress:
 - `.spec_system/state.json` - Current phase, completed sessions
 - `.spec_system/PRD/PRD.md` - Master project requirements
-- `.spec_system/PRD/phase_XX/` - Current phase session definitions
+- `.spec_system/PRD/phase_NN/` - Current phase session definitions
 
 ### 2. Analyze Progress
 
@@ -49,15 +49,15 @@ Create `.spec_system/NEXT_SESSION.md` with:
 
 ## Session Recommendation
 
-**Generated**: [DATE]
-**Project State**: Phase [N] - [Name]
+**Generated**: [YYYY-MM-DD]
+**Project State**: Phase NN - [Name]
 **Completed Sessions**: [count]
 
 ---
 
 ## Recommended Next Session
 
-**Session ID**: `phaseNN-sessionNN-name`
+**Session ID**: `phase_NN_session_NN_name`
 **Session Name**: [Title]
 **Estimated Duration**: [X-Y] hours
 **Estimated Tasks**: [N]
@@ -123,8 +123,22 @@ Run `/sessionspec` to generate the formal specification.
 ### 5. Update State
 
 Update `.spec_system/state.json`:
-- Add entry to `next_session_history`
-- Set `current_session` if appropriate
+
+```json
+{
+  "current_session": "phase_NN_session_NN_name",
+  "next_session_history": [
+    {
+      "date": "YYYY-MM-DD",
+      "session": "phase_NN_session_NN_name",
+      "status": "recommended"
+    }
+  ]
+}
+```
+
+- Add entry to `next_session_history` array
+- Set `current_session` to the recommended session ID
 
 ## Rules
 

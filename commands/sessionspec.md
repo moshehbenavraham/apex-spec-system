@@ -22,14 +22,14 @@ Convert the session recommendation into a detailed, actionable specification.
 Read the following:
 - `.spec_system/NEXT_SESSION.md` - Session recommendation
 - `.spec_system/state.json` - Project state
-- `.spec_system/PRD/phase_XX/session_XX.md` - Session definition (if exists)
+- `.spec_system/PRD/phase_NN/session_NN_name.md` - Session definition (if exists)
 - `${CLAUDE_PLUGIN_ROOT}/templates/sessionspec-template.md` - Template reference
 
 ### 2. Create Session Directory
 
 Create the session directory structure:
 ```
-.spec_system/specs/phaseNN-sessionNN-name/
+.spec_system/specs/phase_NN_session_NN_name/
 ├── spec.md
 └── (tasks.md, etc. created by later commands)
 ```
@@ -41,10 +41,10 @@ Create `spec.md` with all sections filled in:
 ```markdown
 # Session Specification
 
-**Session ID**: `phaseNN-sessionNN-name`
+**Session ID**: `phase_NN_session_NN_name`
 **Phase**: NN - Phase Name
 **Status**: Not Started
-**Created**: [DATE]
+**Created**: [YYYY-MM-DD]
 
 ---
 
@@ -66,7 +66,7 @@ Create `spec.md` with all sections filled in:
 ## 3. Prerequisites
 
 ### Required Sessions
-- [x] `phaseNN-sessionNN-name` - [what it provides]
+- [x] `phase_NN_session_NN_name` - [what it provides]
 
 ### Required Tools/Knowledge
 - [tool/knowledge item]
@@ -177,13 +177,27 @@ Run `/tasks` to generate the implementation task checklist.
 
 ### 4. Archive Previous Recommendation
 
-Move `.spec_system/NEXT_SESSION.md` to `.spec_system/specs/phaseNN-sessionNN-name/NEXT_SESSION_archived.md`
+Move `.spec_system/NEXT_SESSION.md` to `.spec_system/specs/phase_NN_session_NN_name/NEXT_SESSION_archived.md`
 
 ### 5. Update State
 
 Update `.spec_system/state.json`:
+
+```json
+{
+  "current_session": "phase_NN_session_NN_name",
+  "next_session_history": [
+    {
+      "date": "YYYY-MM-DD",
+      "session": "phase_NN_session_NN_name",
+      "status": "spec_created"
+    }
+  ]
+}
+```
+
 - Set `current_session` to the session ID
-- Update `next_session_history` status to `spec_created`
+- Update `next_session_history` entry status to `spec_created`
 
 ## Scope Rules
 

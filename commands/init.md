@@ -44,6 +44,7 @@ mkdir -p .spec_system/archive/backups
 mkdir -p .spec_system/archive/sessions
 mkdir -p .spec_system/archive/planning
 mkdir -p .spec_system/archive/PRD
+mkdir -p .spec_system/archive/phases
 ```
 
 ### 4. Create state.json
@@ -114,9 +115,9 @@ Use `/nextsession` to get recommendations for sessions to implement.
 - [ ] [Criterion 2]
 ```
 
-### 6. Create Phase README
+### 6. Create Phase PRD
 
-Create `.spec_system/PRD/phase_00/README.md`:
+Create `.spec_system/PRD/phase_00/PRD_phase_00.md`:
 
 ```markdown
 # Phase 00: [PHASE_NAME]
@@ -161,15 +162,16 @@ Apex Spec System initialized!
 Created:
 - .spec_system/state.json (project state tracking)
 - .spec_system/PRD/PRD.md (product requirements document)
-- .spec_system/PRD/phase_00/README.md (phase tracker)
-- .spec_system/specs/ (implementation specs directory)
+- .spec_system/PRD/phase_00/PRD_phase_00.md (phase tracker)
+- .spec_system/specs/ (session specifications directory)
 - .spec_system/archive/ (completed work archive)
 
 Next Steps:
 1. Edit .spec_system/PRD/PRD.md with your project requirements
-2. Run /phasebuild to build out the starting phase OR /nextsession to get your first session recommendation
+2. Run /phasebuild to define sessions for Phase 00 (recommended for new projects)
+   OR run /nextsession directly if you already know your first session
 3. Follow the workflow: /nextsession -> /sessionspec -> /tasks -> /implement -> /validate -> /updateprd
-    Until all 'Sessions' of the 'Phase' are complete, then run /phasebuild
+4. Repeat step 3 until all sessions in the phase are complete, then run /phasebuild for the next phase
 ```
 
 ## Rules

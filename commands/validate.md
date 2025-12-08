@@ -45,8 +45,14 @@ For each deliverable file:
 # Check encoding
 file [filename]  # Should show: ASCII text
 
-# Find non-ASCII characters
+# Find non-ASCII characters (GNU grep)
 grep -P '[^\x00-\x7F]' [filename]
+
+# Alternative for macOS/BSD (using LC_ALL)
+LC_ALL=C grep '[^[:print:][:space:]]' [filename]
+
+# Check for CRLF line endings
+grep -l $'\r' [filename]
 ```
 - Report any non-ASCII characters found
 - Report any CRLF line endings
@@ -71,8 +77,8 @@ Create `validation.md` in the session directory:
 ```markdown
 # Validation Report
 
-**Session ID**: `phaseNN-sessionNN-name`
-**Validated**: [DATE]
+**Session ID**: `phase_NN_session_NN_name`
+**Validated**: [YYYY-MM-DD]
 **Result**: PASS / FAIL
 
 ---
@@ -187,7 +193,40 @@ From spec.md:
 [If FAIL]: Address required actions and run `/validate` again.
 ```
 
-### 4. Report Results
+### 4. Update State
+
+Update `.spec_system/state.json` based on validation result:
+
+**If PASS:**
+```json
+{
+  "current_session": "phase_NN_session_NN_name",
+  "next_session_history": [
+    {
+      "date": "YYYY-MM-DD",
+      "session": "phase_NN_session_NN_name",
+      "status": "validated"
+    }
+  ]
+}
+```
+
+**If FAIL:**
+```json
+{
+  "next_session_history": [
+    {
+      "date": "YYYY-MM-DD",
+      "session": "phase_NN_session_NN_name",
+      "status": "validation_failed"
+    }
+  ]
+}
+```
+
+- Update `next_session_history` entry status to `validated` or `validation_failed`
+
+### 5. Report Results
 
 Tell the user:
 - Overall PASS/FAIL status
