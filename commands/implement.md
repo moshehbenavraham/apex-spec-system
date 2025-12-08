@@ -17,15 +17,67 @@ Implement each task in the session's task list, updating progress as you go.
 
 ## Steps
 
-### 1. Read Session Context
+### 1. Get Deterministic Project State (REQUIRED FIRST STEP)
 
-Read the following files:
+Run the analysis script to get reliable state facts. Local scripts (`.spec_system/scripts/`) take precedence over plugin scripts if they exist:
+
+```bash
+# Check for local scripts first, fall back to plugin
+if [ -d ".spec_system/scripts" ]; then
+  bash .spec_system/scripts/analyze-project.sh --json
+else
+  bash ${CLAUDE_PLUGIN_ROOT}/scripts/analyze-project.sh --json
+fi
+```
+
+This returns structured JSON including:
+- `current_session` - The session to implement
+- `current_session_dir_exists` - Whether specs directory exists
+- `current_session_files` - Files already in the session directory
+
+**IMPORTANT**: Use the `current_session` value from this output. If `current_session` is `null`, inform the user they need to run `/nextsession` and `/sessionspec` first.
+
+### 2. Verify Environment Prerequisites (REQUIRED)
+
+Run the prerequisite checker to verify the environment is ready. Use the same local-first pattern:
+
+```bash
+# Check for local scripts first, fall back to plugin
+if [ -d ".spec_system/scripts" ]; then
+  bash .spec_system/scripts/check-prereqs.sh --json --env
+else
+  bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-prereqs.sh --json --env
+fi
+```
+
+This verifies:
+- `.spec_system/` directory and `state.json` are valid
+- `jq` is installed (required for scripts)
+- `git` availability (optional)
+
+**If any environment check fails**: Report the issues to the user and do NOT proceed until resolved.
+
+**Optional - Tool Verification**: After reading spec.md (next step), if the Prerequisites section lists required tools, also run:
+
+```bash
+# Check for local scripts first, fall back to plugin
+if [ -d ".spec_system/scripts" ]; then
+  bash .spec_system/scripts/check-prereqs.sh --json --tools "tool1,tool2,tool3"
+else
+  bash ${CLAUDE_PLUGIN_ROOT}/scripts/check-prereqs.sh --json --tools "tool1,tool2,tool3"
+fi
+```
+
+This catches missing tools BEFORE implementation starts, preventing mid-session failures.
+
+### 3. Read Session Context
+
+Using the `current_session` value from the script output, read:
 - `.spec_system/specs/[current-session]/spec.md` - Full specification
 - `.spec_system/specs/[current-session]/tasks.md` - Task checklist (whether started or continuing)
 - `.spec_system/specs/[current-session]/implementation-notes.md` - Progress log (if exists)
-- `.spec_system/state.json` - Current session
 
-### 2. Initialize Implementation Notes
+### 4. Initialize Implementation Notes
 
 If `implementation-notes.md` doesn't exist, create it:
 
@@ -60,7 +112,7 @@ If `implementation-notes.md` doesn't exist, create it:
 ---
 ```
 
-### 3. Work Through Tasks
+### 5. Work Through Tasks
 
 For each incomplete task:
 
@@ -101,7 +153,7 @@ Add to `.spec_system/specs/[current-session]/implementation-notes.md`:
 - `path/to/file` - [changes made]
 ```
 
-### 4. Handle Blockers
+### 6. Handle Blockers
 
 If you encounter a blocker:
 
@@ -122,7 +174,7 @@ If you encounter a blocker:
    - Skip and document for later
    - Ask user for guidance
 
-### 5. Track Design Decisions
+### 7. Track Design Decisions
 
 When making implementation choices:
 
@@ -140,14 +192,14 @@ When making implementation choices:
 **Rationale**: [Why]
 ```
 
-### 6. Continuous Progress Updates
+### 8. Continuous Progress Updates
 
 After each task or group of tasks:
 - Update the Progress Summary table in tasks.md
 - Update implementation-notes.md Session Progress
 - Inform user of status
 
-### 7. Checkpoint Progress
+### 9. Checkpoint Progress
 
 Save progress at natural breakpoints to ensure work is preserved:
 

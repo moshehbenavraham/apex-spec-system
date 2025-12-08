@@ -71,7 +71,6 @@ The **spec-workflow** skill auto-activates when:
 
 ### Bundled Resources
 
-- **templates/**: Document templates for specs, tasks, validation
 - **scripts/**: Bash utilities for project analysis
 
 ## The Workflow

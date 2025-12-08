@@ -60,7 +60,6 @@ project/
 │   │       ├── tasks.md
 │   │       ├── implementation-notes.md
 │   │       └── validation.md
-│   ├── templates/              # Document templates (if copied locally)
 │   ├── scripts/                # Bash automation (if copied locally)
 │   └── archive/                # Completed work
 └── (project source files)
@@ -203,23 +202,73 @@ For detailed guidance, consult:
 - **`references/templates.md`** - All document templates with field descriptions
 - **`references/workflow.md`** - Detailed command workflows and decision points
 
-### Templates Directory
-
-Template files at `${CLAUDE_PLUGIN_ROOT}/templates/`:
-- `sessionspec-template.md` - Specification template
-- `tasks-template.md` - Task checklist template
-- `implementation-notes-template.md` - Progress log template
-- `validation-template.md` - Validation report template
-- `nextsession-template.md` - Session recommendation template
-- `prd-phase-template.md` - Phase PRD template
-
 ### Scripts Directory
 
-Utility scripts at `${CLAUDE_PLUGIN_ROOT}/scripts/`:
-- `analyze-project.sh` - Project analysis helper
-- `setup-session.sh` - Session setup automation
-- `check-prereqs.sh` - Prerequisites checker
+Utility scripts are available at two locations:
+- **Plugin**: `${CLAUDE_PLUGIN_ROOT}/scripts/` (default, always up-to-date)
+- **Local**: `.spec_system/scripts/` (optional, for per-project customization)
+
+**Local scripts take precedence** - if `.spec_system/scripts/` exists, commands use local scripts instead of plugin scripts.
+
+Available scripts:
+- `analyze-project.sh` - Project state analysis (supports `--json` for structured output)
+- `check-prereqs.sh` - Environment and tool verification (supports `--json` for structured output)
 - `common.sh` - Shared functions
+
+To copy scripts locally during `/init`, choose "copy locally" when prompted. To revert to plugin scripts, delete `.spec_system/scripts/`.
+
+### Hybrid Architecture
+
+Commands use a **hybrid approach** for reliability:
+
+1. **Deterministic State** (`analyze-project.sh --json`): Authoritative state facts
+2. **Environment Verification** (`check-prereqs.sh --json`): Tool and prerequisite validation
+3. **Semantic Analysis** (Claude): Interprets PRD content, makes recommendations
+
+**Why this matters:**
+- Script output is deterministic - same input always gives same output
+- Eliminates risk of Claude misreading state.json
+- Tool verification catches missing dependencies BEFORE implementation starts
+- Users can run scripts independently to debug
+- Claude focuses on what it does best: understanding context and reasoning
+
+**analyze-project.sh JSON Output:**
+```json
+{
+  "project": "project-name",
+  "current_phase": 1,
+  "current_session": "phase01-session02-feature",
+  "completed_sessions": ["phase00-session01-setup"],
+  "candidate_sessions": [
+    {"file": "session_01_auth", "completed": false}
+  ]
+}
+```
+
+**check-prereqs.sh JSON Output:**
+```json
+{
+  "overall": "pass",
+  "environment": {
+    "spec_system": {"status": "pass"},
+    "jq": {"status": "pass", "info": "jq-1.7"}
+  },
+  "tools": {
+    "node": {"status": "pass", "info": "v20.10.0"},
+    "docker": {"status": "fail", "info": "not installed"}
+  },
+  "issues": [
+    {"type": "tool", "name": "docker", "message": "required tool not installed"}
+  ]
+}
+```
+
+**Commands and their script usage:**
+| Command | analyze-project.sh | check-prereqs.sh |
+|---------|-------------------|------------------|
+| `/nextsession` | State + candidates | - |
+| `/implement` | Current session | Environment + tools |
+| `/validate` | Current session | - |
 
 ## Best Practices
 
@@ -240,3 +289,5 @@ Utility scripts at `${CLAUDE_PLUGIN_ROOT}/scripts/`:
 | State out of sync | Manually update .spec_system/state.json |
 | Commands not found | Verify plugin is enabled |
 | Tasks taking too long | Reduce scope, defer non-MVP items |
+| Missing tools | Run `check-prereqs.sh --tools "tool1,tool2"` to verify |
+| Environment issues | Run `check-prereqs.sh --env` to diagnose |
