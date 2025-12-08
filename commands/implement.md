@@ -32,9 +32,9 @@ If `implementation-notes.md` doesn't exist, create it:
 ```markdown
 # Implementation Notes
 
-**Session ID**: `phaseNN-sessionNN-name`
-**Started**: [DATE]
-**Last Updated**: [DATE]
+**Session ID**: `phase_NN_session_NN_name`
+**Started**: [YYYY-MM-DD HH:MM]
+**Last Updated**: [YYYY-MM-DD HH:MM]
 
 ---
 
@@ -50,7 +50,7 @@ If `implementation-notes.md` doesn't exist, create it:
 
 ## Task Log
 
-### [DATE] - Session Start
+### [YYYY-MM-DD] - Session Start
 
 **Environment verified**:
 - [x] Prerequisites confirmed
@@ -89,8 +89,8 @@ Add to `.spec_system/specs/[current-session]/implementation-notes.md`:
 ```markdown
 ### Task TNNN - [Description]
 
-**Started**: [TIME]
-**Completed**: [TIME]
+**Started**: [YYYY-MM-DD HH:MM]
+**Completed**: [YYYY-MM-DD HH:MM]
 **Duration**: [X] minutes
 
 **Notes**:
@@ -146,6 +146,30 @@ After each task or group of tasks:
 - Update the Progress Summary table in tasks.md
 - Update implementation-notes.md Session Progress
 - Inform user of status
+
+### 7. Checkpoint Progress
+
+Save progress at natural breakpoints to ensure work is preserved:
+
+**When to Checkpoint**:
+- After completing each task (update tasks.md immediately)
+- Before starting complex multi-file changes
+- Every 3-5 tasks minimum
+- Before any risky operations
+
+**Checkpoint Actions**:
+1. Save all file changes
+2. Update tasks.md with completed items
+3. Update implementation-notes.md with progress
+4. Commit changes if appropriate (user discretion)
+
+**Context Limits**:
+If approaching context limits during long sessions:
+- Document current state in implementation-notes.md
+- Note the next task to resume from
+- List any in-progress work that needs completion
+
+---
 
 ## Implementation Rules
 

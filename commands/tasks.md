@@ -39,10 +39,10 @@ Create `tasks.md` in the session directory:
 ```markdown
 # Task Checklist
 
-**Session ID**: `phaseNN-sessionNN-name`
+**Session ID**: `phase_NN_session_NN_name`
 **Total Tasks**: [N]
 **Estimated Duration**: [X-Y] hours
-**Created**: [DATE]
+**Created**: [YYYY-MM-DD]
 
 ---
 
@@ -51,7 +51,7 @@ Create `tasks.md` in the session directory:
 - `[x]` = Completed
 - `[ ]` = Pending
 - `[P]` = Parallelizable (can run with other [P] tasks)
-- `[SNNMM]` = Session reference (NN=phase, MM=session)
+- `[SPPSS]` = Session reference (PP=phase number, SS=session number)
 - `TNNN` = Task ID
 
 ---
@@ -72,8 +72,8 @@ Create `tasks.md` in the session directory:
 
 Initial configuration and environment preparation.
 
-- [ ] T001 [SNNMM] Verify prerequisites met (tools, dependencies)
-- [ ] T002 [SNNMM] Create directory structure for deliverables
+- [ ] T001 [SPPSS] Verify prerequisites met (tools, dependencies)
+- [ ] T002 [SPPSS] Create directory structure for deliverables
 
 ---
 
@@ -81,9 +81,9 @@ Initial configuration and environment preparation.
 
 Core structures and base implementations.
 
-- [ ] T003 [SNNMM] [P] Create [component] (`path/to/file`)
-- [ ] T004 [SNNMM] [P] Define [interface/type] (`path/to/file`)
-- [ ] T005 [SNNMM] Implement [base functionality] (`path/to/file`)
+- [ ] T003 [SPPSS] [P] Create [component] (`path/to/file`)
+- [ ] T004 [SPPSS] [P] Define [interface/type] (`path/to/file`)
+- [ ] T005 [SPPSS] Implement [base functionality] (`path/to/file`)
 
 ---
 
@@ -91,12 +91,12 @@ Core structures and base implementations.
 
 Main feature implementation.
 
-- [ ] T006 [SNNMM] Implement [feature part 1] (`path/to/file`)
-- [ ] T007 [SNNMM] Implement [feature part 2] (`path/to/file`)
-- [ ] T008 [SNNMM] [P] Add [component A] (`path/to/file`)
-- [ ] T009 [SNNMM] [P] Add [component B] (`path/to/file`)
-- [ ] T010 [SNNMM] Wire up [integration] (`path/to/file`)
-- [ ] T011 [SNNMM] Add error handling (`path/to/file`)
+- [ ] T006 [SPPSS] Implement [feature part 1] (`path/to/file`)
+- [ ] T007 [SPPSS] Implement [feature part 2] (`path/to/file`)
+- [ ] T008 [SPPSS] [P] Add [component A] (`path/to/file`)
+- [ ] T009 [SPPSS] [P] Add [component B] (`path/to/file`)
+- [ ] T010 [SPPSS] Wire up [integration] (`path/to/file`)
+- [ ] T011 [SPPSS] Add error handling (`path/to/file`)
 
 ---
 
@@ -104,11 +104,11 @@ Main feature implementation.
 
 Verification and quality assurance.
 
-- [ ] T012 [SNNMM] [P] Write unit tests for [component] (`tests/path`)
-- [ ] T013 [SNNMM] [P] Write unit tests for [component] (`tests/path`)
-- [ ] T014 [SNNMM] Run test suite and verify passing
-- [ ] T015 [SNNMM] Validate ASCII encoding on all files
-- [ ] T016 [SNNMM] Manual testing and verification
+- [ ] T012 [SPPSS] [P] Write unit tests for [component] (`tests/path`)
+- [ ] T013 [SPPSS] [P] Write unit tests for [component] (`tests/path`)
+- [ ] T014 [SPPSS] Run test suite and verify passing
+- [ ] T015 [SPPSS] Validate ASCII encoding on all files
+- [ ] T016 [SPPSS] Manual testing and verification
 
 ---
 
@@ -162,12 +162,12 @@ Run `/implement` to begin AI-led implementation.
 
 ### Task Format
 ```
-- [ ] TNNN [SNNMM] [P] Action verb + what + where (`path/to/file`)
+- [ ] TNNN [SPPSS] [P] Action verb + what + where (`path/to/file`)
 ```
 
 Components:
 - `TNNN`: Sequential task ID (T001, T002, ...)
-- `[SNNMM]`: Session reference (S0103 = Phase 01, Session 03)
+- `[SPPSS]`: Session reference (e.g., S0103 = Phase 01, Session 03)
 - `[P]`: Optional parallelization marker
 - Description: Action verb + clear description
 - Path: File being created/modified
@@ -183,6 +183,25 @@ Order tasks by:
 1. Dependencies (prerequisite tasks first)
 2. Logical flow (setup -> foundation -> implementation -> testing)
 3. File dependencies (create before modify)
+
+## Update State
+
+Update `.spec_system/state.json`:
+
+```json
+{
+  "current_session": "phase_NN_session_NN_name",
+  "next_session_history": [
+    {
+      "date": "YYYY-MM-DD",
+      "session": "phase_NN_session_NN_name",
+      "status": "tasks_created"
+    }
+  ]
+}
+```
+
+- Update `next_session_history` entry status to `tasks_created`
 
 ## Output
 
