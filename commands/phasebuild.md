@@ -138,7 +138,7 @@ For each session, create `session_NN_name.md` (use `snake_case` for name):
 ```markdown
 # Session NN: Session Name
 
-**Session ID**: `phase_NN_session_NN_name`
+**Session ID**: `phaseNN-sessionNN-name`
 **Status**: Not Started
 **Estimated Tasks**: ~15-30
 **Estimated Duration**: 2-4 hours

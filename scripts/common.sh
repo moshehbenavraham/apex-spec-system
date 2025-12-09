@@ -302,14 +302,16 @@ validate_ascii() {
         return 1
     fi
 
-    # Check for non-ASCII characters (bytes > 127)
-    if grep -qP '[^\x00-\x7F]' "$file"; then
+    # Check for non-ASCII characters (bytes > 127) using POSIX-compatible grep
+    # LC_ALL=C ensures byte-by-byte comparison; [^[:print:][:space:]] catches
+    # non-printable/non-whitespace chars including non-ASCII
+    if LC_ALL=C grep -q '[^[:print:][:space:]]' "$file" 2>/dev/null; then
         log_error "Non-ASCII characters found in: $file"
         return 1
     fi
 
-    # Check for CRLF line endings
-    if grep -qP '\r\n' "$file"; then
+    # Check for CRLF line endings (carriage return)
+    if grep -q "$(printf '\r')" "$file" 2>/dev/null; then
         log_error "CRLF line endings found in: $file"
         return 1
     fi
@@ -325,8 +327,8 @@ find_non_ascii() {
         return 1
     fi
 
-    # Show non-ASCII characters with line numbers
-    grep -nP '[^\x00-\x7F]' "$file" || true
+    # Show non-ASCII characters with line numbers using POSIX-compatible grep
+    LC_ALL=C grep -n '[^[:print:][:space:]]' "$file" 2>/dev/null || true
 }
 
 validate_all_files() {

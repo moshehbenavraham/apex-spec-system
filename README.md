@@ -1,6 +1,6 @@
 # Apex Spec System
 
-**Version: 0.11.1-alpha**
+**Version: 0.15.8-alpha**
 
 A Claude Code plugin providing a specification-driven workflow system for AI-assisted development.
 
@@ -42,7 +42,7 @@ cp -r apex-spec-system ~/.claude/plugins/
 
 ## Features
 
-- **8-Command Workflow**: Structured process from initialization to completion
+- **9-Command Workflow**: Structured process from initialization to completion
 - **Session Scoping**: Keep work manageable with 15-30 tasks per session
 - **Progress Tracking**: State file and checklists track progress
 - **Validation Gates**: Verify completeness before marking done
@@ -51,7 +51,7 @@ cp -r apex-spec-system ~/.claude/plugins/
 
 ## Plugin Components
 
-### Commands (8 total)
+### Commands (9 total)
 
 | Command | Purpose |
 |---------|---------|
@@ -62,6 +62,7 @@ cp -r apex-spec-system ~/.claude/plugins/
 | `/implement` | AI-led task-by-task implementation |
 | `/validate` | Verify session completeness |
 | `/updateprd` | Mark session complete, sync documentation |
+| `/documents` | Audit and update project documentation |
 | `/phasebuild` | Create structure for new phase |
 
 ### Skill
@@ -97,6 +98,8 @@ The **spec-workflow** skill auto-activates when:
       |
       v
 /updateprd    ->  Sync PRD, mark session complete
+      |
+      +--------> /documents  ->  (recommended) Audit and update docs
       |
       v
 /phasebuild   ->  (optional) Create new phase structure
