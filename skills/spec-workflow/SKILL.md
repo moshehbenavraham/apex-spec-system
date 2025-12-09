@@ -14,7 +14,7 @@ A specification-driven workflow system for AI-assisted development that breaks l
 
 Break large projects into manageable, well-scoped implementation sessions that fit within AI context windows and human attention spans.
 
-## The 8-Command Workflow
+## The 9-Command Workflow
 
 Execute commands in this sequence:
 
@@ -38,6 +38,8 @@ Execute commands in this sequence:
       |
       v
 /updateprd    ->  Sync PRD, mark session complete
+      |
+      +--------> /documents  ->  Audit and update project documentation (recommended after phase completion)
       |
       v
 /phasebuild   ->  (optional, when ready to start a new phase) Create new phase structure
@@ -192,6 +194,7 @@ The `.spec_system/state.json` file tracks project progress:
 | `/implement` | Code implementation | spec.md, tasks.md | implementation-notes.md |
 | `/validate` | Verify completeness | All session files | validation.md |
 | `/updateprd` | Mark complete | validation.md | Updated state.json |
+| `/documents` | Audit/update docs | state.json, PRD, codebase | Updated docs, docs-audit.md |
 | `/phasebuild` | Create new phase | PRD | PRD/phase_NN/ |
 
 ## Additional Resources
@@ -269,6 +272,7 @@ Commands use a **hybrid approach** for reliability:
 | `/nextsession` | State + candidates | - |
 | `/implement` | Current session | Environment + tools |
 | `/validate` | Current session | - |
+| `/documents` | State + progress | - |
 
 ## Best Practices
 
@@ -279,6 +283,7 @@ Commands use a **hybrid approach** for reliability:
 5. **Update tasks continuously** - Mark checkboxes immediately
 6. **Trust the system** - Follow workflow, resist scope creep
 7. **Read before implementing** - Review spec.md and tasks.md first
+8. **Keep docs current** - Run `/documents` after completing a phase or adding packages
 
 ## Troubleshooting
 
@@ -291,3 +296,5 @@ Commands use a **hybrid approach** for reliability:
 | Tasks taking too long | Reduce scope, defer non-MVP items |
 | Missing tools | Run `check-prereqs.sh --tools "tool1,tool2"` to verify |
 | Environment issues | Run `check-prereqs.sh --env` to diagnose |
+| Stale documentation | Run `/documents` to audit and update |
+| Missing docs | Run `/documents` to create standard files |
