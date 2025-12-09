@@ -226,6 +226,87 @@
 
 ---
 
+### /documents Workflow
+
+**Purpose**: Audit, create, and maintain project documentation according to monorepo standards.
+
+**When to Run**:
+- After completing a phase
+- After adding new packages or services
+- When documentation may be stale
+- Any time documentation coverage needs verification
+
+**Steps**:
+
+1. **Get Project State**
+   - Run `analyze-project.sh --json` to understand current progress
+   - Read `.spec_system/state.json` for phase/session status
+   - Read `.spec_system/PRD/PRD.md` for project context
+
+2. **Audit Existing Documentation**
+   Check for standard documentation files:
+
+   **Root Level (Required)**:
+   - `README.md` - Project overview, repo map, quickstart
+   - `CONTRIBUTING.md` - Branch conventions, PR rules, commit style
+   - `ARCHITECTURE.md` - System diagram, tech stack, component relationships
+   - `CODEOWNERS` - Code ownership assignments
+   - `LICENSE` - Legal clarity
+
+   **docs/ Directory**:
+   - `docs/onboarding.md` - Zero-to-hero setup checklist
+   - `docs/development.md` - Local environment, dev scripts
+   - `docs/environments.md` - Dev/staging/prod differences
+   - `docs/deployment.md` - CI/CD pipelines, release process
+   - `docs/adr/` - Architecture Decision Records
+   - `docs/runbooks/` - Incident response procedures
+   - `docs/api/` - API contracts, OpenAPI specs
+
+   **Per-Package READMEs**:
+   - Pattern: `[parent]/[dirname]/README_[dirname].md`
+   - Only root gets `README.md`; subdirectories use `README_<dirname>.md`
+
+3. **Generate Audit Report**
+   Identify:
+   - Missing files (need to create)
+   - Stale files (need to update)
+   - Redundant content (need to consolidate)
+   - Wordy sections (need to trim)
+
+4. **Create Missing Documentation**
+   - Check for local override: `.spec_system/doc-templates/<filename>`
+   - If exists, use local template; otherwise use default templates
+   - Fill with actual project information
+   - Never invent technical details
+
+5. **Update Existing Documentation**
+   - Compare against actual project state
+   - Fix discrepancies between docs and implementation
+   - Remove outdated information
+   - Keep content concise
+
+6. **Quality Checks**
+   - All commands work
+   - All paths exist
+   - All links valid
+   - No TODO placeholders
+   - ASCII-only characters
+
+7. **Generate Audit Report**
+   Create `.spec_system/docs-audit.md` with:
+   - Summary of required vs found files
+   - List of files created
+   - List of files updated
+   - Remaining gaps requiring human input
+
+**Key Rules**:
+- Never invent technical details - only document what exists
+- ASCII-only characters in all files
+- One source of truth - link instead of duplicating
+- Current over complete - accurate and small beats comprehensive and stale
+
+---
+
 ### /phasebuild Workflow
 
 **Purpose**: Create structure for a new project phase.
@@ -280,6 +361,8 @@
 [Validated:PASS] --/updateprd--> [Complete]
 [Validated:FAIL] --fix issues--> [In Progress]
 [Complete] --/nextsession--> [Recommended]
+[Complete] --/documents--> [Documentation Updated] (optional, recommended after phase completion)
+[Phase Complete] --/phasebuild--> [New Phase Created]
 ```
 
 ---
@@ -306,3 +389,12 @@ Common fixes:
 - **Missing files**: Create missing deliverables
 - **ASCII errors**: Fix encoding issues
 - **Test failures**: Fix tests, re-run suite
+
+### Documentation Issues
+
+Common fixes:
+- **Stale documentation**: Run `/documents` to audit and update
+- **Missing required files**: Run `/documents` to create from templates
+- **Docs out of sync with code**: Run `/documents` after any major implementation
+- **Redundant information**: Run `/documents` to consolidate
+- **Invalid links or paths**: Run `/documents` quality checks
