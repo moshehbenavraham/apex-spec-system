@@ -96,7 +96,7 @@ check_required_sessions() {
 
     local failed=0
 
-    echo "$prereqs" | tr ',' '\n' | while read -r prereq; do
+    while IFS= read -r prereq; do
         prereq=$(echo "$prereq" | xargs)  # Trim whitespace
         [[ -z "$prereq" ]] && continue
 
@@ -115,7 +115,7 @@ check_required_sessions() {
             fi
             ((failed++)) || true
         fi
-    done
+    done <<< "$(echo "$prereqs" | tr ',' '\n')"
 
     return $failed
 }

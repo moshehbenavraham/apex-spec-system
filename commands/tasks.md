@@ -39,7 +39,7 @@ Create `tasks.md` in the session directory:
 ```markdown
 # Task Checklist
 
-**Session ID**: `phase_NN_session_NN_name`
+**Session ID**: `phaseNN-sessionNN-name`
 **Total Tasks**: [N]
 **Estimated Duration**: [X-Y] hours
 **Created**: [YYYY-MM-DD]
@@ -51,7 +51,7 @@ Create `tasks.md` in the session directory:
 - `[x]` = Completed
 - `[ ]` = Pending
 - `[P]` = Parallelizable (can run with other [P] tasks)
-- `[SPPSS]` = Session reference (PP=phase number, SS=session number)
+- `[SNNMM]` = Session reference (NN=phase number, MM=session number)
 - `TNNN` = Task ID
 
 ---
@@ -190,11 +190,11 @@ Update `.spec_system/state.json`:
 
 ```json
 {
-  "current_session": "phase_NN_session_NN_name",
+  "current_session": "phaseNN-sessionNN-name",
   "next_session_history": [
     {
       "date": "YYYY-MM-DD",
-      "session": "phase_NN_session_NN_name",
+      "session": "phaseNN-sessionNN-name",
       "status": "tasks_created"
     }
   ]

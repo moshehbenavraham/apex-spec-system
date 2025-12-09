@@ -28,7 +28,7 @@ Read the following:
 
 Create the session directory structure:
 ```
-.spec_system/specs/phase_NN_session_NN_name/
+.spec_system/specs/phaseNN-sessionNN-name/
 ├── spec.md
 └── (tasks.md, etc. created by later commands)
 ```
@@ -40,7 +40,7 @@ Create `spec.md` with all sections filled in:
 ```markdown
 # Session Specification
 
-**Session ID**: `phase_NN_session_NN_name`
+**Session ID**: `phaseNN-sessionNN-name`
 **Phase**: NN - Phase Name
 **Status**: Not Started
 **Created**: [YYYY-MM-DD]
@@ -65,7 +65,7 @@ Create `spec.md` with all sections filled in:
 ## 3. Prerequisites
 
 ### Required Sessions
-- [x] `phase_NN_session_NN_name` - [what it provides]
+- [x] `phaseNN-sessionNN-name` - [what it provides]
 
 ### Required Tools/Knowledge
 - [tool/knowledge item]
@@ -176,7 +176,7 @@ Run `/tasks` to generate the implementation task checklist.
 
 ### 4. Archive Previous Recommendation
 
-Move `.spec_system/NEXT_SESSION.md` to `.spec_system/specs/phase_NN_session_NN_name/NEXT_SESSION_archived.md`
+Move `.spec_system/NEXT_SESSION.md` to `.spec_system/specs/phaseNN-sessionNN-name/NEXT_SESSION_archived.md`
 
 ### 5. Update State
 
@@ -184,11 +184,11 @@ Update `.spec_system/state.json`:
 
 ```json
 {
-  "current_session": "phase_NN_session_NN_name",
+  "current_session": "phaseNN-sessionNN-name",
   "next_session_history": [
     {
       "date": "YYYY-MM-DD",
-      "session": "phase_NN_session_NN_name",
+      "session": "phaseNN-sessionNN-name",
       "status": "spec_created"
     }
   ]

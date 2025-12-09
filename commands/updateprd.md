@@ -13,7 +13,7 @@ You are a **senior engineer** who is obsessive about pristine code — zero erro
 
 ## Your Task
 
-After successful validation, mark the session complete and update all tracking documents.
+After successful validation, mark the session complete, update all tracking documents, increment the project version, and commit everything to the repository.
 
 ## Prerequisites
 
@@ -36,13 +36,13 @@ Update `.spec_system/state.json`:
 {
   "completed_sessions": [
     "...existing...",
-    "phase_NN_session_NN_name"
+    "phaseNN-sessionNN-name"
   ],
   "current_session": null,
   "next_session_history": [
     {
       "date": "YYYY-MM-DD",
-      "session": "phase_NN_session_NN_name",
+      "session": "phaseNN-sessionNN-name",
       "status": "completed"
     }
   ],
@@ -69,7 +69,7 @@ Create `.spec_system/specs/[session]/IMPLEMENTATION_SUMMARY.md`:
 ```markdown
 # Implementation Summary
 
-**Session ID**: `phase_NN_session_NN_name`
+**Session ID**: `phaseNN-sessionNN-name`
 **Completed**: [DATE]
 **Duration**: [X] hours
 
@@ -144,11 +144,52 @@ If this was the last session in the phase:
 - Archive phase: move `.spec_system/PRD/phase_NN/` to `.spec_system/archive/phases/phase_NN/`
 - Update master `.spec_system/PRD/PRD.md`
 
-### 6. Report Completion
+### 6. Increment Project Version
+
+Increment the project's patch version in standard version files. Check for these files in order and update the first one found:
+
+| File | Version Location | Example |
+|------|------------------|---------|
+| `package.json` | `"version": "X.Y.Z"` | `1.2.3` -> `1.2.4` |
+| `pyproject.toml` | `version = "X.Y.Z"` | `1.2.3` -> `1.2.4` |
+| `setup.py` | `version="X.Y.Z"` | `1.2.3` -> `1.2.4` |
+| `Cargo.toml` | `version = "X.Y.Z"` | `1.2.3` -> `1.2.4` |
+| `version.txt` | Plain version string | `1.2.3` -> `1.2.4` |
+| `VERSION` | Plain version string | `1.2.3` -> `1.2.4` |
+
+**Version increment rules:**
+- Increment the **patch** version by default (X.Y.Z -> X.Y.Z+1)
+- If version has pre-release suffix (e.g., `-alpha`, `-beta`), preserve it
+- If no version file found, skip this step and note it in the report
+
+**Also update version in documentation** if the project follows the monorepo documentation standard (see `/documents`):
+- `README.md` - if it contains a version badge or version line
+- Any other files that reference the project version
+
+### 7. Commit and Push to Repo
+
+Commit and push all non-gitignored repo changes. This commit should include:
+- All session implementation work
+- State and PRD updates from steps 2-5
+- Version increment from step 6
+
+Use a commit message format:
+```
+Complete phaseNN-sessionNN-name: [brief description]
+
+- [key deliverable 1]
+- [key deliverable 2]
+- Version: X.Y.Z -> X.Y.Z+1
+```
+
+Do not add co-author attributions.
+
+### 8. Report Completion
 
 Tell the user:
 - Session marked complete
 - Updated files list
+- Version change (old -> new)
 - Phase progress
 - Next recommended action
 
@@ -166,12 +207,13 @@ Tell the user:
 Report to user:
 
 ```
-Session Completed: phase_NN_session_NN_name
+Session Completed: phaseNN-sessionNN-name
 
 Updates Made:
 - .spec_system/state.json: Added to completed_sessions
 - Phase PRD: Marked session complete
 - Created: IMPLEMENTATION_SUMMARY.md
+- Version: 1.2.3 -> 1.2.4 (package.json)
 
 Phase Progress: N/M sessions (X%)
 
@@ -197,4 +239,10 @@ State inconsistency detected.
 
 Current session in .spec_system/state.json doesn't match.
 Please verify .spec_system/state.json and try again.
+```
+
+If no version file found:
+```
+Note: No standard version file found. Skipping version increment.
+Consider adding package.json, pyproject.toml, or version.txt to track versions.
 ```
