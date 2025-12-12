@@ -1,6 +1,6 @@
 # Apex Spec System
 
-**Version: 0.15.8-alpha**
+**Version: 0.16.0-alpha**
 
 A Claude Code plugin providing a specification-driven workflow system for AI-assisted development.
 
@@ -51,7 +51,7 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 
 ## Features
 
-- **9-Command Workflow**: Structured process from initialization to completion
+- **10-Command Workflow**: Structured process from initialization to completion
 - **Session Scoping**: Keep work manageable with 15-30 tasks per session
 - **Progress Tracking**: State file and checklists track progress
 - **Validation Gates**: Verify completeness before marking done
@@ -60,7 +60,7 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 
 ## Plugin Components
 
-### Commands (9 total)
+### Commands (10 total)
 
 | Command | Purpose |
 |---------|---------|
@@ -73,6 +73,7 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 | `/updateprd` | Mark session complete, sync documentation |
 | `/documents` | Audit and update project documentation |
 | `/phasebuild` | Create structure for new phase |
+| `/audit` | Analyze tech stack, run dev tooling, auto-fix issues |
 
 ### Skill
 

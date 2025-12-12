@@ -1,7 +1,7 @@
 ---
 name: Apex Spec Workflow
 description: This skill should be used when the user asks about "spec system", "session workflow", "nextsession", "sessionspec", "implement session", "validate session", "phase build", "session scope", "task checklist", or when working in a project containing .spec_system/ directory. Provides guidance for specification-driven AI development workflows.
-version: 0.15.8-alpha
+version: 0.16.0-alpha
 ---
 
 # Apex Spec Workflow
@@ -14,7 +14,7 @@ A specification-driven workflow system for AI-assisted development that breaks l
 
 Break large projects into manageable, well-scoped implementation sessions that fit within AI context windows and human attention spans.
 
-## The 9-Command Workflow
+## The 10-Command Workflow
 
 The workflow has **3 distinct stages**:
 
@@ -220,6 +220,7 @@ The `.spec_system/state.json` file tracks project progress:
 | `/updateprd` | Mark complete | validation.md | Updated state.json |
 | `/documents` | Audit/update docs | state.json, PRD, codebase | Updated docs, docs-audit.md |
 | `/phasebuild` | Create new phase | PRD | PRD/phase_NN/ |
+| `/audit` | Code quality audit | Codebase | Console report |
 
 ## Additional Resources
 
@@ -322,3 +323,5 @@ Commands use a **hybrid approach** for reliability:
 | Environment issues | Run `check-prereqs.sh --env` to diagnose |
 | Stale documentation | Run `/documents` to audit and update |
 | Missing docs | Run `/documents` to create standard files |
+| Lint/format issues | Run `/audit` to detect stack and auto-fix |
+| Test failures | Run `/audit` to attempt simple fixes |
