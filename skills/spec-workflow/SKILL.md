@@ -37,7 +37,7 @@ Execute commands in this sequence:
 /validate     ->  Verify session completeness
       |
       v
-/updateprd    ->  Sync PRD, mark session complete
+/updateprd    ->  Sync PRD, mark session complete    ->  If still within a Phase, return to /nextsession
       |
       +--------> /documents  ->  Audit and update project documentation (recommended after phase completion)
       |

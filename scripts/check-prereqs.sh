@@ -7,7 +7,8 @@
 #   ./check-prereqs.sh --tools "node,npm"       # Check specific tools
 #   ./check-prereqs.sh --json --env             # JSON output for Claude
 # =============================================================================
-
+# NOTE: The 1st version of this file was taken directly from Github's Spec Kit
+# =============================================================================
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -25,8 +26,8 @@ JSON_RESULT=""
 # =============================================================================
 
 init_json() {
-    JSON_RESULT=$(jq -n '{
-        "generated_at": "",
+    JSON_RESULT=$(jq -n --arg generated_at "$(get_datetime)" '{
+        "generated_at": $generated_at,
         "overall": "pass",
         "environment": {},
         "tools": {},
@@ -34,12 +35,6 @@ init_json() {
         "files": {},
         "issues": []
     }')
-}
-
-set_json_field() {
-    local path="$1"
-    local value="$2"
-    JSON_RESULT=$(echo "$JSON_RESULT" | jq "$path = $value")
 }
 
 add_json_issue() {
@@ -77,6 +72,39 @@ set_check_result() {
 }
 
 # =============================================================================
+# SMALL STRING/LIST HELPERS
+# =============================================================================
+
+trim() {
+    local s="${1:-}"
+    # Remove leading whitespace
+    s="${s#"${s%%[![:space:]]*}"}"
+    # Remove trailing whitespace
+    s="${s%"${s##*[![:space:]]}"}"
+    printf '%s' "$s"
+}
+
+# Print a comma-separated list as trimmed, non-empty, newline-delimited items.
+# This avoids word-splitting issues and preserves spaces inside individual items.
+split_csv() {
+    local input="${1:-}"
+    local item=""
+    local -a parts=()
+
+    input="$(trim "$input")"
+    [[ -z "$input" ]] && return 0
+
+    local IFS=','
+    read -r -a parts <<< "$input" || true
+
+    for item in "${parts[@]}"; do
+        item="$(trim "$item")"
+        [[ -z "$item" ]] && continue
+        printf '%s\n' "$item"
+    done
+}
+
+# =============================================================================
 # CHECK FUNCTIONS
 # =============================================================================
 
@@ -87,7 +115,7 @@ check_required_sessions() {
         log_info "Checking required sessions..."
     fi
 
-    if [[ -z "$prereqs" ]]; then
+    if [[ -z "$(trim "$prereqs")" ]]; then
         if [[ "$OUTPUT_MODE" == "human" ]]; then
             log_info "No prerequisite sessions specified"
         fi
@@ -96,8 +124,8 @@ check_required_sessions() {
 
     local failed=0
 
+    local prereq=""
     while IFS= read -r prereq; do
-        prereq=$(echo "$prereq" | xargs)  # Trim whitespace
         [[ -z "$prereq" ]] && continue
 
         if is_session_completed "$prereq"; then
@@ -115,7 +143,7 @@ check_required_sessions() {
             fi
             ((failed++)) || true
         fi
-    done <<< "$(echo "$prereqs" | tr ',' '\n')"
+    done < <(split_csv "$prereqs")
 
     return $failed
 }
@@ -127,7 +155,7 @@ check_required_tools() {
         log_info "Checking required tools..."
     fi
 
-    if [[ -z "$tools" ]]; then
+    if [[ -z "$(trim "$tools")" ]]; then
         if [[ "$OUTPUT_MODE" == "human" ]]; then
             log_info "No specific tools required"
         fi
@@ -136,23 +164,24 @@ check_required_tools() {
 
     local failed=0
 
-    for tool in $(echo "$tools" | tr ',' '\n'); do
-        tool=$(echo "$tool" | xargs)  # Trim whitespace
+    local tool=""
+    while IFS= read -r tool; do
         [[ -z "$tool" ]] && continue
 
         if command -v "$tool" &> /dev/null; then
             local version=""
             # Try to get version for common tools
             case "$tool" in
-                node) version=$(node --version 2>/dev/null || echo "unknown") ;;
-                npm) version=$(npm --version 2>/dev/null || echo "unknown") ;;
-                python|python3) version=$($tool --version 2>/dev/null | head -1 || echo "unknown") ;;
-                docker) version=$(docker --version 2>/dev/null | head -1 || echo "unknown") ;;
-                git) version=$(git --version 2>/dev/null | head -1 || echo "unknown") ;;
-                go) version=$(go version 2>/dev/null | head -1 || echo "unknown") ;;
-                cargo) version=$(cargo --version 2>/dev/null | head -1 || echo "unknown") ;;
-                *) version=$($tool --version 2>/dev/null | head -1 || echo "available") ;;
+                node) version=$(node --version 2>&1 | head -1 || echo "unknown") ;;
+                npm) version=$(npm --version 2>&1 | head -1 || echo "unknown") ;;
+                python|python3) version=$("$tool" --version 2>&1 | head -1 || echo "unknown") ;;
+                docker) version=$(docker --version 2>&1 | head -1 || echo "unknown") ;;
+                git) version=$(git --version 2>&1 | head -1 || echo "unknown") ;;
+                go) version=$(go version 2>&1 | head -1 || echo "unknown") ;;
+                cargo) version=$(cargo --version 2>&1 | head -1 || echo "unknown") ;;
+                *) version=$("$tool" --version 2>&1 | head -1 || echo "available") ;;
             esac
+            [[ -z "$version" ]] && version="available"
 
             if [[ "$OUTPUT_MODE" == "human" ]]; then
                 log_success "Tool available: $tool ($version)"
@@ -168,7 +197,7 @@ check_required_tools() {
             fi
             ((failed++)) || true
         fi
-    done
+    done < <(split_csv "$tools")
 
     return $failed
 }
@@ -180,7 +209,7 @@ check_required_files() {
         log_info "Checking required files..."
     fi
 
-    if [[ -z "$files" ]]; then
+    if [[ -z "$(trim "$files")" ]]; then
         if [[ "$OUTPUT_MODE" == "human" ]]; then
             log_info "No specific files required"
         fi
@@ -189,8 +218,8 @@ check_required_files() {
 
     local failed=0
 
-    for file in $(echo "$files" | tr ',' '\n'); do
-        file=$(echo "$file" | xargs)  # Trim whitespace
+    local file=""
+    while IFS= read -r file; do
         [[ -z "$file" ]] && continue
 
         if [[ -f "$file" ]]; then
@@ -208,7 +237,7 @@ check_required_files() {
             fi
             ((failed++)) || true
         fi
-    done
+    done < <(split_csv "$files")
 
     return $failed
 }
@@ -219,21 +248,35 @@ check_environment() {
     fi
 
     local failed=0
+    local has_jq=false
+    if command -v jq &> /dev/null; then
+        has_jq=true
+    fi
 
     # Check spec system
     if [[ -d "$SPEC_SYSTEM_DIR" && -f "$STATE_FILE" ]]; then
-        if validate_json "$STATE_FILE" 2>/dev/null; then
-            if [[ "$OUTPUT_MODE" == "human" ]]; then
-                log_success "Spec system: OK"
+        if [[ "$has_jq" == true ]]; then
+            if validate_json "$STATE_FILE" 2>/dev/null; then
+                if [[ "$OUTPUT_MODE" == "human" ]]; then
+                    log_success "Spec system: OK"
+                else
+                    set_check_result "environment" "spec_system" "pass" "$SPEC_SYSTEM_DIR"
+                fi
             else
-                set_check_result "environment" "spec_system" "pass" "$SPEC_SYSTEM_DIR"
+                if [[ "$OUTPUT_MODE" == "human" ]]; then
+                    log_error "Spec system: Invalid state.json"
+                else
+                    set_check_result "environment" "spec_system" "fail" "invalid state.json"
+                    add_json_issue "environment" "spec_system" "state.json is not valid JSON"
+                fi
+                ((failed++)) || true
             fi
         else
             if [[ "$OUTPUT_MODE" == "human" ]]; then
-                log_error "Spec system: Invalid state.json"
+                log_error "Spec system: Found but jq missing (cannot validate state.json)"
             else
-                set_check_result "environment" "spec_system" "fail" "invalid state.json"
-                add_json_issue "environment" "spec_system" "state.json is not valid JSON"
+                set_check_result "environment" "spec_system" "fail" "jq not installed (cannot validate state.json)"
+                add_json_issue "environment" "spec_system" "jq is required to validate state.json"
             fi
             ((failed++)) || true
         fi
@@ -248,7 +291,7 @@ check_environment() {
     fi
 
     # Check jq
-    if command -v jq &> /dev/null; then
+    if [[ "$has_jq" == true ]]; then
         local jq_version
         jq_version=$(jq --version 2>/dev/null || echo "unknown")
         if [[ "$OUTPUT_MODE" == "human" ]]; then
@@ -352,24 +395,54 @@ main() {
 
     # Parse arguments
     while [[ $# -gt 0 ]]; do
-        case $1 in
+        case "$1" in
             --json)
                 OUTPUT_MODE="json"
                 check_jq || exit 1
                 init_json
                 shift
                 ;;
+            --tools=*)
+                tools="${1#*=}"
+                run_any=true
+                shift
+                ;;
             -t|--tools)
+                if [[ $# -lt 2 ]]; then
+                    log_error "Missing value for $1"
+                    show_usage
+                    exit 1
+                fi
                 tools="$2"
                 run_any=true
                 shift 2
                 ;;
+            --files=*)
+                files="${1#*=}"
+                run_any=true
+                shift
+                ;;
             -f|--files)
+                if [[ $# -lt 2 ]]; then
+                    log_error "Missing value for $1"
+                    show_usage
+                    exit 1
+                fi
                 files="$2"
                 run_any=true
                 shift 2
                 ;;
+            --prereqs=*)
+                prereqs="${1#*=}"
+                run_any=true
+                shift
+                ;;
             -p|--prereqs)
+                if [[ $# -lt 2 ]]; then
+                    log_error "Missing value for $1"
+                    show_usage
+                    exit 1
+                fi
                 prereqs="$2"
                 run_any=true
                 shift 2
@@ -382,6 +455,10 @@ main() {
             -h|--help)
                 show_usage
                 exit 0
+                ;;
+            --)
+                shift
+                break
                 ;;
             *)
                 log_error "Unknown option: $1"
@@ -396,9 +473,7 @@ main() {
         env_only=true
     fi
 
-    if [[ "$OUTPUT_MODE" == "json" ]]; then
-        set_json_field '.generated_at' "\"$(get_datetime)\""
-    else
+    if [[ "$OUTPUT_MODE" != "json" ]]; then
         echo "=============================================="
         echo "PREREQUISITE CHECK"
         echo "=============================================="
@@ -406,11 +481,12 @@ main() {
     fi
 
     local total_failed=0
+    local rc=0
 
     # Always check environment first
-    if ! check_environment; then
-        ((total_failed++)) || true
-    fi
+    rc=0
+    check_environment || rc=$?
+    total_failed=$((total_failed + rc))
 
     if [[ "$env_only" == true && -z "$tools" && -z "$files" && -z "$prereqs" ]]; then
         # Just environment check
@@ -421,26 +497,26 @@ main() {
         fi
 
         # Check session prerequisites
-        if [[ -n "$prereqs" ]]; then
-            if ! check_required_sessions "$prereqs"; then
-                ((total_failed++)) || true
-            fi
+        if [[ -n "$(trim "$prereqs")" ]]; then
+            rc=0
+            check_required_sessions "$prereqs" || rc=$?
+            total_failed=$((total_failed + rc))
             [[ "$OUTPUT_MODE" == "human" ]] && echo ""
         fi
 
         # Check tools
-        if [[ -n "$tools" ]]; then
-            if ! check_required_tools "$tools"; then
-                ((total_failed++)) || true
-            fi
+        if [[ -n "$(trim "$tools")" ]]; then
+            rc=0
+            check_required_tools "$tools" || rc=$?
+            total_failed=$((total_failed + rc))
             [[ "$OUTPUT_MODE" == "human" ]] && echo ""
         fi
 
         # Check files
-        if [[ -n "$files" ]]; then
-            if ! check_required_files "$files"; then
-                ((total_failed++)) || true
-            fi
+        if [[ -n "$(trim "$files")" ]]; then
+            rc=0
+            check_required_files "$files" || rc=$?
+            total_failed=$((total_failed + rc))
             [[ "$OUTPUT_MODE" == "human" ]] && echo ""
         fi
     fi
@@ -471,3 +547,5 @@ main() {
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     main "$@"
 fi
+
+# CREDIT NOTE: The 1st version of this file was taken directly from Github's Spec Kit

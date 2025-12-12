@@ -1,0 +1,13 @@
+# .gitignore
+
+# AI assistant instruction/memory files
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+
+# Project root directories
+/tmp/
+/tests/
+/logs/
+/archive/
+/test_data/

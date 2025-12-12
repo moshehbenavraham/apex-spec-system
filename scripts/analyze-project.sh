@@ -6,6 +6,8 @@
 #   ./analyze-project.sh           # Human-readable output
 #   ./analyze-project.sh --json    # JSON output for Claude integration
 # =============================================================================
+# CREDIT NOTE: The 1st version of this file was taken directly from Github's Spec Kit
+# =============================================================================
 
 set -euo pipefail
 
@@ -68,7 +70,9 @@ output_json() {
 
             # Extract session number from filename (session_NN_name)
             if [[ "$filename" =~ ^session_([0-9]+)_(.+)$ ]]; then
-                local session_num="${BASH_REMATCH[1]}"
+                local session_num_raw="${BASH_REMATCH[1]}"
+                local session_num
+                session_num=$((10#$session_num_raw))
                 local session_name="${BASH_REMATCH[2]}"
                 local is_completed="false"
 
@@ -210,15 +214,15 @@ analyze_next_candidates() {
 
     if [[ -d "$prd_dir" ]]; then
         # List session files that aren't completed
-        find "$prd_dir" -name "session_*.md" -type f | sort | while read -r file; do
+        while IFS= read -r file; do
             local filename
             filename=$(basename "$file" .md)
 
             # Extract session number from filename (session_NN_name)
             if [[ "$filename" =~ ^session_([0-9]+)_ ]]; then
-                local session_num="${BASH_REMATCH[1]}"
-                local session_id
-                session_id=$(build_session_id "$current_phase" "$session_num" "placeholder")
+                local session_num_raw="${BASH_REMATCH[1]}"
+                local session_num
+                session_num=$((10#$session_num_raw))
 
                 if ! is_session_number_completed "$session_num" "$current_phase"; then
                     echo "  - $filename (not completed)"
@@ -226,7 +230,7 @@ analyze_next_candidates() {
                     echo "  - $filename (completed)"
                 fi
             fi
-        done
+        done < <(find "$prd_dir" -name "session_*.md" -type f | sort)
     else
         echo "  (no phase directory found: $prd_dir)"
     fi
@@ -335,3 +339,5 @@ main() {
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     main "$@"
 fi
+
+# CREDIT NOTE: The 1st version of this file was taken directly from Github's Spec Kit

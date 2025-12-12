@@ -51,14 +51,14 @@ Check for the presence and quality of standard documentation files.
 |------|---------|-------|
 | `README.md` | What this is, repo map, one-command quickstart | Exists? Current? |
 | `CONTRIBUTING.md` | Branch conventions, PR rules, commit style | Exists? Current? |
-| `ARCHITECTURE.md` | System diagram, service relationships, tech stack | Exists? Current? |
-| `CODEOWNERS` | Who owns what | Exists? Current? |
 | `LICENSE` | Legal clarity | Exists? |
 
 #### `/docs/` Directory
 
 ```
 docs/
+├── ARCHITECTURE.md        # System diagram, service relationships, tech stack
+├── CODEOWNERS             # Who owns what
 ├── onboarding.md          # Zero-to-hero checklist
 ├── development.md         # Local environment, dev scripts
 ├── environments.md        # Dev/staging/prod differences
@@ -130,7 +130,7 @@ For each missing required file:
 
 - [Getting Started](docs/onboarding.md)
 - [Development Guide](docs/development.md)
-- [Architecture](ARCHITECTURE.md)
+- [Architecture](docs/ARCHITECTURE.md)
 - [Contributing](CONTRIBUTING.md)
 
 ## Tech Stack
@@ -181,7 +181,7 @@ Use conventional commits:
 - Approve when ready, request changes when not
 ```
 
-#### ARCHITECTURE.md Template
+#### docs/ARCHITECTURE.md Template
 
 ```markdown
 # Architecture
@@ -582,8 +582,8 @@ Create `.spec_system/docs-audit.md`:
 
 | Category | Required | Found | Status |
 |----------|----------|-------|--------|
-| Root files | 5 | N | PASS/FAIL |
-| /docs/ files | 6 | N | PASS/FAIL |
+| Root files | 3 | N | PASS/FAIL |
+| /docs/ files | 8 | N | PASS/FAIL |
 | ADRs | N/A | N | INFO |
 | Package READMEs | N | N | PASS/FAIL |
 
@@ -648,13 +648,13 @@ Created:
 - docs/development.md
 
 Updated:
-- ARCHITECTURE.md (synced with Phase 01 implementation)
+- docs/ARCHITECTURE.md (synced with Phase 01 implementation)
 - docs/deployment.md (updated CI pipeline steps)
 
 Coverage: 8/9 standard files present
 
 Gaps requiring input:
-- CODEOWNERS: Need team assignments
+- docs/CODEOWNERS: Need team assignments
 - docs/api/: Need OpenAPI spec location
 
 Full report: .spec_system/docs-audit.md
