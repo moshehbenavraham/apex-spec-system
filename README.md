@@ -87,31 +87,57 @@ The **spec-workflow** skill auto-activates when:
 
 ## The Workflow
 
+The workflow has **3 distinct stages**:
+
+### Stage 1: INITIALIZATION (One-Time Setup)
+
 ```
-/init         ->  Set up spec system in project
+/init              ->  Set up spec system in project
       |
       v
-/nextsession  ->  Analyze project, recommend next feature
+[User Action]      ->  Populate PRD with project requirements
       |
       v
-/sessionspec  ->  Convert to formal specification
+/phasebuild        ->  Create first phase structure (session stubs)
+```
+
+### Stage 2: SESSIONS WORKFLOW (Repeat Until Phase Complete)
+
+```
+/nextsession   ->  Analyze project, recommend next session
       |
       v
-/tasks        ->  Generate 15-30 task checklist
+/sessionspec   ->  Convert to formal specification
       |
       v
-/implement    ->  AI-led task-by-task implementation
+/tasks         ->  Generate 15-30 task checklist
       |
       v
-/validate     ->  Verify session completeness
+/implement     ->  AI-led task-by-task implementation
       |
       v
-/updateprd    ->  Sync PRD, mark session complete
-      |
-      +--------> /documents  ->  (recommended) Audit and update docs
+/validate      ->  Verify session completeness
       |
       v
-/phasebuild   ->  (optional) Create new phase structure
+/updateprd     ->  Sync PRD, mark session complete
+      |
+      +-------------> Loop back to /nextsession
+                      until ALL phase sessions complete
+```
+
+### Stage 3: PHASE TRANSITION (After Phase Complete)
+
+```
+/documents         ->  Audit and update documentation (recommended)
+      |
+      v
+/phasebuild        ->  Create next phase structure
+      |
+      v
+[User Action]      ->  Manual testing (highly recommended)
+      |
+      v
+                   ->  Return to Stage 2 for new phase
 ```
 
 ## Project Structure

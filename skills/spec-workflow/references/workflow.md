@@ -352,17 +352,37 @@
 
 ## State Machine
 
+The workflow has **3 distinct stages**:
+
+### Stage 1: INITIALIZATION (One-Time)
+
 ```
-[No Session] --/nextsession--> [Recommended]
+[New Project] --/init--> [Initialized]
+[Initialized] --User populates PRD--> [PRD Ready]
+[PRD Ready] --/phasebuild--> [Phase Created]
+```
+
+### Stage 2: SESSIONS WORKFLOW (Repeat Until Phase Complete)
+
+```
+[Phase Created] --/nextsession--> [Recommended]
 [Recommended] --/sessionspec--> [Specified]
 [Specified] --/tasks--> [Ready]
 [Ready] --/implement--> [In Progress]
 [In Progress] --/validate--> [Validated]
-[Validated:PASS] --/updateprd--> [Complete]
+[Validated:PASS] --/updateprd--> [Session Complete]
 [Validated:FAIL] --fix issues--> [In Progress]
-[Complete] --/nextsession--> [Recommended]
-[Complete] --/documents--> [Documentation Updated] (optional, recommended after phase completion)
-[Phase Complete] --/phasebuild--> [New Phase Created]
+[Session Complete] --more sessions?--> /nextsession --> [Recommended]
+[Session Complete] --all sessions done--> [Phase Complete]
+```
+
+### Stage 3: PHASE TRANSITION (After Phase Complete)
+
+```
+[Phase Complete] --/documents--> [Docs Updated] (recommended)
+[Docs Updated] --/phasebuild--> [New Phase Created]
+[New Phase Created] --user manual testing--> (highly recommended)
+[New Phase Created] --> Return to Stage 2
 ```
 
 ---
