@@ -249,11 +249,11 @@
    **Root Level (Required)**:
    - `README.md` - Project overview, repo map, quickstart
    - `CONTRIBUTING.md` - Branch conventions, PR rules, commit style
-   - `ARCHITECTURE.md` - System diagram, tech stack, component relationships
-   - `CODEOWNERS` - Code ownership assignments
    - `LICENSE` - Legal clarity
 
    **docs/ Directory**:
+   - `docs/ARCHITECTURE.md` - System diagram, tech stack, component relationships
+   - `docs/CODEOWNERS` - Code ownership assignments
    - `docs/onboarding.md` - Zero-to-hero setup checklist
    - `docs/development.md` - Local environment, dev scripts
    - `docs/environments.md` - Dev/staging/prod differences

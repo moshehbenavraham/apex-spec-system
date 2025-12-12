@@ -20,6 +20,15 @@ claude --plugin-dir /path/to/apex-spec-system
 cp -r apex-spec-system ~/.claude/plugins/
 ```
 
+## Requirements
+
+| Dependency | Required | Install |
+|------------|----------|---------|
+| **jq** | Yes | `apt install jq` or `brew install jq` |
+| **git** | Optional | Usually pre-installed |
+
+The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.sh --env`
+
 ## Quick Start
 
 1. **Install the plugin** (see above)

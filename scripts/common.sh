@@ -4,6 +4,8 @@
 # =============================================================================
 # Source this file in other scripts: source "$(dirname "$0")/common.sh"
 # =============================================================================
+# CREDIT NOTE: The 1st version of this file was taken directly from Github's Spec Kit
+# =============================================================================
 
 set -euo pipefail
 
@@ -37,24 +39,25 @@ else
 fi
 
 log_info() {
-    echo -e "${BLUE}[INFO]${NC} $*"
+    # Use printf for portability and to avoid echo option edge-cases (e.g. "-n").
+    printf '%b\n' "${BLUE}[INFO]${NC} $*"
 }
 
 log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $*"
+    printf '%b\n' "${GREEN}[SUCCESS]${NC} $*"
 }
 
 log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $*"
+    printf '%b\n' "${YELLOW}[WARNING]${NC} $*"
 }
 
 log_error() {
-    echo -e "${RED}[ERROR]${NC} $*" >&2
+    printf '%b\n' "${RED}[ERROR]${NC} $*" >&2
 }
 
 log_debug() {
     if [[ "${DEBUG:-0}" == "1" ]]; then
-        echo -e "${CYAN}[DEBUG]${NC} $*"
+        printf '%b\n' "${CYAN}[DEBUG]${NC} $*"
     fi
 }
 
@@ -80,7 +83,7 @@ json_get() {
         return 1
     fi
 
-    jq -r "$path" "$file"
+    jq -r "$path" -- "$file"
 }
 
 json_set() {
@@ -98,7 +101,18 @@ json_set() {
     local tmp_file
     tmp_file=$(mktemp)
 
-    jq "$path = $value" "$file" > "$tmp_file" && mv "$tmp_file" "$file"
+    if jq "$path = $value" -- "$file" > "$tmp_file"; then
+        if mv -- "$tmp_file" "$file"; then
+            return 0
+        fi
+        local rc=$?
+        rm -f -- "$tmp_file"
+        return $rc
+    fi
+
+    local rc=$?
+    rm -f -- "$tmp_file"
+    return $rc
 }
 
 json_append_array() {
@@ -111,7 +125,18 @@ json_append_array() {
     local tmp_file
     tmp_file=$(mktemp)
 
-    jq "$path += [$value]" "$file" > "$tmp_file" && mv "$tmp_file" "$file"
+    if jq "$path += [$value]" -- "$file" > "$tmp_file"; then
+        if mv -- "$tmp_file" "$file"; then
+            return 0
+        fi
+        local rc=$?
+        rm -f -- "$tmp_file"
+        return $rc
+    fi
+
+    local rc=$?
+    rm -f -- "$tmp_file"
+    return $rc
 }
 
 validate_json() {
@@ -119,7 +144,7 @@ validate_json() {
 
     check_jq || return 1
 
-    if jq empty "$file" 2>/dev/null; then
+    if jq empty -- "$file" 2>/dev/null; then
         return 0
     else
         log_error "Invalid JSON in $file"
@@ -135,6 +160,16 @@ validate_json() {
 #   phase00-session01-project-setup
 #   phase01-session08b-refinements
 
+is_valid_identifier() {
+    local name="${1:-}"
+    # Valid bash identifier: [a-zA-Z_][a-zA-Z0-9_]*
+    # Use glob matching (not regex) to avoid clobbering BASH_REMATCH.
+    [[ -n "$name" ]] || return 1
+    [[ "$name" == [a-zA-Z_]* ]] || return 1
+    [[ "$name" != *[!a-zA-Z0-9_]* ]] || return 1
+    return 0
+}
+
 parse_session_id() {
     local session_id="$1"
     local phase_var="${2:-}"
@@ -144,10 +179,28 @@ parse_session_id() {
 
     # Regex: phase([0-9]{2})-session([0-9]{2})([a-z])?-(.+)
     if [[ "$session_id" =~ ^phase([0-9]{2})-session([0-9]{2})([a-z])?-(.+)$ ]]; then
-        [[ -n "$phase_var" ]] && eval "$phase_var='${BASH_REMATCH[1]}'"
-        [[ -n "$session_var" ]] && eval "$session_var='${BASH_REMATCH[2]}'"
-        [[ -n "$suffix_var" ]] && eval "$suffix_var='${BASH_REMATCH[3]}'"
-        [[ -n "$name_var" ]] && eval "$name_var='${BASH_REMATCH[4]}'"
+        # Capture values immediately so helper calls below can't clobber BASH_REMATCH.
+        local phase_val="${BASH_REMATCH[1]}"
+        local session_val="${BASH_REMATCH[2]}"
+        local suffix_val="${BASH_REMATCH[3]}"
+        local name_val="${BASH_REMATCH[4]}"
+
+        if [[ -n "$phase_var" ]]; then
+            is_valid_identifier "$phase_var" || { log_error "Invalid variable name: $phase_var"; return 1; }
+            printf -v "$phase_var" '%s' "$phase_val"
+        fi
+        if [[ -n "$session_var" ]]; then
+            is_valid_identifier "$session_var" || { log_error "Invalid variable name: $session_var"; return 1; }
+            printf -v "$session_var" '%s' "$session_val"
+        fi
+        if [[ -n "$suffix_var" ]]; then
+            is_valid_identifier "$suffix_var" || { log_error "Invalid variable name: $suffix_var"; return 1; }
+            printf -v "$suffix_var" '%s' "$suffix_val"
+        fi
+        if [[ -n "$name_var" ]]; then
+            is_valid_identifier "$name_var" || { log_error "Invalid variable name: $name_var"; return 1; }
+            printf -v "$name_var" '%s' "$name_val"
+        fi
         return 0
     else
         log_error "Invalid session ID format: $session_id"
@@ -226,7 +279,7 @@ is_session_completed() {
     local completed
     completed=$(get_completed_sessions)
 
-    if echo "$completed" | grep -q "^${session_id}$"; then
+    if grep -Fxq -- "$session_id" <<< "$completed"; then
         return 0
     else
         return 1
@@ -244,7 +297,7 @@ is_session_number_completed() {
     local pattern
     pattern=$(printf "phase%02d-session%02d" "$phase" "$session_num")
 
-    if echo "$completed" | grep -q "^${pattern}"; then
+    if grep -q "^${pattern}" <<< "$completed"; then
         return 0
     else
         return 1
@@ -305,13 +358,13 @@ validate_ascii() {
     # Check for non-ASCII characters (bytes > 127) using POSIX-compatible grep
     # LC_ALL=C ensures byte-by-byte comparison; [^[:print:][:space:]] catches
     # non-printable/non-whitespace chars including non-ASCII
-    if LC_ALL=C grep -q '[^[:print:][:space:]]' "$file" 2>/dev/null; then
+    if LC_ALL=C grep -q '[^[:print:][:space:]]' -- "$file" 2>/dev/null; then
         log_error "Non-ASCII characters found in: $file"
         return 1
     fi
 
     # Check for CRLF line endings (carriage return)
-    if grep -q "$(printf '\r')" "$file" 2>/dev/null; then
+    if grep -q "$(printf '\r')" -- "$file" 2>/dev/null; then
         log_error "CRLF line endings found in: $file"
         return 1
     fi
@@ -328,7 +381,7 @@ find_non_ascii() {
     fi
 
     # Show non-ASCII characters with line numbers using POSIX-compatible grep
-    LC_ALL=C grep -n '[^[:print:][:space:]]' "$file" 2>/dev/null || true
+    LC_ALL=C grep -n '[^[:print:][:space:]]' -- "$file" 2>/dev/null || true
 }
 
 validate_all_files() {
@@ -337,9 +390,9 @@ validate_all_files() {
 
     while IFS= read -r -d '' file; do
         if ! validate_ascii "$file"; then
-            ((errors++))
+            ((errors++)) || true
         fi
-    done < <(find "$dir" -type f \( -name "*.md" -o -name "*.py" -o -name "*.js" -o -name "*.ts" -o -name "*.json" \) -print0)
+    done < <(find "$dir" -type f \( -name "*.md" -o -name "*.py" -o -name "*.js" -o -name "*.ts" -o -name "*.json" -o -name "*.sh" \) -print0)
 
     if [[ $errors -gt 0 ]]; then
         log_error "Found $errors files with encoding issues"
@@ -357,7 +410,7 @@ validate_all_files() {
 ensure_dir() {
     local dir="$1"
     if [[ ! -d "$dir" ]]; then
-        mkdir -p "$dir"
+        mkdir -p -- "$dir"
         log_info "Created directory: $dir"
     fi
 }
@@ -462,3 +515,5 @@ EOF
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     show_common_help
 fi
+
+# CREDIT NOTE: The 1st version of this file was taken directly from Github's Spec Kit
