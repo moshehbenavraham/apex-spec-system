@@ -33,6 +33,42 @@ Parse any arguments provided after `/audit`:
 | `--phase <1\|2\|3>` | all | Run specific phase only |
 | `--no-save` | false | Don't save report to file |
 
+## Known Issues File
+
+The audit respects a `.spec_system/audit/known-issues.md` file that documents intentional exceptions. This prevents the same known issues from cluttering every audit report.
+
+### Format
+
+```markdown
+# Known Issues
+
+## Ignored Paths
+<!-- Files/directories to skip or treat as advisory-only -->
+- `src/legacy/**` - Untyped legacy code, migration planned for Q2
+- `vendor/` - Third-party code, do not modify
+
+## Ignored Rules
+<!-- Specific rule + path combinations that are intentional -->
+- `no-console` in `src/cli/**` - CLI legitimately uses console output
+- `@typescript-eslint/no-explicit-any` in `src/types/legacy.ts` - Complex generics
+
+## Skipped Tests
+<!-- Tests that are known-failing or intentionally skipped -->
+- `auth.test.ts::should refresh expired token` - Blocked on external API mock (issue #142)
+
+## Notes
+<!-- Context for future audits -->
+- ESLint chosen over Biome due to plugin ecosystem needs
+- Test coverage target is 80% for src/, not enforced for scripts/
+```
+
+### Behavior
+
+- **Ignored Paths**: Issues in these paths are reported separately as "Known (X issues)" rather than "Remaining"
+- **Ignored Rules**: Specific rule violations in matched paths are excluded from issue counts
+- **Skipped Tests**: Known-failing tests don't count against the pass rate
+- **Notes**: Read for context, included in report header if present
+
 ## Steps
 
 ### Step 0: Preflight
@@ -47,7 +83,12 @@ Before starting the audit:
 
 2. **Note timestamp** for the report
 
-3. **If `--dry-run`**: Skip to Dry Run Output section
+3. **Check for known-issues.md**
+   - Look for `.spec_system/audit/known-issues.md`
+   - If found, parse and load the ignore rules
+   - Note in report: "Known issues file loaded ({n} paths, {n} rules, {n} tests)"
+
+4. **If `--dry-run`**: Skip to Dry Run Output section
 
 ### Step 1: Phase 1 - Detection & Setup
 
@@ -101,6 +142,7 @@ For each tool, and each repo (in monorepo):
    - Total issues found
    - Issues auto-fixed
    - Remaining issues (with file:line references)
+   - Known issues (matching known-issues.md patterns, reported separately)
 
 #### 2.2 Guardrail - Syntax Verification
 
@@ -129,6 +171,11 @@ Execute test suite with standard commands
 
 Capture results: passed, failed, skipped counts.
 
+**Known-skip handling**: Tests listed in known-issues.md "Skipped Tests" section are:
+- Expected to fail (don't attempt remediation)
+- Reported separately from unexpected failures
+- Not counted against the pass rate
+
 #### 3.3 Remediation
 
 For manageable failures (within a single context window):
@@ -150,6 +197,8 @@ Output a compact report. For monorepos, show per-package results inline.
 ```
 AUDIT REPORT | {project_name} | {YYYY-MM-DD HH:MM}
 Git: {clean|dirty} | Stack(s): {language(s) + framework(s)}
+{if known-issues.md loaded}Known issues: {n} paths, {n} rules, {n} tests{/if}
+{if notes in known-issues.md}Note: {first note from file}{/if}
 
 [SETUP] {pkg_manager} | Linter: {ok|missing} | Fmt: {ok|missing} | Types: {ok|missing}
 {if installed}  + Installed: {tool}, {tool}{/if}
@@ -157,17 +206,24 @@ Git: {clean|dirty} | Stack(s): {language(s) + framework(s)}
 
 {for each package in monorepo, or root if single repo}
 [{package_name}]
-  Fmt: {n} fixed | Lint: {n} fixed, {n} remain | Types: {n} errors
+  Fmt: {n} fixed | Lint: {n} fixed, {n} remain, {n} known | Types: {n} errors, {n} known
   {if remaining issues, max 5}
     {file}:{line} {message} [{rule}]
   {/if}
-  Tests: {passed}/{total} pass {if failures}| FAIL: {test_name}{/if}
+  {if known issues exist, summarize}
+    Known: {n} in src/legacy/**, {n} no-console in src/cli/**
+  {/if}
+  Tests: {passed}/{total} pass, {n} known-skip {if failures}| FAIL: {test_name}{/if}
 {/for}
 
-SUMMARY: P1 {ok|partial} | P2 {fixed}/{total} fixed | P3 {pass|fail|skip}
+SUMMARY: P1 {ok|partial} | P2 {fixed}/{total} fixed, {known} known | P3 {pass|fail|skip}
 {if action items}
 TODO:
   - {actionable item}
+{/if}
+{if new patterns detected that could be added to known-issues.md}
+SUGGESTED FOR known-issues.md:
+  - `{rule}` in `{path}` ({n} occurrences) - {add reason or remove this line}
 {/if}
 ```
 
@@ -179,6 +235,7 @@ If `--dry-run` was specified:
 AUDIT PREVIEW (DRY RUN) | {project_name}
 
 Detected: {language} | {pkg_manager}
+{if known-issues.md exists}Known issues: {n} paths, {n} rules, {n} tests{/if}
 Would install: {tool}, {tool}
 Would run: {formatter} --fix, {linter} --fix, {type_checker}, {test_cmd}
 Packages: {n} ({pkg1}, {pkg2}, ...)
@@ -220,6 +277,8 @@ Saved: .spec_system/audit/{filename}
 4. **Clear instructions** - When auto-fix fails, provide copy-paste commands
 5. **ASCII UFT-8 LF only** - All output uses ASCII characters (0-127), UTF-8, LF
 6. **Stack agnostic** - Work with any language that has dev tooling
+7. **Respect known-issues.md** - Don't attempt to fix issues marked as known/intentional
+8. **Suggest patterns** - When 3+ identical issues appear in same path, suggest adding to known-issues.md
 
 ## Edge Cases
 
@@ -246,6 +305,15 @@ Handling:
 - Run the one with more complete config
 - Warn: "Multiple {category} tools detected. Using {tool}."
 
+### Stale Known Issues
+
+When a known-issues.md entry no longer matches any actual issues:
+
+Handling:
+- Note in report: "Stale: `{pattern}` - no matching issues found"
+- Suggest removal in the SUGGESTED section
+- Do not auto-remove (user may want to keep for documentation)
+
 ## Error Handling
 
 | Error | Severity | Response |
@@ -261,6 +329,9 @@ Handling:
 
 Display the structured audit report to console and save to `.spec_system/audit/` by default. Include:
 - Phase-by-phase summary
-- Statistics (issues found/fixed/remaining)
+- Statistics (issues found/fixed/remaining/known)
+- Known issues summary (if known-issues.md loaded)
+- Suggestions for known-issues.md additions (patterns with 3+ occurrences)
+- Stale known-issues.md entries (no longer matching)
 - Actionable items for manual follow-up
 - File path where report was saved
