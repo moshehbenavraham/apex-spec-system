@@ -40,6 +40,7 @@ Create the following directories:
 ```bash
 mkdir -p .spec_system/PRD/phase_00
 mkdir -p .spec_system/specs
+mkdir -p .spec_system/audit
 mkdir -p .spec_system/archive/backups
 mkdir -p .spec_system/archive/sessions
 mkdir -p .spec_system/archive/planning
@@ -172,6 +173,7 @@ Created:
 - .spec_system/PRD/PRD.md (product requirements document)
 - .spec_system/PRD/phase_00/PRD_phase_00.md (phase tracker)
 - .spec_system/specs/ (session specifications directory)
+- .spec_system/audit/ (audit reports directory)
 - .spec_system/archive/ (completed work archive)
 
 Next Steps:
