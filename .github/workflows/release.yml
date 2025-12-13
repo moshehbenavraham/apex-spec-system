@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version info
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          if [[ "$VERSION" == *"alpha"* ]] || [[ "$VERSION" == *"beta"* ]]; then
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "v${{ steps.version.outputs.version }}"
+          generate_release_notes: true
+          prerelease: ${{ steps.version.outputs.prerelease == 'true' }}
+          body: |
+            ## Apex Spec System v${{ steps.version.outputs.version }}
+
+            A specification-driven workflow system for AI-assisted development.
+
+            ### Installation
+
+            ```bash
+            # Clone and use as plugin directory
+            git clone https://github.com/ai-with-apex/apex-spec-system.git
+            claude --plugin-dir /path/to/apex-spec-system
+
+            # Or add to your plugins
+            cp -r apex-spec-system ~/.claude/plugins/
+            ```
+
+            ### What's Changed
+
+            See auto-generated changelog below.

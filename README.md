@@ -1,14 +1,16 @@
 # Apex Spec System
 
-**Version: 0.16.0-alpha**
+**Version: 0.17.0-beta**
 
-A Claude Code plugin providing a specification-driven workflow system for AI-assisted development.
+A Claude Code plugin providing a specification-driven workflow system for AI-assisted development. Think Github Spec Kit (our source inspiration) simplified.
 
 ## Overview
 
 The Apex Spec System breaks large projects into manageable, well-scoped implementation sessions that fit within AI context windows and human attention spans.
 
 **Philosophy**: `1 session = 1 spec = 2-4 hours (15-30 tasks)`
+
+**Video Tutorial**: [Watch on YouTube](https://youtu.be/iY6ySesmOCg) - Installation and workflow walkthrough
 
 ## Installation
 
