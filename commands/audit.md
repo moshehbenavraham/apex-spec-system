@@ -31,6 +31,7 @@ Parse any arguments provided after `/audit`:
 | `--skip-tests` | false | Skip Phase 3 entirely |
 | `--verbose` | false | Show full tool output |
 | `--phase <1\|2\|3>` | all | Run specific phase only |
+| `--no-save` | false | Don't save report to file |
 
 ## Steps
 
@@ -185,6 +186,32 @@ Packages: {n} ({pkg1}, {pkg2}, ...)
 Run without --dry-run to apply.
 ```
 
+### Step 5: Save Report
+
+Unless `--no-save` is set, save the report to `.spec_system/audit/`.
+
+#### 5.1 Ensure Directory Exists
+
+Create `.spec_system/audit/` if it doesn't exist.
+
+#### 5.2 Determine Filename
+
+**If `.spec_system/state.json` exists:**
+- Read `project_name` from state.json
+- Slugify: lowercase, replace spaces/special chars with hyphens
+- Format: `{slug}_{YYYYMMDD_HHMM}.txt`
+
+**If no state.json:**
+- Format: `audit_{YYYYMMDD_HHMM}.txt`
+
+#### 5.3 Write and Confirm
+
+Save the report and append to console output:
+
+```
+Saved: .spec_system/audit/{filename}
+```
+
 ## Rules
 
 1. **Auto-fix by default** - Apply safe fixes without asking
@@ -232,7 +259,8 @@ Handling:
 
 ## Output
 
-Display the structured audit report directly to console. Include:
+Display the structured audit report to console and save to `.spec_system/audit/` by default. Include:
 - Phase-by-phase summary
 - Statistics (issues found/fixed/remaining)
 - Actionable items for manual follow-up
+- File path where report was saved
