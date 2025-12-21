@@ -1,6 +1,6 @@
 # Apex Spec System
 
-**Version: 0.17.0-beta**
+**Version: 0.18.0-beta**
 
 A Claude Code plugin providing a specification-driven workflow system for AI-assisted development. Think Github Spec Kit (our source inspiration) simplified.
 
@@ -53,7 +53,7 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 
 ## Features
 
-- **10-Command Workflow**: Structured process from initialization to completion
+- **11-Command Workflow**: Structured process from initialization to completion
 - **Session Scoping**: Keep work manageable with 15-30 tasks per session
 - **Progress Tracking**: State file and checklists track progress
 - **Validation Gates**: Verify completeness before marking done
@@ -62,11 +62,12 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 
 ## Plugin Components
 
-### Commands (10 total)
+### Commands (11 total)
 
 | Command | Purpose |
 |---------|---------|
 | `/init` | Initialize spec system in current project |
+| `/createprd` | Generate master PRD from requirements document |
 | `/nextsession` | Analyze project and recommend next session |
 | `/sessionspec` | Create formal technical specification |
 | `/tasks` | Generate 15-30 task checklist |
@@ -98,7 +99,9 @@ The workflow has **3 distinct stages**:
 /init              ->  Set up spec system in project
       |
       v
-[User Action]      ->  Populate PRD with project requirements
+/createprd         ->  Generate PRD from requirements doc (optional)
+  OR                   OR
+[User Action]      ->  Manually populate PRD with requirements
       |
       v
 /phasebuild        ->  Create first phase structure (session stubs)

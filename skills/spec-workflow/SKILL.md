@@ -1,7 +1,7 @@
 ---
 name: Apex Spec Workflow
-description: This skill should be used when the user asks about "spec system", "session workflow", "nextsession", "sessionspec", "implement session", "validate session", "phase build", "session scope", "task checklist", or when working in a project containing .spec_system/ directory. Provides guidance for specification-driven AI development workflows.
-version: 0.17.0-beta
+description: This skill should be used when the user asks about "spec system", "session workflow", "createprd", "nextsession", "sessionspec", "implement session", "validate session", "phase build", "session scope", "task checklist", or when working in a project containing .spec_system/ directory. Provides guidance for specification-driven AI development workflows.
+version: 0.18.0-beta
 ---
 
 # Apex Spec Workflow
@@ -14,7 +14,7 @@ A specification-driven workflow system for AI-assisted development that breaks l
 
 Break large projects into manageable, well-scoped implementation sessions that fit within AI context windows and human attention spans.
 
-## The 10-Command Workflow
+## The 11-Command Workflow
 
 The workflow has **3 distinct stages**:
 
@@ -24,7 +24,9 @@ The workflow has **3 distinct stages**:
 /init              ->  Set up spec system in project
       |
       v
-[User Action]      ->  Populate PRD with project requirements
+/createprd         ->  Generate PRD from requirements doc (optional)
+  OR                   OR
+[User Action]      ->  Manually populate PRD with requirements
       |
       v
 /phasebuild        ->  Create first phase structure (session stubs)
@@ -212,6 +214,7 @@ The `.spec_system/state.json` file tracks project progress:
 | Command | Purpose | Input | Output |
 |---------|---------|-------|--------|
 | `/init` | Initialize spec system | Project info | .spec_system/ structure |
+| `/createprd` | Generate master PRD | Requirements doc | PRD/PRD.md |
 | `/nextsession` | Recommend next session | state.json, PRD | NEXT_SESSION.md |
 | `/sessionspec` | Create specification | NEXT_SESSION.md | specs/.../spec.md |
 | `/tasks` | Generate task list | spec.md | specs/.../tasks.md |
