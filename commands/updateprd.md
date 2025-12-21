@@ -168,6 +168,8 @@ Increment the project's patch version in standard version files. Check for these
 
 ### 7. Commit and Push to Repo
 
+Do NOT add co-authors!  Do NOT add any attributions!
+
 Commit and push all non-gitignored repo changes. This commit should include:
 - All session implementation work
 - State and PRD updates from steps 2-5
@@ -182,7 +184,7 @@ Complete phaseNN-sessionNN-name: [brief description]
 - Version: X.Y.Z -> X.Y.Z+1
 ```
 
-Do not add co-author attributions.
+Do NOT add co-authors!  Do NOT add any attributions!
 
 ### 8. Report Completion
 
