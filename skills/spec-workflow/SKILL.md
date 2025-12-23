@@ -1,7 +1,7 @@
 ---
 name: Apex Spec Workflow
 description: This skill should be used when the user asks about "spec system", "session workflow", "createprd", "nextsession", "sessionspec", "implement session", "validate session", "phase build", "session scope", "task checklist", or when working in a project containing .spec_system/ directory. Provides guidance for specification-driven AI development workflows.
-version: 0.18.0-beta
+version: 0.20.9-beta
 ---
 
 # Apex Spec Workflow
@@ -21,7 +21,7 @@ The workflow has **3 distinct stages**:
 ### Stage 1: INITIALIZATION (One-Time Setup)
 
 ```
-/init              ->  Set up spec system in project
+/initspec          ->  Set up spec system in project
       |
       v
 /createprd         ->  Generate PRD from requirements doc (optional)
@@ -59,13 +59,16 @@ The workflow has **3 distinct stages**:
 ### Stage 3: PHASE TRANSITION (After Phase Complete)
 
 ```
+/audit             ->  Dev tooling (recommended)
+      |
+      v
 /documents         ->  Audit and update documentation (recommended)
       |
       v
-/phasebuild        ->  Create next phase structure
+[User Action]      ->  Manual testing (highly recommended)
       |
       v
-[User Action]      ->  Manual testing (highly recommended)
+/phasebuild        ->  Create next phase structure
       |
       v
                    ->  Return to Stage 2 for new phase
@@ -122,17 +125,7 @@ project/
 |--------|-------|
 | Task count | 15-25 (sweet spot: 20-25) |
 | Duration | 2-3 hours |
-| Focus | MVP only |
-
-### MVP vs Full Feature
-
-| Aspect | MVP (Include) | Full (Defer) |
-|--------|---------------|--------------|
-| Core logic | Essential functionality | Edge cases |
-| Error handling | Happy path + basic errors | All edge cases |
-| UI | Functional | Polish, animations |
-| Testing | Happy path + 1 error case | Comprehensive |
-| Config | Hardcoded/simple | Full configurability |
+| Focus | Stable/late MVP |
 
 ## Task Design
 
@@ -213,8 +206,8 @@ The `.spec_system/state.json` file tracks project progress:
 
 | Command | Purpose | Input | Output |
 |---------|---------|-------|--------|
-| `/init` | Initialize spec system | Project info | .spec_system/ structure |
-| `/createprd` | Generate master PRD | Requirements doc | PRD/PRD.md |
+| `/initspec` | Initialize spec system | Project info | .spec_system/ structure |
+| `/createprd` | Generate master PRD | Requirements doc or user text | PRD/PRD.md |
 | `/nextsession` | Recommend next session | state.json, PRD | NEXT_SESSION.md |
 | `/sessionspec` | Create specification | NEXT_SESSION.md | specs/.../spec.md |
 | `/tasks` | Generate task list | spec.md | specs/.../tasks.md |
@@ -246,7 +239,7 @@ Available scripts:
 - `check-prereqs.sh` - Environment and tool verification (supports `--json` for structured output)
 - `common.sh` - Shared functions
 
-To copy scripts locally during `/init`, choose "copy locally" when prompted. To revert to plugin scripts, delete `.spec_system/scripts/`.
+To copy scripts locally during `/initspec`, choose "copy locally" when prompted. To revert to plugin scripts, delete `.spec_system/scripts/`.
 
 ### Hybrid Architecture
 

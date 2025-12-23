@@ -23,11 +23,11 @@ This PRD is used by the rest of the workflow:
 
 ## Prerequisites
 
-- The project must be initialized with `/init`
+- The project must be initialized with `/initspec`
 - `.spec_system/state.json` must exist
 - `.spec_system/PRD/` directory must exist
 
-If any prerequisite is missing, stop and instruct the user to run `/init` first.
+If any prerequisite is missing, stop and instruct the user to run `/initspec` first.
 
 ## Steps
 
@@ -37,7 +37,7 @@ Check for:
 - `.spec_system/state.json`
 - `.spec_system/PRD/`
 
-If missing, tell the user to run `/init` and stop.
+If missing, tell the user to run `/initspec` and stop.
 
 ### 2. Get Deterministic Project State
 
@@ -265,7 +265,7 @@ Cannot create PRD.
 
 Reason: .spec_system/ not initialized
 
-Please run /init first.
+Please run /initspec first.
 ```
 
 If the source document is incomplete:
