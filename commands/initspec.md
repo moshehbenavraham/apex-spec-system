@@ -1,9 +1,9 @@
 ---
-name: init
+name: initspec
 description: Initialize the Apex Spec System in the current project
 ---
 
-# /init Command
+# /initspec Command
 
 Initialize the Apex Spec System in the current project directory.
 

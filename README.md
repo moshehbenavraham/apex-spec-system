@@ -1,6 +1,6 @@
 # Apex Spec System
 
-**Version: 0.18.0-beta**
+**Version: 0.20.9-beta**
 
 A Claude Code plugin providing a specification-driven workflow system for AI-assisted development. Think Github Spec Kit (our source inspiration) simplified.
 
@@ -8,7 +8,7 @@ A Claude Code plugin providing a specification-driven workflow system for AI-ass
 
 The Apex Spec System breaks large projects into manageable, well-scoped implementation sessions that fit within AI context windows and human attention spans.
 
-**Philosophy**: `1 session = 1 spec = 2-4 hours (15-30 tasks)`
+**Philosophy**: `1 session = 1 spec = 2-4 hours (15-30 tasks) = safe context window of AI`
 
 **Video Tutorial**: [Watch on YouTube](https://youtu.be/iY6ySesmOCg) - Installation and workflow walkthrough
 
@@ -37,19 +37,41 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 
 2. **Initialize in your project**:
    ```
-   /apex-spec:init
+   /initspec OR /apex-spec:initspec
    ```
    This creates the spec system structure in your project.
 
-3. **Run the workflow**:
    ```
-   /apex-spec:nextsession    # Get recommendation for next session
-   /apex-spec:sessionspec    # Create formal specification
-   /apex-spec:tasks          # Generate task checklist
-   /apex-spec:implement      # Start implementation
-   /apex-spec:validate       # Verify completeness
-   /apex-spec:updateprd      # Mark complete
+   /createprd OR /apex-spec:createprd OR Manually fill out .spec_system/PRD/PRD.md
    ```
+   Optional:  Turn argument or file path into a technical PRD for development.
+   Example: /createprd "a habit trackker app"
+            /createprd @docs/requirements.md
+
+   ```
+   /phasebuild OR /apex-spec:phasebuild
+   ```
+   This will set up the initial Phase and Sessions for that initial Phase
+
+3. **Run the session workflow and repeat until all sessions inside the Phase are completed, thus completing the Phase**:
+   ```
+   /nextsession OR /apex-spec:nextsession    # Get recommendation for next session
+   /sessionspec OR /apex-spec:sessionspec    # Create formal specification
+   /tasks OR /apex-spec:tasks                # Generate task checklist
+   /implement OR /apex-spec:implement        # Start implementation
+   /validate OR /apex-spec:validate          # Verify completeness
+   /updateprd OR /apex-spec:updateprd        # Mark complete, update system
+   ```
+
+ 4. **Between Phases**
+   ```
+   /audit OR /apex-spec:audit                # Dev tooling
+   /documents OR /apex-spec:documents        # Create, maintain project documentation
+   -- Optional but recommended, do manual testing HERE --
+   /phasebuild OR /apex-spec:phasebuild      # Set up next Phase and Phase's sessions
+   ```
+
+ 5. **Repeat until all phases complete!**
 
 ## Features
 
@@ -57,8 +79,10 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 - **Session Scoping**: Keep work manageable with 15-30 tasks per session
 - **Progress Tracking**: State file and checklists track progress
 - **Validation Gates**: Verify completeness before marking done
-- **ASCII Enforcement**: Avoid encoding issues that break code generation
 - **Auto-Activating Skill**: Provides workflow guidance automatically
+- **Dev Tooling**: Regular code quality audits
+- **Documentation Maintenance**: Keep project documentation up to date
+- **ASCII Enforcement**: Avoid encoding issues that break code generation
 
 ## Plugin Components
 
@@ -66,7 +90,7 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 
 | Command | Purpose |
 |---------|---------|
-| `/init` | Initialize spec system in current project |
+| `/initspec` | Initialize spec system in current project |
 | `/createprd` | Generate master PRD from requirements document |
 | `/nextsession` | Analyze project and recommend next session |
 | `/sessionspec` | Create formal technical specification |
@@ -89,66 +113,9 @@ The **spec-workflow** skill auto-activates when:
 
 - **scripts/**: Bash utilities for project analysis
 
-## The Workflow
-
-The workflow has **3 distinct stages**:
-
-### Stage 1: INITIALIZATION (One-Time Setup)
-
-```
-/init              ->  Set up spec system in project
-      |
-      v
-/createprd         ->  Generate PRD from requirements doc (optional)
-  OR                   OR
-[User Action]      ->  Manually populate PRD with requirements
-      |
-      v
-/phasebuild        ->  Create first phase structure (session stubs)
-```
-
-### Stage 2: SESSIONS WORKFLOW (Repeat Until Phase Complete)
-
-```
-/nextsession   ->  Analyze project, recommend next session
-      |
-      v
-/sessionspec   ->  Convert to formal specification
-      |
-      v
-/tasks         ->  Generate 15-30 task checklist
-      |
-      v
-/implement     ->  AI-led task-by-task implementation
-      |
-      v
-/validate      ->  Verify session completeness
-      |
-      v
-/updateprd     ->  Sync PRD, mark session complete
-      |
-      +-------------> Loop back to /nextsession
-                      until ALL phase sessions complete
-```
-
-### Stage 3: PHASE TRANSITION (After Phase Complete)
-
-```
-/documents         ->  Audit and update documentation (recommended)
-      |
-      v
-/phasebuild        ->  Create next phase structure
-      |
-      v
-[User Action]      ->  Manual testing (highly recommended)
-      |
-      v
-                   ->  Return to Stage 2 for new phase
-```
-
 ## Project Structure
 
-After running `/init`, your project will have:
+After running `/initspec`, your project will have:
 
 ```
 your-project/
@@ -177,7 +144,7 @@ your-project/
 ### Ideal Targets
 - 15-25 tasks (sweet spot: 20-25)
 - 2-3 hours typical
-- MVP focus only
+- Stable/late MVP focus
 
 ## Session Naming
 
@@ -203,7 +170,8 @@ All files must use ASCII-only characters (0-127):
 2. **MVP first** - Defer polish and optimizations
 3. **Validate encoding** - Check ASCII before committing
 4. **Update tasks continuously** - Mark checkboxes immediately
-5. **Trust the system** - Follow workflow, resist scope creep
+5. **Do manual testing** - Best judgment, but at least manaul testing per Phase
+6. **Trust the system** - Follow workflow, resist scope creep
 
 ## License
 

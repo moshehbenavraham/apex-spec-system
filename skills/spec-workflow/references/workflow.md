@@ -357,7 +357,7 @@ The workflow has **3 distinct stages**:
 ### Stage 1: INITIALIZATION (One-Time)
 
 ```
-[New Project] --/init--> [Initialized]
+[New Project] --/initspec--> [Initialized]
 [Initialized] --User populates PRD--> [PRD Ready]
 [PRD Ready] --/phasebuild--> [Phase Created]
 ```
