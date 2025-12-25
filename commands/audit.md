@@ -32,6 +32,7 @@ Parse any arguments provided after `/audit`:
 | `--verbose` | false | Show full tool output |
 | `--phase <1\|2\|3>` | all | Run specific phase only |
 | `--no-save` | false | Don't save report to file |
+| `--skip-conventions` | false | Skip CONVENTIONS.md maintenance |
 
 ## Known Issues File
 
@@ -196,7 +197,58 @@ For manageable failures (within a single context window):
 
 4. **Maximum 3 fix iterations** per failing test
 
-### Step 4: Generate Report
+### Step 4: Phase 4 - CONVENTIONS.md Maintenance
+
+Skip this phase if `--skip-conventions` is set or no `.spec_system/CONVENTIONS.md` exists.
+
+#### 4.1 Analyze Current Conventions
+
+Read `.spec_system/CONVENTIONS.md` and extract:
+- Documented patterns, naming conventions, file structures
+- Technology choices and standards
+- Testing and quality requirements
+
+#### 4.2 Detect Actual Patterns
+
+From the audit findings and codebase analysis, identify:
+- **New patterns**: Consistent patterns in code not yet documented
+- **Stale conventions**: Documented rules no longer followed (3+ violations)
+- **Evolved patterns**: Rules that have naturally shifted (e.g., new naming style)
+
+#### 4.3 Make Surgical Updates
+
+Apply minimal, targeted edits to CONVENTIONS.md:
+
+1. **Add** newly detected patterns that appear in 3+ files consistently
+2. **Update** conventions that have evolved (keep the spirit, update the specifics)
+3. **Remove** stale conventions that are consistently violated without issue
+4. **Consolidate** redundant or overlapping rules
+
+**Edit principles:**
+- One edit per pattern change
+- Preserve existing structure and formatting
+- Keep language concise (1-2 lines per convention)
+- Never add speculative or aspirational conventions
+
+#### 4.4 Enforce 300-Line Limit (STRICT)
+
+CONVENTIONS.md must stay under **300 lines maximum**. If over limit after updates:
+
+1. **Merge** similar conventions into single entries
+2. **Remove** least-enforced or most-obvious conventions
+3. **Condense** verbose explanations to single lines
+4. **Archive** detailed rationale to separate docs if needed
+
+**If still over 300 lines**: Prioritize by impact and remove lowest-value entries until compliant.
+
+#### 4.5 Validate Changes
+
+After edits:
+1. Verify file is valid markdown
+2. Confirm line count <= 300
+3. Ensure no duplicate sections created
+
+### Step 5: Generate Report
 
 Output a compact report. For monorepos, show per-package results inline.
 
@@ -223,7 +275,16 @@ Git: {clean|dirty} | Stack(s): {language(s) + framework(s)}
   Tests: {passed}/{total} pass, {n} known-skip {if failures}| FAIL: {test_name}{/if}
 {/for}
 
-SUMMARY: P1 {ok|partial} | P2 {fixed}/{total} fixed, {known} known | P3 {pass|fail|skip}
+{if conventions maintenance ran}
+[CONVENTIONS] {lines}/300 lines | +{added} -{removed} ~{updated}
+  {if changes made, list max 3}
+    + Added: {pattern description}
+    - Removed: {stale pattern}
+    ~ Updated: {evolved pattern}
+  {/if}
+{/if}
+
+SUMMARY: P1 {ok|partial} | P2 {fixed}/{total} fixed, {known} known | P3 {pass|fail|skip} | P4 {ok|trimmed|skip}
 {if action items}
 TODO:
   - {actionable item}
@@ -245,20 +306,21 @@ Detected: {language} | {pkg_manager}
 {if known-issues.md exists}Known issues: {n} paths, {n} rules, {n} tests{/if}
 Would install: {tool}, {tool}
 Would run: {formatter} --fix, {linter} --fix, {type_checker}, {test_cmd}
+{if CONVENTIONS.md exists}CONVENTIONS.md: {lines} lines (limit: 300){/if}
 Packages: {n} ({pkg1}, {pkg2}, ...)
 
 Run without --dry-run to apply.
 ```
 
-### Step 5: Save Report
+### Step 6: Save Report
 
 Unless `--no-save` is set, save the report to `.spec_system/audit/`.
 
-#### 5.1 Ensure Directory Exists
+#### 6.1 Ensure Directory Exists
 
 Create `.spec_system/audit/` if it doesn't exist.
 
-#### 5.2 Determine Filename
+#### 6.2 Determine Filename
 
 **If `.spec_system/state.json` exists:**
 - Read `project_name` from state.json
@@ -268,7 +330,7 @@ Create `.spec_system/audit/` if it doesn't exist.
 **If no state.json:**
 - Format: `audit_{YYYYMMDD_HHMM}.txt`
 
-#### 5.3 Write and Confirm
+#### 6.3 Write and Confirm
 
 Save the report and append to console output:
 
@@ -286,6 +348,8 @@ Saved: .spec_system/audit/{filename}
 6. **Stack agnostic** - Work with any language that has dev tooling
 7. **Respect known-issues.md** - Don't attempt to fix issues marked as known/intentional
 8. **Suggest patterns** - When 3+ identical issues appear in same path, suggest adding to known-issues.md
+9. **CONVENTIONS.md <= 300 lines** - Strictly enforce line limit; trim ruthlessly if exceeded
+10. **Evidence-based conventions** - Only document patterns with 3+ occurrences in codebase
 
 ## Edge Cases
 
@@ -312,6 +376,27 @@ Handling:
 - Run the one with more complete config
 - Warn: "Multiple {category} tools detected. Using {tool}."
 
+### CONVENTIONS.md Over Limit
+
+When CONVENTIONS.md exceeds 300 lines:
+
+Handling:
+- First pass: Merge duplicate/similar conventions
+- Second pass: Remove obvious or unenforced rules
+- Third pass: Condense verbose entries to single lines
+- If still over: Remove lowest-impact conventions until compliant
+- Report: "CONVENTIONS.md trimmed from {n} to {m} lines"
+
+### CONVENTIONS.md Severely Outdated
+
+When >50% of documented conventions conflict with actual code patterns:
+
+Handling:
+- Don't attempt wholesale rewrite in single audit
+- Make up to 10 surgical changes per audit run
+- Flag in report: "CONVENTIONS.md needs major revision ({n} stale patterns)"
+- Suggest user review manually or run multiple audits
+
 ### Stale Known Issues
 
 When a known-issues.md entry no longer matches any actual issues:
@@ -331,6 +416,8 @@ Handling:
 | Test fix made things worse | Medium | Revert fix, log for manual review |
 | Permission denied | High | Provide chmod/sudo instructions |
 | Network/registry unavailable | Low | Skip install, use existing tools |
+| CONVENTIONS.md over 300 lines | Medium | Trim until compliant, report changes |
+| CONVENTIONS.md severely stale | Low | Make up to 10 changes, flag for manual review |
 
 ## Output
 
@@ -338,6 +425,7 @@ Display the structured audit report to console and save to `.spec_system/audit/`
 - Phase-by-phase summary
 - Statistics (issues found/fixed/remaining/known)
 - Known issues summary (if known-issues.md loaded)
+- CONVENTIONS.md changes (added/removed/updated patterns, line count)
 - Suggestions for known-issues.md additions (patterns with 3+ occurrences)
 - Stale known-issues.md entries (no longer matching)
 - Actionable items for manual follow-up
