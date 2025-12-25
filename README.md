@@ -1,6 +1,6 @@
 # Apex Spec System
 
-**Version: 0.22.0-beta**
+**Version: 0.23.0-beta**
 
 A Claude Code plugin providing a specification-driven workflow system for AI-assisted development. Think Github Spec Kit (our source inspiration) simplified.
 
@@ -41,6 +41,8 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
    ```
    This creates the spec system structure in your project.
 
+   **Optional but recommended**: Customize `.spec_system/CONVENTIONS.md` with your project's coding standards (naming, structure, error handling, testing philosophy, etc.)
+
    ```
    /createprd OR /apex-spec:createprd OR Manually fill out .spec_system/PRD/PRD.md
    ```
@@ -80,6 +82,7 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 - **Session Scoping**: Keep work manageable with 15-30 tasks per session
 - **Progress Tracking**: State file and checklists track progress
 - **Validation Gates**: Verify completeness before marking done
+- **Coding Conventions**: Customizable standards enforced during implementation and validation
 - **Auto-Activating Skill**: Provides workflow guidance automatically
 - **Dev Tooling**: Regular code quality audits
 - **Documentation Maintenance**: Keep project documentation up to date
@@ -124,6 +127,7 @@ your-project/
 ├── .spec_system/               # All spec system files
 │   ├── state.json              # Project state tracking
 │   ├── CONSIDERATIONS.md       # Institutional memory (lessons learned)
+│   ├── CONVENTIONS.md          # Project coding standards and conventions
 │   ├── PRD/                    # Product requirements
 │   │   ├── PRD.md              # Master PRD
 │   │   └── phase_00/           # Phase definitions
@@ -171,10 +175,11 @@ All files must use ASCII-only characters (0-127):
 
 1. **One session at a time** - Complete before starting next
 2. **MVP first** - Defer polish and optimizations
-3. **Validate encoding** - Check ASCII before committing
-4. **Update tasks continuously** - Mark checkboxes immediately
-5. **Do manual testing** - Best judgment, but at least manaul testing per Phase
-6. **Trust the system** - Follow workflow, resist scope creep
+3. **Follow conventions** - Customize and follow CONVENTIONS.md for consistency
+4. **Validate encoding** - Check ASCII before committing
+5. **Update tasks continuously** - Mark checkboxes immediately
+6. **Do manual testing** - Best judgment, but at least manual testing per Phase
+7. **Trust the system** - Follow workflow, resist scope creep
 
 ## License
 

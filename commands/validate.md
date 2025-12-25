@@ -43,6 +43,9 @@ Using the `current_session` value from the script output, read all session docum
 - `.spec_system/specs/[current-session]/spec.md` - Requirements
 - `.spec_system/specs/[current-session]/tasks.md` - Task checklist
 - `.spec_system/specs/[current-session]/implementation-notes.md` - Progress log
+- `.spec_system/CONVENTIONS.md` - Project coding conventions (if exists)
+
+**CONVENTIONS.md** is used in the Quality Gates check (section 3.E) to verify code follows project conventions for naming, structure, error handling, testing, etc.
 
 ### 3. Run Validation Checks
 
@@ -89,6 +92,16 @@ From spec.md success criteria:
 - Verify testing requirements met
 - Confirm quality gates passed
 
+#### F. Conventions Compliance (if CONVENTIONS.md exists)
+Spot-check deliverables against project conventions:
+- **Naming**: Functions, variables, files follow naming conventions
+- **Structure**: Files are organized according to file structure conventions
+- **Error Handling**: Follows the project's error handling approach
+- **Comments**: Explain "why" not "what", no commented-out code
+- **Testing**: Tests follow project testing philosophy
+
+Note: This is a spot-check, not exhaustive. Flag obvious violations only.
+
 ### 4. Generate Validation Report
 
 Create `validation.md` in the session directory:
@@ -111,6 +124,7 @@ Create `validation.md` in the session directory:
 | ASCII Encoding | PASS/FAIL | [issues] |
 | Tests Passing | PASS/FAIL | X/Y tests |
 | Quality Gates | PASS/FAIL | [issues] |
+| Conventions | PASS/SKIP | [issues or "No CONVENTIONS.md"] |
 
 **Overall**: PASS / FAIL
 
@@ -192,6 +206,25 @@ From spec.md:
 - [x] All files ASCII-encoded
 - [x] Unix LF line endings
 - [x] Code follows project conventions
+
+---
+
+## 6. Conventions Compliance
+
+### Status: PASS/SKIP
+
+*Skipped if no `.spec_system/CONVENTIONS.md` exists.*
+
+| Category | Status | Notes |
+|----------|--------|-------|
+| Naming | PASS/FAIL | [issues] |
+| File Structure | PASS/FAIL | [issues] |
+| Error Handling | PASS/FAIL | [issues] |
+| Comments | PASS/FAIL | [issues] |
+| Testing | PASS/FAIL | [issues] |
+
+### Convention Violations
+[List violations or "None" or "Skipped - no CONVENTIONS.md"]
 
 ---
 

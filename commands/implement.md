@@ -76,6 +76,9 @@ Using the `current_session` value from the script output, read:
 - `.spec_system/specs/[current-session]/spec.md` - Full specification
 - `.spec_system/specs/[current-session]/tasks.md` - Task checklist (whether started or continuing)
 - `.spec_system/specs/[current-session]/implementation-notes.md` - Progress log (if exists)
+- `.spec_system/CONVENTIONS.md` - Project coding conventions (if exists)
+
+**CONVENTIONS.md** contains project-specific coding standards (naming conventions, file structure, error handling patterns, testing philosophy, git practices, etc.). All code you write MUST follow these conventions. If the file doesn't exist, follow standard best practices.
 
 ### 4. Initialize Implementation Notes
 
@@ -120,7 +123,8 @@ For each incomplete task:
 Find the first unchecked `- [ ]` task in tasks.md
 
 #### B. Implement Task
-- Following CLAUDE.md guidelines
+- Follow CLAUDE.md guidelines
+- Follow CONVENTIONS.md standards (naming, structure, error handling, comments, etc.)
 - Read the task description carefully
 - Implement the required changes
 - Follow the spec's technical approach
@@ -227,7 +231,7 @@ If approaching context limits during long sessions:
 
 ### Code Quality
 - Follow CLAUDE.md guidelines
-- Follow project conventions
+- Follow `.spec_system/CONVENTIONS.md` (naming, structure, error handling, testing, git, etc.)
 - ASCII-only characters
 - Unix LF line endings
 - Clear, readable code
