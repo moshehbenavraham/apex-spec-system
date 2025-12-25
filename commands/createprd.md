@@ -72,9 +72,24 @@ If the user provides a file path, read it. If pasted text, treat it as the sourc
 Check whether `.spec_system/PRD/PRD.md` already exists.
 
 - If it does not exist: create it
-- If it exists: do not overwrite without explicit user confirmation
+- If it exists: check if it is a template placeholder or real content
 
-If overwrite is confirmed:
+**Detecting Template Placeholder PRD**:
+
+The `/initspec` command creates a placeholder PRD with markers like `[Goal 1]`, `[Goal 2]`, `[PROJECT_DESCRIPTION]`, `[Objective 1]`, `[Criterion 1]`, etc.
+
+Read the existing PRD and check for these template markers:
+- `[Goal 1]` or `[Goal 2]` or `[Goal 3]`
+- `[PROJECT_DESCRIPTION]`
+- `[Objective 1]` or `[Objective 2]`
+- `[Criterion 1]` or `[Criterion 2]`
+- `[Technology 1]` or `[Technology 2]`
+
+If **2 or more** of these markers are present, the PRD is a template placeholder with no real value. Proceed to overwrite it **without asking for confirmation** (no backup needed for templates).
+
+If the PRD appears to have real content (fewer than 2 template markers), ask for explicit user confirmation before overwriting.
+
+**If overwriting real content (confirmation given)**:
 1. Create a timestamped backup in `.spec_system/archive/PRD/` before writing
 2. Then replace `.spec_system/PRD/PRD.md`
 
@@ -227,7 +242,7 @@ If checks fail, fix the PRD content and re-check.
 ## Rules
 
 1. Do not run `/phasebuild` for the user - only generate the master PRD
-2. Never overwrite an existing PRD without explicit confirmation
+2. Never overwrite a real PRD without explicit confirmation (template placeholders from /initspec can be overwritten silently)
 3. Do not invent requirements - ask targeted questions instead
 4. ASCII-only characters and Unix LF line endings only
 5. Do not create phase directories or session stubs
