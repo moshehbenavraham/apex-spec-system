@@ -28,6 +28,21 @@ Pay attention to:
 - Estimated session count
 - High-level objectives
 
+### 1b. Review Institutional Memory (If Exists)
+
+Read `.spec_system/CONSIDERATIONS.md` if it exists. This contains lessons learned from previous phases.
+
+**Extract and apply:**
+- **Active Concerns** - Issues that may affect this phase's sessions (technical debt, external dependencies, performance/security requirements, architectural constraints)
+- **Lessons Learned** - Patterns to follow or avoid when planning sessions
+- **Tool/Library Notes** - Relevant insights for technologies used in this phase
+
+**Use this to inform:**
+- Session ordering (address Active Concerns early if relevant)
+- Technical Considerations section in PRD
+- Risk identification
+- Session scope decisions
+
 #### Make Sure Phase is Aligned, Accurate and Up to Date
 
 As the project progresses, it's normal that deeper Phases could be mis-aligned.
@@ -104,6 +119,11 @@ Create directory `.spec_system/PRD/phase_NN/` and markdown `.spec_system/PRD/pha
 
 ### Risks
 - [Risk 1]: [Mitigation]
+
+### Relevant Considerations
+<!-- From CONSIDERATIONS.md - remove section if none apply -->
+- [P##] **[Item from Active Concerns]**: How it affects this phase
+- [P##] **[Lesson Learned]**: How we're applying it
 
 ---
 

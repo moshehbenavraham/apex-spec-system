@@ -44,11 +44,14 @@ This returns structured JSON with:
 With the state facts established, read these files for context:
 - `.spec_system/PRD/PRD.md` - Master project requirements
 - Candidate session files from the JSON output (use the `path` field)
+- `.spec_system/CONSIDERATIONS.md` - Institutional memory (if exists)
 
 Focus on understanding:
 - Session objectives and scope
 - Prerequisites and dependencies
 - Logical ordering
+- **Active Concerns** that may influence session priority or approach
+- **Lessons Learned** relevant to candidate sessions
 
 ### 3. Analyze and Recommend
 
@@ -128,6 +131,11 @@ Create `.spec_system/NEXT_SESSION.md` with:
 ### Potential Challenges
 - [challenge 1]
 - [challenge 2]
+
+### Relevant Considerations
+<!-- From CONSIDERATIONS.md - omit section if none apply -->
+- [P##] **[Active Concern]**: How it affects this session
+- [P##] **[Lesson Learned]**: How to apply it here
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: Apex Spec Workflow
 description: This skill should be used when the user asks about "spec system", "session workflow", "createprd", "nextsession", "sessionspec", "implement session", "validate session", "phase build", "session scope", "task checklist", or when working in a project containing .spec_system/ directory. Provides guidance for specification-driven AI development workflows.
-version: 0.21.0-beta
+version: 0.22.0-beta
 ---
 
 # Apex Spec Workflow
@@ -14,7 +14,7 @@ A specification-driven workflow system for AI-assisted development that breaks l
 
 Break large projects into manageable, well-scoped implementation sessions that fit within AI context windows and human attention spans.
 
-## The 11-Command Workflow
+## The 12-Command Workflow
 
 The workflow has **3 distinct stages**:
 
@@ -68,6 +68,9 @@ The workflow has **3 distinct stages**:
 [User Action]      ->  Manual testing (highly recommended)
       |
       v
+/carryforward      ->  Capture lessons learned (optional but recommended)
+      |
+      v
 /phasebuild        ->  Create next phase structure
       |
       v
@@ -82,6 +85,7 @@ Projects using this system follow this layout:
 project/
 ├── .spec_system/               # All spec system files
 │   ├── state.json              # Project state tracking
+│   ├── CONSIDERATIONS.md       # Institutional memory (lessons learned)
 │   ├── PRD/                    # Product requirements
 │   │   ├── PRD.md              # Master PRD
 │   │   └── phase_NN/           # Phase definitions
@@ -214,6 +218,7 @@ The `.spec_system/state.json` file tracks project progress:
 | `/implement` | Code implementation | spec.md, tasks.md | implementation-notes.md |
 | `/validate` | Verify completeness | All session files | validation.md |
 | `/updateprd` | Mark complete | validation.md | Updated state.json |
+| `/carryforward` | Capture lessons | Completed phase artifacts | CONSIDERATIONS.md |
 | `/documents` | Audit/update docs | state.json, PRD, codebase | Updated docs, docs-audit.md |
 | `/phasebuild` | Create new phase | PRD | PRD/phase_NN/ |
 | `/audit` | Code quality audit | Codebase | Console report |
