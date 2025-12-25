@@ -29,6 +29,12 @@ This PRD is used by the rest of the workflow:
 
 If any prerequisite is missing, stop and instruct the user to run `/initspec` first.
 
+## Flags
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--skip-conventions` | false | Skip CONVENTIONS.md fine-tuning |
+
 ## Steps
 
 ### 1. Confirm Spec System Is Initialized
@@ -223,7 +229,104 @@ Notes:
 - Do not create phase directories here - that is `/phasebuild`'s job
 - Use `[PHASE_NAME]` placeholder - default to "Foundation" if not specified
 
-### 7. Validate Output
+### 7. Customize CONVENTIONS.md for Tech Stack
+
+After generating the PRD, customize `.spec_system/CONVENTIONS.md` to reflect the project's tech stack and domain.
+
+This is **initial customization**, not maintenance. The `/audit` command handles ongoing maintenance with surgical edits; here we have more freedom to reshape the document.
+
+#### 7.1 Detect Tech Stack
+
+From the PRD's Technical Stack section and the source requirements, identify:
+- **Primary language(s)**: JavaScript/TypeScript, Python, Go, Rust, Java, etc.
+- **Framework(s)**: React, Next.js, FastAPI, Express, Django, Spring, etc.
+- **Runtime**: Node.js, Deno, Bun, browser, Python 3.x, etc.
+- **Package manager**: npm, pnpm, yarn, pip, poetry, cargo, etc.
+- **Testing framework**: Jest, Vitest, pytest, Go test, etc.
+- **Project domain**: CLI tool, web app, API service, library, mobile app, etc.
+- **etc**
+
+#### 7.2 Transform Generic Template
+
+Read `.spec_system/CONVENTIONS.md` (the generic template from /initspec).
+
+**Transformation principles:**
+- **Replace** generic conventions with stack-specific equivalents
+- **Add** new conventions required by the detected stack
+- **Remove** generic conventions that don't apply to this stack
+- **Restructure** sections if the stack warrants different organization
+- Keep each convention to 1-2 lines
+- Do not add speculative or aspirational conventions
+
+**Stack-specific transformations (examples):**
+
+| Stack | Transformations |
+|-------|-----------------|
+| TypeScript | Replace generic naming with TS conventions; add type safety rules; add `interface` vs `type` guidance |
+| React | Add component patterns; hooks conventions; state management approach; JSX style |
+| Next.js | Add App Router conventions; server/client component rules; API route patterns; file-based routing |
+| Python | Replace with PEP 8; add type hint requirements; docstring format; import ordering |
+| Go | Replace with Effective Go idioms; add error handling patterns; package naming; interface conventions |
+| Rust | Add Clippy compliance; Result/Option patterns; ownership conventions; module organization |
+| CLI | Add exit code standards; stdout vs stderr rules; flag naming; help text conventions |
+| API | Add REST conventions; status code usage; error response format; versioning approach |
+| Library | Add semantic versioning rules; public API stability; backwards compatibility; documentation requirements |
+| Monorepo | Add workspace conventions; shared dependency rules; cross-package imports |
+
+**Section-specific transformations:**
+
+| Section | Generic -> Stack-Specific |
+|---------|--------------------------|
+| **Naming** | Universal advice -> Language-specific casing (camelCase, snake_case, PascalCase, kebab-case) |
+| **Files & Structure** | Generic -> Framework directory conventions (src/, app/, lib/, components/, routes/) |
+| **Functions & Modules** | Universal -> Language idioms (async/await, error returns, generators, decorators) |
+| **Error Handling** | Generic -> Stack patterns (try/catch, Result types, error boundaries, panic vs error) |
+| **Testing** | Universal -> Framework patterns (describe/it, pytest fixtures, table-driven tests, mocking approach) |
+| **Dependencies** | Generic -> Package manager commands, lockfile rules, version pinning strategy |
+
+**Add new sections if warranted:**
+- **TypeScript**: Add "Types" section for type conventions
+- **React**: Add "Components" section for component patterns
+- **API**: Add "Endpoints" section for API design conventions
+- **Database**: Add "Data" section for schema/query conventions
+
+#### 7.3 Enforce 300-Line Limit (STRICT)
+
+After transformation, verify CONVENTIONS.md stays under **300 lines maximum**.
+
+```bash
+wc -l .spec_system/CONVENTIONS.md
+```
+
+If over 300 lines:
+1. **Merge** similar conventions into single entries
+2. **Prioritize** stack-specific over generic (remove generic if redundant)
+3. **Condense** verbose explanations to single lines
+4. **Remove** lowest-impact conventions until compliant
+
+**Budget guidance**: The generic template is ~85 lines. You have ~215 lines for stack-specific customization. A well-customized CONVENTIONS.md typically lands between 120-200 lines.
+
+#### 7.4 Validate Changes
+
+After edits:
+1. Verify file is valid markdown
+2. Confirm line count <= 300
+3. Ensure no duplicate sections created
+4. Confirm ASCII-only characters
+
+```bash
+wc -l .spec_system/CONVENTIONS.md
+LC_ALL=C grep -n '[^[:print:][:space:]]' .spec_system/CONVENTIONS.md && echo "Non-ASCII found"
+```
+
+#### 7.5 Skip Conditions
+
+Skip this step entirely if:
+- `.spec_system/CONVENTIONS.md` does not exist
+- No tech stack was identified from the requirements
+- User explicitly requests `--skip-conventions`
+
+### 8. Validate Output
 
 Before reporting completion:
 - Confirm the file exists at `.spec_system/PRD/PRD.md`
@@ -246,6 +349,9 @@ If checks fail, fix the PRD content and re-check.
 3. Do not invent requirements - ask targeted questions instead
 4. ASCII-only characters and Unix LF line endings only
 5. Do not create phase directories or session stubs
+6. CONVENTIONS.md must stay under 300 lines - trim ruthlessly if exceeded
+7. CONVENTIONS.md customization can be significant (this is initial setup, not maintenance like /audit)
+8. Only add conventions with clear evidence from the tech stack - no speculative additions
 
 ## Output
 
@@ -265,10 +371,18 @@ Summary:
 - Non-Goals: N items
 - Open Questions: N items
 
+[If conventions were customized:]
+Conventions:
+- .spec_system/CONVENTIONS.md customized for [stack] (N/300 lines)
+- Stack: [detected languages/frameworks]
+- Key additions: [brief list, max 3]
+- Sections modified: [list affected sections]
+
 Next Steps:
 1. Review the generated PRD and refine as needed
-2. Run /phasebuild to define Phase 00 sessions
-3. Run /nextsession to begin implementation
+2. Review CONVENTIONS.md and adjust for team preferences
+3. Run /phasebuild to define Phase 00 sessions
+4. Run /nextsession to begin implementation
 ```
 
 ## Error Handling
