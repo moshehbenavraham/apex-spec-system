@@ -1,7 +1,7 @@
 ---
 name: Apex Spec Workflow
 description: This skill should be used when the user asks about "spec system", "session workflow", "createprd", "nextsession", "sessionspec", "implement session", "validate session", "phase build", "session scope", "task checklist", or when working in a project containing .spec_system/ directory. Provides guidance for specification-driven AI development workflows.
-version: 0.22.0-beta
+version: 0.23.0-beta
 ---
 
 # Apex Spec Workflow
@@ -86,6 +86,7 @@ project/
 ├── .spec_system/               # All spec system files
 │   ├── state.json              # Project state tracking
 │   ├── CONSIDERATIONS.md       # Institutional memory (lessons learned)
+│   ├── CONVENTIONS.md          # Project coding standards and conventions
 │   ├── PRD/                    # Product requirements
 │   │   ├── PRD.md              # Master PRD
 │   │   └── phase_NN/           # Phase definitions
@@ -228,7 +229,6 @@ The `.spec_system/state.json` file tracks project progress:
 ### Reference Files
 
 For detailed guidance, consult:
-- **`references/templates.md`** - All document templates with field descriptions
 - **`references/workflow.md`** - Detailed command workflows and decision points
 
 ### Scripts Directory

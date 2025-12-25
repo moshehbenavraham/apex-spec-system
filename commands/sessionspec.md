@@ -24,11 +24,18 @@ Read the following:
 - `.spec_system/state.json` - Project state
 - `.spec_system/PRD/phase_NN/session_NN_name.md` - Session definition (if exists)
 - `.spec_system/CONSIDERATIONS.md` - Institutional memory (if exists)
+- `.spec_system/CONVENTIONS.md` - Project coding conventions (if exists)
 
 **From CONSIDERATIONS.md, identify:**
 - Active Concerns relevant to this session's scope
 - Lessons Learned that should inform implementation approach
 - Tool/Library Notes for technologies being used
+
+**From CONVENTIONS.md, incorporate:**
+- Naming conventions that affect file/function/variable naming in deliverables
+- File structure conventions that inform where deliverables should be placed
+- Testing philosophy that shapes the Testing Strategy section
+- Any patterns or anti-patterns relevant to the technical approach
 
 ### 2. Create Session Directory
 

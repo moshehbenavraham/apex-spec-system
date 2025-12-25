@@ -88,7 +88,13 @@ Before starting the audit:
    - If found, parse and load the ignore rules
    - Note in report: "Known issues file loaded ({n} paths, {n} rules, {n} tests)"
 
-4. **If `--dry-run`**: Skip to Dry Run Output section
+4. **Check for CONVENTIONS.md**
+   - Look for `.spec_system/CONVENTIONS.md`
+   - If found, note project conventions for context during audit
+   - Use conventions to inform: naming validation, file structure checks, testing standards
+   - Note in report: "Conventions loaded" (if found)
+
+5. **If `--dry-run`**: Skip to Dry Run Output section
 
 ### Step 1: Phase 1 - Detection & Setup
 
@@ -197,6 +203,7 @@ Output a compact report. For monorepos, show per-package results inline.
 ```
 AUDIT REPORT | {project_name} | {YYYY-MM-DD HH:MM}
 Git: {clean|dirty} | Stack(s): {language(s) + framework(s)}
+{if CONVENTIONS.md loaded}Conventions: loaded{/if}
 {if known-issues.md loaded}Known issues: {n} paths, {n} rules, {n} tests{/if}
 {if notes in known-issues.md}Note: {first note from file}{/if}
 
