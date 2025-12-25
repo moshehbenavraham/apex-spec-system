@@ -1,6 +1,6 @@
 # Apex Spec System
 
-**Version: 0.21.0-beta**
+**Version: 0.22.0-beta**
 
 A Claude Code plugin providing a specification-driven workflow system for AI-assisted development. Think Github Spec Kit (our source inspiration) simplified.
 
@@ -68,6 +68,7 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
    /audit OR /apex-spec:audit                # Dev tooling
    /documents OR /apex-spec:documents        # Create, maintain project documentation
    -- Optional but recommended, do manual testing HERE --
+   /carryforward OR /apex-spec:carryforward  # Capture lessons learned (optional)
    /phasebuild OR /apex-spec:phasebuild      # Set up next Phase and Phase's sessions
    ```
 
@@ -75,7 +76,7 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 
 ## Features
 
-- **11-Command Workflow**: Structured process from initialization to completion
+- **12-Command Workflow**: Structured process from initialization to completion
 - **Session Scoping**: Keep work manageable with 15-30 tasks per session
 - **Progress Tracking**: State file and checklists track progress
 - **Validation Gates**: Verify completeness before marking done
@@ -86,7 +87,7 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 
 ## Plugin Components
 
-### Commands (11 total)
+### Commands (12 total)
 
 | Command | Purpose |
 |---------|---------|
@@ -98,6 +99,7 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 | `/implement` | AI-led task-by-task implementation |
 | `/validate` | Verify session completeness |
 | `/updateprd` | Mark session complete, sync documentation |
+| `/carryforward` | Extract lessons learned between phases |
 | `/documents` | Audit and update project documentation |
 | `/phasebuild` | Create structure for new phase |
 | `/audit` | Analyze tech stack, run dev tooling, auto-fix issues |
@@ -121,6 +123,7 @@ After running `/initspec`, your project will have:
 your-project/
 ├── .spec_system/               # All spec system files
 │   ├── state.json              # Project state tracking
+│   ├── CONSIDERATIONS.md       # Institutional memory (lessons learned)
 │   ├── PRD/                    # Product requirements
 │   │   ├── PRD.md              # Master PRD
 │   │   └── phase_00/           # Phase definitions

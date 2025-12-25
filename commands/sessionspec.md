@@ -23,6 +23,12 @@ Read the following:
 - `.spec_system/NEXT_SESSION.md` - Session recommendation
 - `.spec_system/state.json` - Project state
 - `.spec_system/PRD/phase_NN/session_NN_name.md` - Session definition (if exists)
+- `.spec_system/CONSIDERATIONS.md` - Institutional memory (if exists)
+
+**From CONSIDERATIONS.md, identify:**
+- Active Concerns relevant to this session's scope
+- Lessons Learned that should inform implementation approach
+- Tool/Library Notes for technologies being used
 
 ### 2. Create Session Directory
 
@@ -136,6 +142,11 @@ Create `spec.md` with all sections filled in:
 
 ### Potential Challenges
 - [Challenge]: [Mitigation]
+
+### Relevant Considerations
+<!-- From CONSIDERATIONS.md - remove section if none apply -->
+- [P##] **[Active Concern]**: How it affects this session and mitigation
+- [P##] **[Lesson Learned]**: How we're applying it in this implementation
 
 ### ASCII Reminder
 All output files must use ASCII-only characters (0-127).
