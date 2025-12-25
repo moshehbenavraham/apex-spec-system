@@ -39,6 +39,33 @@ Also read:
 - `.spec_system/state.json` - Project state and phase/session progress
 - `.spec_system/PRD/PRD.md` - Product requirements for context
 
+### 1b. Determine Audit Scope (Phase-Focused vs Full)
+
+Check if a phase was recently completed:
+
+1. **Identify recently completed phase**: Look at `completed_sessions` in state.json - if all sessions for a phase are complete but the next phase hasn't started, that phase was "just completed"
+2. **Collect phase artifacts**: For the completed phase, read all `implementation-notes.md` files from `.spec_system/specs/phaseNN-session*/`
+3. **Extract change manifest**: Build a list of files/directories created or modified during that phase
+
+**Phase-Focused Mode** (when a phase was just completed):
+- Prioritize documenting changes from the completed phase
+- Focus README updates on newly added packages/services
+- Update ARCHITECTURE.md with new components added in the phase
+- Still verify all standard files exist, but deep-audit only changed areas
+
+**Full Audit Mode** (initial setup, major milestones, or explicit request):
+- Audit all documentation comprehensively
+- Use when: first run, after multiple phases, or user requests full audit
+
+Report the audit mode to the user before proceeding:
+```
+Audit Mode: Phase-Focused (Phase 01 just completed)
+Focus Areas:
+- apps/api/ (new - session 01-03)
+- packages/auth/ (new - session 04)
+- src/middleware/ (modified - session 02, 05)
+```
+
 ### 2. Audit Existing Documentation
 
 Check for the presence and quality of standard documentation files.
@@ -548,6 +575,32 @@ Cross-reference documentation with:
 
 Ensure README and ARCHITECTURE reflect actual implemented state, not planned future state.
 
+#### Phase-Focused Sync (when applicable)
+
+When in Phase-Focused Mode, use implementation-notes.md files as the primary source:
+
+1. **Read all implementation notes** for the completed phase:
+   ```
+   .spec_system/specs/phaseNN-session*/implementation-notes.md
+   ```
+
+2. **Extract structured changes**:
+   - Files created (need documentation if they're new packages/services)
+   - Files modified (may need doc updates if behavior changed)
+   - Dependencies added (update tech stack sections)
+   - APIs added/changed (update API docs)
+
+3. **Prioritize documentation updates** based on change type:
+   | Change Type | Documentation Action |
+   |-------------|---------------------|
+   | New package/service | Create README_<name>.md |
+   | New API endpoints | Update docs/api/ |
+   | New dependencies | Update tech stack in README, ARCHITECTURE |
+   | Config changes | Update onboarding.md, environments.md |
+   | New scripts | Update development.md |
+
+4. **Skip deep-audit** for unchanged areas - verify file exists, don't rewrite content
+
 ### 7. Quality Checks
 
 For all documentation files:
@@ -577,6 +630,7 @@ Create `.spec_system/docs-audit.md`:
 
 **Date**: [YYYY-MM-DD]
 **Project**: [PROJECT_NAME]
+**Audit Mode**: [Phase-Focused (Phase NN) | Full Audit]
 
 ## Summary
 
@@ -587,6 +641,18 @@ Create `.spec_system/docs-audit.md`:
 | ADRs | N/A | N | INFO |
 | Package READMEs | N | N | PASS/FAIL |
 
+## Phase Focus (if applicable)
+
+**Completed Phase**: Phase NN - [Phase Name]
+**Sessions Analyzed**: [list of session names]
+
+### Change Manifest (from implementation-notes.md)
+
+| Session | Files Created | Files Modified |
+|---------|---------------|----------------|
+| session01-name | path/to/new.ts | path/to/existing.ts |
+| session02-name | ... | ... |
+
 ## Actions Taken
 
 ### Created
@@ -595,8 +661,8 @@ Create `.spec_system/docs-audit.md`:
 ### Updated
 - [List of files updated with summary of changes]
 
-### No Changes Needed
-- [List of files already current]
+### Verified (No Changes Needed)
+- [List of files verified as current]
 
 ## Documentation Gaps
 
@@ -605,7 +671,7 @@ Create `.spec_system/docs-audit.md`:
 ## Next Audit
 
 Recommend re-running `/documents` after:
-- Completing a phase
+- Completing the next phase
 - Adding new packages/services
 - Making architectural changes
 ```
@@ -641,6 +707,30 @@ After completing the audit and updates:
 
 ```
 Documentation Audit Complete
+Mode: Phase-Focused (Phase 01 just completed)
+
+Phase 01 Changes Documented:
+- apps/api/ -> Created README_api.md
+- packages/auth/ -> Created README_auth.md
+- ARCHITECTURE.md -> Added auth service diagram
+
+Other Updates:
+- docs/onboarding.md (new env vars from Phase 01)
+- docs/development.md (new dev scripts)
+
+Standard Files Verified: 8/9 present
+
+Gaps requiring input:
+- docs/CODEOWNERS: Need team assignments
+
+Full report: .spec_system/docs-audit.md
+```
+
+For Full Audit mode:
+
+```
+Documentation Audit Complete
+Mode: Full Audit
 
 Created:
 - README.md (root)
@@ -648,7 +738,7 @@ Created:
 - docs/development.md
 
 Updated:
-- docs/ARCHITECTURE.md (synced with Phase 01 implementation)
+- docs/ARCHITECTURE.md (synced with current implementation)
 - docs/deployment.md (updated CI pipeline steps)
 
 Coverage: 8/9 standard files present
