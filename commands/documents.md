@@ -747,5 +747,7 @@ Gaps requiring input:
 - docs/CODEOWNERS: Need team assignments
 - docs/api/: Need OpenAPI spec location
 
+If all documents are satisfactory, please run /phasebuild to generate the next phase!
+
 Full report: .spec_system/docs-audit.md
 ```

@@ -220,8 +220,8 @@ Updates Made:
 Phase Progress: N/M sessions (X%)
 
 Next Steps:
-- Run `/nextsession` to get next recommendation
-- Or run `/phasebuild` if starting new phase
+- Run `/nextsession` if phase is not complete
+- If phase completed, we are now in 'transition' between phases - run `/audit`
 ```
 
 ## Error Handling

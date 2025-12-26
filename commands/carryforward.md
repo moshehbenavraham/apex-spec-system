@@ -195,7 +195,7 @@ Key additions:
 - [Active] Brief description
 - [Lesson] Brief description
 
-Ready for /phasebuild to start next phase.
+Ready for /documents to maintain project documentation.
 ```
 
 ## Error Handling

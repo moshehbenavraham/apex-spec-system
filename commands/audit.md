@@ -429,4 +429,5 @@ Display the structured audit report to console and save to `.spec_system/audit/`
 - Suggestions for known-issues.md additions (patterns with 3+ occurrences)
 - Stale known-issues.md entries (no longer matching)
 - Actionable items for manual follow-up
+- If audit is clean, recommend running /carryforward next
 - File path where report was saved
