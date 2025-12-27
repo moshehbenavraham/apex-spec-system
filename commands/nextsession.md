@@ -179,7 +179,7 @@ Update `.spec_system/state.json`:
 3. **One session at a time** - Only recommend one session
 4. **Respect dependencies** - Don't skip prerequisites
 5. **MVP focus** - Recommend core features before polish
-6. **Scope discipline** - Sessions should be 15-30 tasks, 2-4 hours
+6. **Scope discipline** - Sessions should be 12-25 tasks, 2-4 hours
 7. **Logical progression** - Follow natural build order
 
 ## Error Handling

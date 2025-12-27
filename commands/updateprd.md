@@ -221,7 +221,7 @@ Phase Progress: N/M sessions (X%)
 
 Next Steps:
 - Run `/nextsession` if phase is not complete
-- If phase completed, we are now in 'transition' between phases - run `/audit`
+- If phase completed, we are now in transition between phases - run `/audit`
 ```
 
 ## Error Handling

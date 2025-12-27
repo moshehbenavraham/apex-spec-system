@@ -74,9 +74,9 @@ Create directory `.spec_system/PRD/phase_NN/` and markdown `.spec_system/PRD/pha
 
 | Session | Name | Status | Est. Tasks | Validated |
 |---------|------|--------|------------|-----------|
-| 01 | [Name] | Not Started | ~15-30 | - |
-| 02 | [Name] | Not Started | ~15-30 | - |
-| 03 | [Name] | Not Started | ~15-30 | - |
+| 01 | [Name] | Not Started | ~12-25 | - |
+| 02 | [Name] | Not Started | ~12-25 | - |
+| 03 | [Name] | Not Started | ~12-25 | - |
 | ... | ... | ... | ... | ... |
 
 ---
@@ -160,7 +160,7 @@ For each session, create `session_NN_name.md` (use `snake_case` for name):
 
 **Session ID**: `phaseNN-sessionNN-name`
 **Status**: Not Started
-**Estimated Tasks**: ~15-30
+**Estimated Tasks**: ~12-25
 **Estimated Duration**: 2-4 hours
 
 ---
@@ -239,7 +239,7 @@ Add phase reference to `.spec_system/PRD/PRD.md`:
 - Large phase: Consider splitting
 
 ### Session Sizing
-- Each session: 15-30 tasks
+- Each session: 12-25 tasks
 - Each session: 2-4 hours
 - Single clear objective per session
 

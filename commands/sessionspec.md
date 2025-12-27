@@ -219,7 +219,7 @@ Update `.spec_system/state.json`:
 ## Scope Rules
 
 ### Hard Limits (Reject if exceeded)
-- Maximum 30 tasks
+- Maximum 25 tasks
 - Maximum 4 hours
 - Clear objective(s) [try to keep it at one]
 

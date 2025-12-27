@@ -182,7 +182,7 @@ Create `.spec_system/PRD/PRD.md` using this template. Use straight quotes only. 
 
 ## Phases
 
-This system delivers the product via phases. Each phase is implemented via multiple 2-4 hour sessions (15-30 tasks each).
+This system delivers the product via phases. Each phase is implemented via multiple 2-4 hour sessions (12-25 tasks each).
 
 | Phase | Name | Sessions | Status |
 |-------|------|----------|--------|

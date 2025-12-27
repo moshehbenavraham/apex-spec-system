@@ -1,7 +1,7 @@
 {
   "name": "apex-spec",
   "version": "0.27.0-beta",
-  "description": "A specification-driven workflow system for AI-assisted development. Break large projects into manageable 2-4 hour sessions with 15-30 tasks each.",
+  "description": "A specification-driven workflow system for AI-assisted development. Break large projects into manageable 2-4 hour sessions with 12-25 tasks each.",
   "author": {
     "name": "AI with Apex"
   },

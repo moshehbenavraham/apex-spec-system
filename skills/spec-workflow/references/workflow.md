@@ -73,7 +73,7 @@
    - Update `next_session_history` status
 
 **Scope Validation**:
-- Reject if > 30 tasks estimated
+- Reject if > 25 tasks estimated
 - Reject if > 4 hours estimated
 - Reject if multiple objectives
 
@@ -81,7 +81,7 @@
 
 ### /tasks Workflow
 
-**Purpose**: Generate detailed, sequenced task checklist (15-30 tasks).
+**Purpose**: Generate detailed, sequenced task checklist (12-25 tasks).
 
 **Steps**:
 
@@ -376,7 +376,7 @@ The workflow has **3 distinct stages**:
 [Session Complete] --all sessions done--> [Phase Complete]
 ```
 
-### Stage 3: PHASE TRANSITION (After Phase Complete)
+### Stage 3: PHASE TRANSITION (After All Previous Phase's Sessions Are Complete)
 
 ```
 [Phase Complete] --/documents--> [Docs Updated] (recommended)

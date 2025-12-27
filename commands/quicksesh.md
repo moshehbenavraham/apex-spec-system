@@ -176,7 +176,7 @@ Set `current_session` and add to `next_session_history` with status `recommended
 
 ### 2.3 Scope Rules (Hard Limits - Reject if Exceeded)
 
-- Maximum 30 tasks
+- Maximum 25 tasks
 - Maximum 4 hours
 - Single clear objective
 
@@ -340,7 +340,7 @@ From spec.md identify:
 
 ### 3.2 Task Design Rules
 
-**Quantity**: 15-30 tasks (sweet spot: 20-25)
+**Quantity**: 12-25 tasks (sweet spot: 20)
 **Sizing**: ~20-25 minutes per task, single file focus, clear atomic action
 
 **Categories**:
@@ -976,7 +976,7 @@ Read existing artifacts (tasks.md, implementation-notes.md) to resume mid-phase.
 3. **One session** - Complete fully before starting next
 4. **Respect dependencies** - Don't skip prerequisites
 5. **MVP focus** - Core features before polish
-6. **Scope discipline** - 15-30 tasks, 2-4 hours max, single objective
+6. **Scope discipline** - 12-25 tasks, 2-4 hours max, single objective
 7. **ASCII only** - All output files 0-127 bytes, LF endings
 8. **Checkpoint often** - Update artifacts after each task
 9. **No extras** - Implement exactly what's in spec
