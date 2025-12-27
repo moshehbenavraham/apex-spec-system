@@ -6,13 +6,15 @@ version: 0.27.0-beta
 
 # Apex Spec Workflow
 
-A specification-driven workflow system for AI-assisted development that breaks large projects into manageable 2-4 hour sessions with 15-30 tasks each.
+A specification-driven workflow system for AI-assisted development that breaks large projects into manageable 2-4 hour sessions with 12-25 tasks each.
 
 ## Core Philosophy
 
-**1 session = 1 spec = 2-4 hours (15-30 tasks)**
+**1 session = 1 spec = 2-4 hours (12-25 tasks)**
 
 Break large projects into manageable, well-scoped implementation sessions that fit within AI context windows and human attention spans.
+
+A collection of sessions is a phase. A collection of phases is a mature/late technical PRD.
 
 ## The 12-Command Workflow
 
@@ -41,7 +43,7 @@ The workflow has **3 distinct stages**:
 /sessionspec   ->  Convert to formal specification
       |
       v
-/tasks         ->  Generate 15-30 task checklist
+/tasks         ->  Generate 12-25 task checklist
       |
       v
 /implement     ->  AI-led task-by-task implementation
@@ -56,7 +58,7 @@ The workflow has **3 distinct stages**:
                       until ALL phase sessions complete
 ```
 
-### Stage 3: PHASE TRANSITION (After Phase Complete)
+### Stage 3: PHASE TRANSITION (After All Previous Phase's Sessions Are Complete)
 
 ```
 /audit             ->  Dev tooling (recommended)
@@ -120,7 +122,7 @@ project/
 
 | Limit | Value |
 |-------|-------|
-| Maximum tasks | 30 |
+| Maximum tasks | 25 |
 | Maximum duration | 4 hours |
 | Objectives | Single clear objective |
 
@@ -128,7 +130,7 @@ project/
 
 | Target | Value |
 |--------|-------|
-| Task count | 15-25 (sweet spot: 20-25) |
+| Task count | 12-25 (sweet spot: 20) |
 | Duration | 2-3 hours |
 | Focus | Stable/late MVP |
 

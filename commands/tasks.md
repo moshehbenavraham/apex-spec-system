@@ -1,6 +1,6 @@
 ---
 name: tasks
-description: Generate a 15-30 task checklist for the current session
+description: Generate a 12-25 task checklist for the current session
 ---
 
 # /tasks Command
@@ -13,7 +13,7 @@ You are a **senior engineer** who is obsessive about pristine code — zero erro
 
 ## Your Task
 
-Create a detailed, sequenced task list (15-30 tasks) for implementing the session specification.
+Create a detailed, sequenced task list (12-25 tasks) for implementing the session specification.
 
 ## Steps
 
@@ -145,9 +145,9 @@ Run `/implement` to begin AI-led implementation.
 ## Task Design Rules
 
 ### Quantity
-- **Minimum**: 15 tasks
-- **Maximum**: 30 tasks
-- **Sweet spot**: 20-25 tasks
+- **Minimum**: 12 tasks
+- **Maximum**: 25 tasks
+- **Sweet spot**: 20 tasks
 
 ### Task Sizing
 - Each task: ~20-25 minutes

@@ -8,7 +8,7 @@ A Claude Code plugin providing a specification-driven workflow system for AI-ass
 
 The Apex Spec System breaks large projects into manageable, well-scoped implementation sessions that fit within AI context windows and human attention spans.
 
-**Philosophy**: `1 session = 1 spec = 2-4 hours (15-30 tasks) = safe context window of AI`
+**Philosophy**: `1 session = 1 spec = 2-4 hours (12-25 tasks) = safe context window of AI`
 
 **Video Tutorial**: [Watch on YouTube](https://youtu.be/iY6ySesmOCg) - Installation and workflow walkthrough
 
@@ -79,7 +79,7 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 ## Features
 
 - **12-Command Workflow**: Structured process from initialization to completion
-- **Session Scoping**: Keep work manageable with 15-30 tasks per session
+- **Session Scoping**: Keep work manageable with 12-25 tasks per session
 - **Progress Tracking**: State file and checklists track progress
 - **Validation Gates**: Verify completeness before marking done
 - **Coding Conventions**: Customizable standards enforced during implementation and validation
@@ -98,7 +98,7 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 | `/createprd` | Generate master PRD from requirements document |
 | `/nextsession` | Analyze project and recommend next session |
 | `/sessionspec` | Create formal technical specification |
-| `/tasks` | Generate 15-30 task checklist |
+| `/tasks` | Generate 12-25 task checklist |
 | `/implement` | AI-led task-by-task implementation |
 | `/validate` | Verify session completeness |
 | `/updateprd` | Mark session complete, sync documentation |
@@ -144,12 +144,12 @@ your-project/
 ## Session Scope
 
 ### Hard Limits
-- Maximum 30 tasks per session
+- Maximum 25 tasks per session
 - Maximum 4 hours estimated time
 - Single clear objective
 
 ### Ideal Targets
-- 15-25 tasks (sweet spot: 20-25)
+- 12-25 tasks (sweet spot: 20)
 - 2-3 hours typical
 - Stable/late MVP focus
 
