@@ -1,0 +1,281 @@
+# Apex Spec System Usage Guidance
+
+Practical guidance for getting the most out of the Apex Spec System.
+
+---
+
+## When to Use Apex Spec
+
+### Ideal Projects (Strong Fit)
+
+| Scenario | Why It Works |
+|----------|--------------|
+| **Greenfield development** | New projects benefit most from structured phases |
+| **From Quality Boilerplates** | This is the best! |
+| **Medium-to-large scope** | Projects spanning 3+ sessions (6+ hours total) |
+| **Solo developer + AI** | The primary design target |
+| **Well-defined requirements** | Clear enough to write a PRD, although /createprd can do lifting |
+| **Learning new tech** | Structure helps when exploring unfamiliar territory |
+
+**Real example**: The NJ Title Intelligence Platform (see [WALKTHROUGH.md](WALKTHROUGH.md)) used Apex Spec to build a 4M+ parcel system across 16 phases and 79+ sessions in ~3 weeks.
+
+### Acceptable Projects (Moderate Fit)
+
+- **Feature additions** - Adding major features to existing codebases
+- **Refactoring projects** - Large-scale restructuring with clear goals
+- **Proof of concepts** - When you want documentation of decisions
+
+### Poor Fit (Consider Alternatives)
+
+| Scenario | Why It Doesn't Fit |
+|----------|-------------------|
+| **Quick bug fixes** | Overhead exceeds value for <1 hour tasks |
+| **Exploratory prototyping** | Constant pivoting conflicts with session structure |
+| **Team projects with existing workflows** | May conflict with established processes |
+| **Urgent/time-critical work** | Structure adds latency |
+
+### Quick Self-Assessment
+
+**Use Apex Spec if you answer YES to 2+ of these:**
+
+- [ ] Have you started AI-assisted projects that lost coherence after a few sessions?
+- [ ] Do you find yourself re-explaining context to Claude repeatedly?
+- [ ] Do your projects lack documentation because "you'll do it later"?
+- [ ] Have you shipped code without proper testing/linting setup?
+- [ ] Do you want a repeatable process for AI-assisted development?
+
+**Skip Apex Spec if:**
+
+- The task will take less than 2 hours total
+- You're not sure what you're building yet
+- You need to ship something in the next hour
+- Your team has a working process already
+
+---
+
+## Workflow Modes
+
+Apex Spec offers two workflow modes to match your needs.
+
+### Full Workflow (Default)
+
+```
+/nextsession -> /sessionspec -> /tasks -> /implement -> /validate -> /updateprd
+```
+
+**Best for:**
+- Complex sessions with multiple considerations
+- Sessions requiring careful scoping decisions
+- When you want detailed documentation
+- Learning the system (see each step clearly)
+
+**Artifacts created:**
+- NEXT_SESSION.md (recommendation)
+- spec.md (detailed specification)
+- tasks.md (12-25 task checklist)
+- implementation-notes.md (progress log)
+- validation.md (quality verification)
+- IMPLEMENTATION_SUMMARY.md (completion record)
+
+### Quick Session (/quicksesh)
+
+```
+/quicksesh
+```
+
+Single command that runs all 6 phases automatically:
+1. Analyze and recommend session
+2. Create specification
+3. Generate task list
+4. Implement all tasks
+5. Validate completion
+6. Update PRD and commit
+
+**Best for:**
+- Straightforward sessions with clear scope
+- Experienced users who trust the system
+- When iteration speed matters more than step-by-step control
+- Sessions where you don't need to pause between phases
+
+**Same artifacts, faster flow** - /quicksesh creates all the same documentation, just without stopping between phases.
+
+### Resuming /quicksesh
+
+If interrupted, resume from any phase:
+
+```
+/quicksesh --from 4    # Resume from implementation
+/quicksesh --from 5    # Resume from validation
+```
+
+| Flag | Resumes From |
+|------|--------------|
+| `--from 1` | Fresh analysis |
+| `--from 2` | Specification (skips analysis) |
+| `--from 3` | Tasks (skips spec) |
+| `--from 4` | Implementation (reads existing tasks.md) |
+| `--from 5` | Validation (skips implementation) |
+| `--from 6` | Completion (skips validation) |
+
+### Which to Choose?
+
+| Situation | Recommendation |
+|-----------|----------------|
+| First time using Apex Spec | Full workflow (learn the steps) |
+| Complex/risky session | Full workflow (more control) |
+| Simple, well-understood session | /quicksesh |
+| Time pressure | /quicksesh |
+| Want to review spec before tasks | Full workflow |
+| Debugging a failed session | Full workflow (isolate the issue) |
+
+---
+
+## Team Usage Patterns
+
+Apex Spec is designed for **solo developer + AI** workflows. However, teams can adapt the system with these patterns.
+
+### Pattern 1: Shared PRD, Individual Sessions
+
+```
+Team                          Individual
+─────                         ──────────
+Collaborate on PRD     ->     Developer claims session
+Define phases          ->     Runs session workflow solo
+Review phase structure ->     Commits via standard git
+                       ->     /carryforward captures lessons
+```
+
+**Coordination**: Add `Assigned: @username` to session stub files in PRD.
+
+**Merge strategy**: Standard git workflow - each developer works on their branch, PRs for review.
+
+### Pattern 2: Pair Programming with AI
+
+```
+Developer A (Driver)          Developer B (Navigator)
+────────────────────          ─────────────────────────
+Runs Claude commands          Reviews output
+Executes implementation       Catches issues early
+Marks tasks complete          Suggests improvements
+```
+
+**Benefits**:
+- Knowledge transfer
+- Real-time review
+- Reduced errors
+- Shared context
+
+### Pattern 3: Review Checkpoints
+
+```
+Developer                     Team
+─────────                     ────
+Complete session       ->
+/validate              ->     Review validation.md
+                       <-     Feedback
+Incorporate feedback   ->
+/updateprd             ->     Merge approved
+```
+
+**Adds human review gate** before marking sessions complete.
+
+### What Apex Spec Does NOT Handle
+
+| Need | Solution |
+|------|----------|
+| Real-time collaboration | Use other tools (VS Code Live Share, etc.) |
+| Session conflict resolution | Coordinate via PRD assignment |
+| Team velocity tracking | Use external tools |
+| Cross-session dependencies between developers | Plan in PRD, communicate |
+
+### Team Best Practice
+
+Treat Apex Spec as a **personal workflow tool** that produces **shareable artifacts**:
+- specs, tasks, validation reports are reviewable
+- implementation-notes.md provides context
+- CONSIDERATIONS.md captures institutional memory
+- Git commits provide natural integration points
+
+---
+
+## Future Enhancements
+
+The following features are under consideration but require implementation work:
+
+### Metrics Tracking (Not Yet Implemented)
+
+**Concept**: Track session duration, task counts, and estimation accuracy over time.
+
+```
+/metrics
+
+Session Velocity:
+- Average session duration: 2.3 hours
+- Estimation accuracy: 92%
+- Total sessions completed: 5
+```
+
+**Status**: Would require state.json schema changes and new /metrics command.
+
+### Project Templates (Not Yet Implemented)
+
+**Concept**: Pre-configured PRD structures for common project types.
+
+```
+/initspec --template cli
+/initspec --template web-app
+/initspec --template api-server
+```
+
+**Status**: Would require template files and /initspec command changes.
+
+### Export Capabilities (Not Yet Implemented)
+
+**Concept**: Generate shareable status reports.
+
+```
+/export --format markdown
+/export --format html
+```
+
+**Status**: Would require new /export command.
+
+---
+
+## Quick Reference
+
+### Command Cheat Sheet
+
+| Goal | Command |
+|------|---------|
+| Start new project | `/initspec` |
+| Generate PRD from requirements | `/createprd "description"` or `/createprd @file.md` |
+| Create phase structure | `/phasebuild` |
+| Get next session recommendation | `/nextsession` |
+| Create session specification | `/sessionspec` |
+| Generate task checklist | `/tasks` |
+| Implement tasks | `/implement` |
+| Verify completion | `/validate` |
+| Mark session complete | `/updateprd` |
+| Run full session workflow | `/quicksesh` |
+| Add dev tooling | `/audit` |
+| Add CI/CD | `/pipeline` |
+| Add infrastructure | `/infra` |
+| Update documentation | `/documents` |
+| Capture lessons learned | `/carryforward` |
+
+### Session Limits
+
+| Limit | Value |
+|-------|-------|
+| Maximum tasks | 25 |
+| Maximum duration | 4 hours |
+| Ideal task count | 12-25 (sweet spot: 20) |
+| Ideal duration | 2-3 hours |
+| Objectives | Single clear objective |
+
+### Recovery
+
+Every `/updateprd` commits and pushes. Git is your safety net:
+- Undo completed session: `git revert <commit>`
+- Mid-session issues: Resume `/implement` or delete session directory

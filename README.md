@@ -1,6 +1,6 @@
 # Apex Spec System
 
-**Version: 0.27.0-beta**
+**Version: 0.35.9-beta**
 
 A Claude Code plugin providing a specification-driven workflow system for AI-assisted development. Think Github Spec Kit (our source inspiration) simplified.
 
@@ -11,6 +11,10 @@ The Apex Spec System breaks large projects into manageable, well-scoped implemen
 **Philosophy**: `1 session = 1 spec = 2-4 hours (12-25 tasks) = safe context window of AI`
 
 **Video Tutorial**: [Watch on YouTube](https://youtu.be/iY6ySesmOCg) - Installation and workflow walkthrough
+
+**Real-World Example**: See [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md) - Complete walkthrough using a production project (79+ sessions, 16 phases)
+
+**Usage Guidance**: See [docs/GUIDANCE.md](docs/GUIDANCE.md) - When to use, workflow modes, team patterns
 
 ## Installation
 
@@ -67,7 +71,9 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 
  4. **Between Phases**
    ```
-   /audit OR /apex-spec:audit                # Dev tooling
+   /audit OR /apex-spec:audit                # Local dev tooling (formatter, linter, types, tests, hooks)
+   /pipeline OR /apex-spec:pipeline          # CI/CD workflows (quality, build, security, integration, ops)
+   /infra OR /apex-spec:infra                # Production infrastructure (health, security, backup, deploy)
    /documents OR /apex-spec:documents        # Create, maintain project documentation
    -- Optional but recommended, do manual testing HERE --
    /carryforward OR /apex-spec:carryforward  # Capture lessons learned (optional)
@@ -78,7 +84,7 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 
 ## Features
 
-- **12-Command Workflow**: Structured process from initialization to completion
+- **14-Command Workflow**: Structured process from initialization to completion
 - **Session Scoping**: Keep work manageable with 12-25 tasks per session
 - **Progress Tracking**: State file and checklists track progress
 - **Validation Gates**: Verify completeness before marking done
@@ -90,7 +96,7 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 
 ## Plugin Components
 
-### Commands (12 total)
+### Commands (14 total)
 
 | Command | Purpose |
 |---------|---------|
@@ -102,10 +108,12 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 | `/implement` | AI-led task-by-task implementation |
 | `/validate` | Verify session completeness |
 | `/updateprd` | Mark session complete, sync documentation |
-| `/carryforward` | Extract lessons learned between phases |
+| `/audit` | Local dev tooling (formatter, linter, types, tests, hooks) |
+| `/pipeline` | CI/CD workflows (quality, build, security, integration, ops) |
+| `/infra` | Production infrastructure (health, security, backup, deploy) |
 | `/documents` | Audit and update project documentation |
+| `/carryforward` | Extract lessons learned between phases |
 | `/phasebuild` | Create structure for new phase |
-| `/audit` | Analyze tech stack, run dev tooling, auto-fix issues |
 
 ### Skill
 
@@ -180,6 +188,15 @@ All files must use ASCII-only characters (0-127):
 5. **Update tasks continuously** - Mark checkboxes immediately
 6. **Do manual testing** - Best judgment, but at least manual testing per Phase
 7. **Trust the system** - Follow workflow, resist scope creep
+
+## Recovery
+
+Worried about mistakes? Every `/updateprd` automatically commits and pushes your progress. Git is your safety net:
+
+- **Undo a completed session**: `git revert <commit>`
+- **Mid-session issues**: Resume with `/implement` or delete the session directory and re-run `/nextsession`
+
+No special recovery procedures - standard git workflows apply.
 
 ## License
 
