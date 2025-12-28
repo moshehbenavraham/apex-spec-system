@@ -226,6 +226,109 @@
 
 ---
 
+### /audit Workflow
+
+**Purpose**: Add and validate local dev tooling one bundle at a time.
+
+**Master List (5 Bundles)**:
+1. Formatting (Prettier, Biome, Ruff)
+2. Linting (ESLint, Biome, Ruff, Clippy)
+3. Type Safety (TypeScript, mypy, Pyright)
+4. Testing (Jest, Vitest, pytest + coverage)
+5. Git Hooks (husky, pre-commit, lefthook)
+
+**Universal 9-Step Flow**:
+
+1. **DETECT** - Read CONVENTIONS.md for stack, scan for existing configs
+2. **COMPARE** - Check Local Dev Tools table against master list
+3. **SELECT** - Pick highest-priority missing bundle
+4. **IMPLEMENT** - Install tool, generate config
+5. **VALIDATE** - Run ALL configured tools
+6. **FIX** - Fix ALL errors (auto-fix where possible)
+7. **RECORD** - Update CONVENTIONS.md with new tool
+8. **REPORT** - Summary of added, fixed, remaining
+9. **RECOMMEND** - "Rerun /audit" or "Run /pipeline"
+
+**Key Rules**:
+- One bundle per run
+- Validate everything after adding
+- Fix everything before reporting
+- Never leave syntax broken
+- Respect known-issues.md
+
+---
+
+### /pipeline Workflow
+
+**Purpose**: Add and validate CI/CD workflows one bundle at a time.
+
+**Master List (5 Bundles)**:
+1. Code Quality (lint + format + type check)
+2. Build & Test (build + unit tests + coverage)
+3. Security (secrets scanning + SAST/CodeQL + dependency review)
+4. Integration (E2E + integration tests + DB migration dry-run)
+5. Operations (notifications + Dependabot/Renovate + release tagging)
+
+**Universal 9-Step Flow**:
+
+1. **DETECT** - Read CONVENTIONS.md, scan .github/workflows/, check open PRs
+2. **COMPARE** - Check CI/CD table against master list
+3. **SELECT** - Pick highest-priority missing bundle
+4. **IMPLEMENT** - Generate workflow YAML, commit, push
+5. **VALIDATE** - Poll `gh run list`, check ALL workflows, check PR status
+6. **FIX** - Fix CI failures, address PR review comments
+7. **RECORD** - Update CONVENTIONS.md CI/CD table
+8. **REPORT** - Summary of added, fixed, PR status
+9. **RECOMMEND** - "Rerun /pipeline" or "Run /infra"
+
+**PR Handling**:
+- Use `--pr <number>` to focus on specific PR
+- Fetches review comments and addresses actionable ones
+- Fixes CI failures on PR branch
+- Reports PR readiness for merge
+
+**Key Rules**:
+- One bundle per run
+- GitHub Actions first (GitLab CI limited support)
+- Document secrets, never create them
+- 3-minute CI timeout, then report and exit
+- Address reviews but don't over-engineer
+
+---
+
+### /infra Workflow
+
+**Purpose**: Add and validate production infrastructure one bundle at a time.
+
+**Master List (4 Bundles)**:
+1. Health (/health endpoint + platform probes)
+2. Security (WAF rules + rate limiting)
+3. Backup (DB backup + storage + retention)
+4. Deploy (CD webhook/trigger from main)
+
+**Universal 9-Step Flow**:
+
+1. **DETECT** - Read CONVENTIONS.md Infrastructure table, detect platform
+2. **COMPARE** - Check against master list
+3. **SELECT** - Pick highest-priority missing bundle
+4. **IMPLEMENT** - Create endpoint, config, or script
+5. **VALIDATE** - curl /health, test rate limiting, verify backup exists
+6. **FIX** - Fix connectivity, configs, or scripts
+7. **RECORD** - Update CONVENTIONS.md Infrastructure table
+8. **REPORT** - Summary of added, validated, manual steps needed
+9. **RECOMMEND** - "Rerun /infra" or "Run /documents"
+
+**Stack-Agnostic**: Works with any platform (Cloudflare, AWS, Vercel, Coolify, etc.)
+
+**Key Rules**:
+- One bundle per run
+- Read platform from CONVENTIONS.md
+- Document manual steps for platform UIs
+- Don't store secrets, document env vars needed
+- Validate that infra actually works
+
+---
+
 ### /documents Workflow
 
 **Purpose**: Audit, create, and maintain project documentation according to monorepo standards.
@@ -307,6 +410,42 @@
 
 ---
 
+### /carryforward Workflow
+
+**Purpose**: Capture lessons learned and institutional memory between phases.
+
+**When to Run**:
+- After completing all sessions in a phase
+- Before starting /phasebuild for the next phase
+
+**Steps**:
+
+1. **Gather Phase Artifacts**
+   - Read all session implementation-notes.md files
+   - Read all session validation.md files
+   - Identify patterns, blockers, and decisions
+
+2. **Extract Lessons**
+   - What worked well?
+   - What caused problems?
+   - What would we do differently?
+   - What patterns emerged?
+
+3. **Update CONSIDERATIONS.md**
+   - Add phase-specific learnings
+   - Update general guidelines if patterns are universal
+   - Keep concise and actionable
+
+4. **Archive Phase**
+   - Move completed phase artifacts to archive if needed
+
+**Key Rules**:
+- Focus on actionable insights
+- Don't repeat what's in CONVENTIONS.md
+- Keep entries concise
+
+---
+
 ### /phasebuild Workflow
 
 **Purpose**: Create structure for a new project phase.
@@ -358,7 +497,7 @@ The workflow has **3 distinct stages**:
 
 ```
 [New Project] --/initspec--> [Initialized]
-[Initialized] --User populates PRD--> [PRD Ready]
+[Initialized] --/createprd or manual--> [PRD Ready]
 [PRD Ready] --/phasebuild--> [Phase Created]
 ```
 
@@ -379,11 +518,36 @@ The workflow has **3 distinct stages**:
 ### Stage 3: PHASE TRANSITION (After All Previous Phase's Sessions Are Complete)
 
 ```
-[Phase Complete] --/documents--> [Docs Updated] (recommended)
-[Docs Updated] --/phasebuild--> [New Phase Created]
-[New Phase Created] --user manual testing--> (highly recommended)
-[New Phase Created] --> Return to Stage 2
+[Phase Complete] --/audit--> [Dev Tooling Ready]
+    |
+    v
+[Dev Tooling Ready] --/pipeline--> [CI/CD Ready]
+    |
+    v
+[CI/CD Ready] --/infra--> [Infrastructure Ready]
+    |
+    v
+[Infrastructure Ready] --/documents--> [Docs Updated]
+    |
+    v
+[Docs Updated] --manual testing--> (highly recommended)
+    |
+    v
+[Tested] --/carryforward--> [Lessons Captured] (optional)
+    |
+    v
+[Ready] --/phasebuild--> [New Phase Created]
+    |
+    v
+--> Return to Stage 2
 ```
+
+**Phase Transition Commands** (universal 9-step flow):
+- `/audit` - Local dev tooling (5 bundles: format, lint, types, test, hooks)
+- `/pipeline` - CI/CD workflows (5 bundles: quality, build, security, integration, ops)
+- `/infra` - Production infrastructure (4 bundles: health, security, backup, deploy)
+
+Each command adds ONE bundle per run, validates ALL configured items, fixes ALL errors.
 
 ---
 
@@ -409,6 +573,30 @@ Common fixes:
 - **Missing files**: Create missing deliverables
 - **ASCII errors**: Fix encoding issues
 - **Test failures**: Fix tests, re-run suite
+
+### Local Dev Tooling Issues
+
+Common fixes:
+- **Missing tools**: Run `/audit` to detect and install
+- **Lint/format errors**: Run `/audit` to auto-fix
+- **Type errors**: Run `/audit` to attempt fixes
+- **Config issues**: Check CONVENTIONS.md Local Dev Tools table
+
+### CI/CD Issues
+
+Common fixes:
+- **Failing workflows**: Run `/pipeline` to fix errors
+- **PR review comments**: Run `/pipeline --pr <number>` to address
+- **Missing workflows**: Run `/pipeline` to add next bundle
+- **Secrets needed**: Check REPORT output for required secrets
+
+### Infrastructure Issues
+
+Common fixes:
+- **Health check failing**: Run `/infra` to fix endpoint or connectivity
+- **Backup missing**: Run `/infra` to configure backup script
+- **Rate limiting broken**: Check platform WAF settings
+- **Deploy not triggering**: Verify webhook URL in platform
 
 ### Documentation Issues
 

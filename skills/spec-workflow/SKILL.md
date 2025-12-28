@@ -1,7 +1,7 @@
 ---
 name: Apex Spec Workflow
 description: This skill should be used when the user asks about "spec system", "session workflow", "createprd", "nextsession", "sessionspec", "implement session", "validate session", "phase build", "session scope", "task checklist", or when working in a project containing .spec_system/ directory. Provides guidance for specification-driven AI development workflows.
-version: 0.27.0-beta
+version: 0.35.9-beta
 ---
 
 # Apex Spec Workflow
@@ -16,7 +16,7 @@ Break large projects into manageable, well-scoped implementation sessions that f
 
 A collection of sessions is a phase. A collection of phases is a mature/late technical PRD.
 
-## The 12-Command Workflow
+## The 14-Command Workflow
 
 The workflow has **3 distinct stages**:
 
@@ -61,10 +61,16 @@ The workflow has **3 distinct stages**:
 ### Stage 3: PHASE TRANSITION (After All Previous Phase's Sessions Are Complete)
 
 ```
-/audit             ->  Dev tooling (recommended)
+/audit             ->  Local dev tooling (formatter, linter, types, tests, hooks)
       |
       v
-/documents         ->  Audit and update documentation (recommended)
+/pipeline          ->  CI/CD workflows (quality, build, security, integration, ops)
+      |
+      v
+/infra             ->  Production infrastructure (health, security, backup, deploy)
+      |
+      v
+/documents         ->  Audit and update documentation
       |
       v
 [User Action]      ->  Manual testing (highly recommended)
@@ -221,10 +227,12 @@ The `.spec_system/state.json` file tracks project progress:
 | `/implement` | Code implementation | spec.md, tasks.md | implementation-notes.md |
 | `/validate` | Verify completeness | All session files | validation.md |
 | `/updateprd` | Mark complete | validation.md | Updated state.json |
-| `/carryforward` | Capture lessons | Completed phase artifacts | CONSIDERATIONS.md |
+| `/audit` | Local dev tooling | CONVENTIONS.md | Updated tools, report |
+| `/pipeline` | CI/CD workflows | CONVENTIONS.md | Workflow files, report |
+| `/infra` | Production infra | CONVENTIONS.md | Configs, report |
 | `/documents` | Audit/update docs | state.json, PRD, codebase | Updated docs, docs-audit.md |
+| `/carryforward` | Capture lessons | Completed phase artifacts | CONSIDERATIONS.md |
 | `/phasebuild` | Create new phase | PRD | PRD/phase_NN/ |
-| `/audit` | Code quality audit | Codebase | Console report |
 
 ## Additional Resources
 
@@ -326,5 +334,6 @@ Commands use a **hybrid approach** for reliability:
 | Environment issues | Run `check-prereqs.sh --env` to diagnose |
 | Stale documentation | Run `/documents` to audit and update |
 | Missing docs | Run `/documents` to create standard files |
-| Lint/format issues | Run `/audit` to detect stack and auto-fix |
-| Test failures | Run `/audit` to attempt simple fixes |
+| Lint/format issues | Run `/audit` to add tooling and auto-fix |
+| CI failures | Run `/pipeline` to add workflows and fix errors |
+| Infra not validated | Run `/infra` to configure health, security, backup, deploy |

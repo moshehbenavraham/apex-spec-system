@@ -5,429 +5,186 @@ description: Analyze tech stack, run dev tooling, and remediate code quality iss
 
 # /audit Command
 
-You are an AI assistant responsible for auditing code quality by detecting the tech stack, running dev tools, and auto-fixing / fixing issues where possible.
+Add and validate local dev tooling one bundle at a time. Follows the universal 9-step flow shared with /pipeline and /infra.
 
-## Role & Mindset
+## Master List (5 Bundles)
 
-You are a **senior engineer** obsessive about code quality -- zero errors, zero warnings, zero lint issues. You approach this audit methodically, fixing what can be fixed and clearly reporting what requires manual attention.
+Industry standard order (fast to slow, format before validate):
 
-## Your Task
-
-Execute a comprehensive 3-phase audit of the project. This command is **non-session-stateful** -- it does not read or modify `.spec_system/state.json`.  You should expect monorepos.
-
-**Phases:**
-1. **Detection & Setup** - Identify tech stacks, ensure tooling exists
-2. **Tool Execution** - Run linter/formatter/typechecker, auto-fix issues
-3. **Test Execution** - Run tests, attempt fixes
+| Priority | Bundle | Contents |
+|----------|--------|----------|
+| 1 | **Formatting** | Formatter (Prettier, Biome, Black, Ruff format) |
+| 2 | **Linting** | Linter (ESLint, Biome, Ruff, Clippy) |
+| 3 | **Type Safety** | Type checker (TypeScript, mypy, Pyright) |
+| 4 | **Testing** | Test runner + coverage (Jest, Vitest, pytest, pytest-cov) |
+| 5 | **Git Hooks** | Pre-commit hooks (husky, pre-commit, lefthook) |
 
 ## Flags
-
-Parse any arguments provided after `/audit`:
 
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--dry-run` | false | Preview what would happen without changes |
 | `--skip-install` | false | Don't install missing tools |
-| `--skip-tests` | false | Skip Phase 3 entirely |
 | `--verbose` | false | Show full tool output |
-| `--phase <1\|2\|3>` | all | Run specific phase only |
-| `--no-save` | false | Don't save report to file |
-| `--skip-conventions` | false | Skip CONVENTIONS.md maintenance |
 
-## Known Issues File
+## Flow
 
-The audit respects a `.spec_system/audit/known-issues.md` file that documents intentional exceptions. This prevents the same known issues from cluttering every audit report.
+### Step 1: DETECT
 
-### Format
+1. Check for `.spec_system/CONVENTIONS.md`
+   - If missing: "No CONVENTIONS.md found. Run /initspec first or create manually."
+   - Read Repository section for monorepo detection
+   - Read Stack section for languages/runtimes
+   - Read Local Dev Tools table for configured tools
 
+2. Check for `.spec_system/audit/known-issues.md`
+   - If found, load ignore patterns
+   - Note: "Known issues loaded (N paths, N rules, N tests)"
+
+3. Check git status
+   - If dirty: Warn "Uncommitted changes exist. Fixes will mix with existing changes."
+
+4. If `--dry-run`: Skip to Dry Run Output
+
+### Step 2: COMPARE
+
+Compare Local Dev Tools table against 5-bundle master list:
+- For each bundle, check if Tool column has a value or shows "not configured" / "-"
+- Build list of missing bundles in priority order
+
+If all bundles configured: "All recommended local dev tools configured. Jumping to Step 5."
+
+### Step 3: SELECT
+
+Pick the highest-priority missing bundle from Step 2.
+
+Output: "Selected: [Bundle Name] - not yet configured"
+
+### Step 4: IMPLEMENT
+
+Install and configure the selected bundle.
+
+**Detection by language** (from CONVENTIONS.md Stack section):
+
+| Language | Formatter | Linter | Type Checker | Test Framework | Git Hooks |
+|----------|-----------|--------|--------------|----------------|-----------|
+| Python | Ruff | Ruff | mypy | pytest + pytest-cov | pre-commit |
+| TypeScript | Biome | Biome | tsc (strict) | Vitest | husky + lint-staged |
+| JavaScript | Biome | Biome | - | Vitest | husky + lint-staged |
+| Rust | rustfmt | Clippy | (built-in) | cargo test | pre-commit |
+| Go | gofmt | golangci-lint | (built-in) | go test | pre-commit |
+
+**For monorepos**: Install at root if shared, or per-package if stack differs.
+
+1. Install tool via detected package manager
+2. Generate config file with sensible defaults
+3. If install fails and not `--skip-install`: Provide manual instructions, continue
+
+### Step 5: VALIDATE
+
+Run ALL configured tools (not just the new one):
+
+1. **Formatter** (if configured): Run with auto-fix flag
+2. **Linter** (if configured): Run with auto-fix flag
+3. **Type checker** (if configured): Run in check mode
+4. **Tests** (if configured): Run full suite
+5. **Git hooks** (if configured): Verify hooks are installed
+
+**For monorepos**: Run per package, collect results.
+
+Capture all output. Parse for errors, warnings, fixes applied.
+
+### Step 6: FIX
+
+For each issue found in Step 5:
+
+1. **Auto-fixable** (format, some lint): Already fixed in Step 5
+2. **Type errors**: Attempt fix, verify syntax still valid
+3. **Test failures**: Attempt fix, re-run affected test
+4. **Unfixable after 3 attempts**: Log for manual review, revert if syntax broken
+
+**Guardrail**: After any fix, verify syntax/compilation. If broken after 2 retries, revert.
+
+Filter out issues matching known-issues.md patterns - report separately as "Known".
+
+### Step 7: RECORD
+
+If a new bundle was added, update `.spec_system/CONVENTIONS.md`:
+
+Update the Local Dev Tools table:
 ```markdown
-# Known Issues
-
-## Ignored Paths
-<!-- Files/directories to skip or treat as advisory-only -->
-- `src/legacy/**` - Untyped legacy code, migration planned for Q2
-- `vendor/` - Third-party code, do not modify
-
-## Ignored Rules
-<!-- Specific rule + path combinations that are intentional -->
-- `no-console` in `src/cli/**` - CLI legitimately uses console output
-- `@typescript-eslint/no-explicit-any` in `src/types/legacy.ts` - Complex generics
-
-## Skipped Tests
-<!-- Tests that are known-failing or intentionally skipped -->
-- `auth.test.ts::should refresh expired token` - Blocked on external API mock (issue #142)
-
-## Notes
-<!-- Context for future audits -->
-- ESLint chosen over Biome due to plugin ecosystem needs
-- Test coverage target is 80% for src/, not enforced for scripts/
+| Category | Tool | Config |
+|----------|------|--------|
+| Formatter | Ruff | ruff.toml |  <-- was "not configured"
 ```
 
-### Behavior
+### Step 8: REPORT
 
-- **Ignored Paths**: Issues in these paths are reported separately as "Known (X issues)" rather than "Remaining"
-- **Ignored Rules**: Specific rule violations in matched paths are excluded from issue counts
-- **Skipped Tests**: Known-failing tests don't count against the pass rate
-- **Notes**: Read for context, included in report header if present
-
-## Steps
-
-### Step 0: Preflight
-
-Before starting the audit:
-
-1. **Check git status**
-   ```bash
-   git status --porcelain
-   ```
-   - If output is non-empty, warn: "Git working tree has uncommitted changes. Audit fixes will be mixed with existing changes."
-
-2. **Note timestamp** for the report
-
-3. **Check for known-issues.md**
-   - Look for `.spec_system/audit/known-issues.md`
-   - If found, parse and load the ignore rules
-   - Note in report: "Known issues file loaded ({n} paths, {n} rules, {n} tests)"
-
-4. **Check for CONVENTIONS.md**
-   - Look for `.spec_system/CONVENTIONS.md`
-   - If found, note project conventions for context during audit
-   - Use conventions to inform: naming validation, file structure checks, testing standards
-   - Note in report: "Conventions loaded" (if found)
-
-5. **If `--dry-run`**: Skip to Dry Run Output section
-
-### Step 1: Phase 1 - Detection & Setup
-
-First, detect if this is a monorepo. If so, identify packages and run detection steps for each.
-
-#### 1.1 Language Detection
-
-Look for manifest files, etc to identify languages.
-
-#### 1.2 Package Manager Detection
-
-Look for Lockfiles, Pack Manager files, etc.
-
-#### 1.3 Existing Dev Tools Detection
-
-Check for configuration files, etc.  You are looking for any standard dev tooling such as linters, fromatters, type checkers, code quality, testing frameworks, etc.
-
-#### 1.4 Install Missing Tools
-
-For each tooling category (linter, formatter, type checker, code quality, test framework, etc):
-
-1. **If present**: Note tools and versions
-2. **If missing and `--skip-install` is NOT set**: Attempt installation with detected package managers
-3. **If install fails**: Provide manual installation instructions
-4. **Continue on failure** - don't block the audit
-
-#### 1.5 Consider Config Updates
-
-Review existing configs and make updates if:
-- Configs are outdated for the current language version
-- New recommended rules exist
-- Project has grown beyond initial config scope
-
-### Step 2: Phase 2 - Tool Execution & Auto-Fix
-
-**Execution Order (important):**
-1. Formatter first (changes file content)
-2. Linter second (may have fixes that depend on formatting)
-3. Type checker third (validates types after lint fixes)
-4. Tests last (validate behavior after all code changes; fix any issues found)
-
-#### 2.1 Run Each Tool
-
-For each tool, and each repo (in monorepo):
-
-1. **Run with auto-fix flag** if available!
-
-2. **Capture all output** (stdout and stderr)
-
-3. **Parse results** to identify:
-   - Total issues found
-   - Issues auto-fixed
-   - Remaining issues (with file:line references)
-   - Known issues (matching known-issues.md patterns, reported separately)
-
-#### 2.2 Guardrail - Syntax Verification
-
-After applying fixes, run a syntax/compile check
-
-**If syntax is broken:**
-
-1. Try to fix the syntax error
-2. If unable to fix, retry. If still failing after 2 more attempts, revert only the affected files
-3. Report the failure clearly
-4. Continue with remaining phases
-
-### Step 3: Phase 3 - Test Execution & Remediation
-
-Skip this phase if `--skip-tests` is set.
-
-#### 3.1 Detect Test Framework
-
-1. Identify test framework from configs or dependencies
-2. Locate test files
-3. If no tests found, skip Phase 3 with note in report
-
-#### 3.2 Run Tests
-
-Execute test suite with standard commands
-
-Capture results: passed, failed, skipped counts.
-
-**Known-skip handling**: Tests listed in known-issues.md "Skipped Tests" section are:
-- Expected to fail (don't attempt remediation)
-- Reported separately from unexpected failures
-- Not counted against the pass rate
-
-#### 3.3 Remediation
-
-For manageable failures (within a single context window):
-
-1. **Attempt fix**
-
-2. **Verify fix** by re-running only the affected test(s)
-
-3. **If fix doesn't resolve**:
-   - Try two more times with different approach
-   - If still failing, revert and log for manual review
-
-4. **Maximum 3 fix iterations** per failing test
-
-### Step 4: Phase 4 - CONVENTIONS.md Maintenance
-
-Skip this phase if `--skip-conventions` is set or no `.spec_system/CONVENTIONS.md` exists.
-
-#### 4.1 Analyze Current Conventions
-
-Read `.spec_system/CONVENTIONS.md` and extract:
-- Documented patterns, naming conventions, file structures
-- Technology choices and standards
-- Testing and quality requirements
-
-#### 4.2 Detect Actual Patterns
-
-From the audit findings and codebase analysis, identify:
-- **New patterns**: Consistent patterns in code not yet documented
-- **Stale conventions**: Documented rules no longer followed (3+ violations)
-- **Evolved patterns**: Rules that have naturally shifted (e.g., new naming style)
-
-#### 4.3 Make Surgical Updates
-
-Apply minimal, targeted edits to CONVENTIONS.md:
-
-1. **Add** newly detected patterns that appear in 3+ files consistently
-2. **Update** conventions that have evolved (keep the spirit, update the specifics)
-3. **Remove** stale conventions that are consistently violated without issue
-4. **Consolidate** redundant or overlapping rules
-
-**Edit principles:**
-- One edit per pattern change
-- Preserve existing structure and formatting
-- Keep language concise (1-2 lines per convention)
-- Never add speculative or aspirational conventions
-
-#### 4.4 Enforce 300-Line Limit (STRICT)
-
-CONVENTIONS.md must stay under **300 lines maximum**. If over limit after updates:
-
-1. **Merge** similar conventions into single entries
-2. **Remove** least-enforced or most-obvious conventions
-3. **Condense** verbose explanations to single lines
-4. **Archive** detailed rationale to separate docs if needed
-
-**If still over 300 lines**: Prioritize by impact and remove lowest-value entries until compliant.
-
-#### 4.5 Validate Changes
-
-After edits:
-1. Verify file is valid markdown
-2. Confirm line count <= 300
-3. Ensure no duplicate sections created
-
-### Step 5: Generate Report
-
-Output a compact report. For monorepos, show per-package results inline.
-
+**For monorepos**, show per-package:
 ```
-AUDIT REPORT | {project_name} | {YYYY-MM-DD HH:MM}
-Git: {clean|dirty} | Stack(s): {language(s) + framework(s)}
-{if CONVENTIONS.md loaded}Conventions: loaded{/if}
-{if known-issues.md loaded}Known issues: {n} paths, {n} rules, {n} tests{/if}
-{if notes in known-issues.md}Note: {first note from file}{/if}
-
-[SETUP] {pkg_manager} | Linter: {ok|missing} | Fmt: {ok|missing} | Types: {ok|missing}
-{if installed}  + Installed: {tool}, {tool}{/if}
-{if failed}  ! Missing: {tool} -> {install_command}{/if}
-
-{for each package in monorepo, or root if single repo}
-[{package_name}]
-  Fmt: {n} fixed | Lint: {n} fixed, {n} remain, {n} known | Types: {n} errors, {n} known
-  {if remaining issues, max 5}
-    {file}:{line} {message} [{rule}]
-  {/if}
-  {if known issues exist, summarize}
-    Known: {n} in src/legacy/**, {n} no-console in src/cli/**
-  {/if}
-  Tests: {passed}/{total} pass, {n} known-skip {if failures}| FAIL: {test_name}{/if}
-{/for}
-
-{if conventions maintenance ran}
-[CONVENTIONS] {lines}/300 lines | +{added} -{removed} ~{updated}
-  {if changes made, list max 3}
-    + Added: {pattern description}
-    - Removed: {stale pattern}
-    ~ Updated: {evolved pattern}
-  {/if}
-{/if}
-
-SUMMARY: P1 {ok|partial} | P2 {fixed}/{total} fixed, {known} known | P3 {pass|fail|skip} | P4 {ok|trimmed|skip}
-{if action items}
-TODO:
-  - {actionable item}
-{/if}
-{if new patterns detected that could be added to known-issues.md}
-SUGGESTED FOR known-issues.md:
-  - `{rule}` in `{path}` ({n} occurrences) - {add reason or remove this line}
-{/if}
+[apps/web] Formatter: 12 fixed | Linter: 3 remain
+[apps/api] Formatter: 8 fixed | Types: 2 errors
 ```
 
-### Dry Run Output
+**For single repos**:
+```
+REPORT
+- Added: Formatting (Ruff)
+- Config: ruff.toml created
+- Fixed: 47 format issues, 12 lint errors
+- Remaining: 3 type errors in src/api/handlers.ts:45, :67, :89
+- Known: 5 issues in src/legacy/** (ignored per known-issues.md)
+```
 
-If `--dry-run` was specified:
+### Step 9: RECOMMEND
+
+**If issues remain:**
+```
+ACTION REQUIRED:
+1. Fix type errors in src/api/handlers.ts
+
+Rerun /audit after addressing these issues.
+```
+
+**If new bundle added configured and passing:**
+```
+New dev tool bundle configured and all tools passing.
+
+Recommendation: Run /pipeline
+```
+
+**If all 5 bundles configured and passing:**
+```
+All local dev tools configured and all tools passing.
+
+Recommendation: Run /pipeline
+```
+
+## Dry Run Output
 
 ```
-AUDIT PREVIEW (DRY RUN) | {project_name}
+AUDIT PREVIEW (DRY RUN)
 
-Detected: {language} | {pkg_manager}
-{if known-issues.md exists}Known issues: {n} paths, {n} rules, {n} tests{/if}
-Would install: {tool}, {tool}
-Would run: {formatter} --fix, {linter} --fix, {type_checker}, {test_cmd}
-{if CONVENTIONS.md exists}CONVENTIONS.md: {lines} lines (limit: 300){/if}
-Packages: {n} ({pkg1}, {pkg2}, ...)
+Repository: monorepo (Turborepo)
+Packages: apps/web, apps/api, packages/shared
+Stack: Python 3.12, Node 20
+Package managers: uv, pnpm
+
+Configured: Formatting, Linting
+Missing: Type Safety, Testing, Git Hooks
+
+Would add: Type Safety
+Would install: mypy (apps/api), typescript strict (apps/web, packages/shared)
+Would run: ruff format, ruff check, biome format, biome lint, mypy, tsc
 
 Run without --dry-run to apply.
 ```
 
-### Step 6: Save Report
-
-Unless `--no-save` is set, save the report to `.spec_system/audit/`.
-
-#### 6.1 Ensure Directory Exists
-
-Create `.spec_system/audit/` if it doesn't exist.
-
-#### 6.2 Determine Filename
-
-**If `.spec_system/state.json` exists:**
-- Read `project_name` from state.json
-- Slugify: lowercase, replace spaces/special chars with hyphens
-- Format: `{slug}_{YYYYMMDD_HHMM}.txt`
-
-**If no state.json:**
-- Format: `audit_{YYYYMMDD_HHMM}.txt`
-
-#### 6.3 Write and Confirm
-
-Save the report and append to console output:
-
-```
-Saved: .spec_system/audit/{filename}
-```
-
 ## Rules
 
-1. **Auto-fix by default** - Apply safe fixes without asking
-2. **After 3 attempts, rollback on syntax break** - Never leave code in broken state!
-3. **Continue on failure** - One tool failing doesn't stop the audit
-4. **Clear instructions** - When auto-fix fails, provide copy-paste commands
-5. **ASCII UFT-8 LF only** - All output uses ASCII characters (0-127), UTF-8, LF
-6. **Stack agnostic** - Work with any language that has dev tooling
-7. **Respect known-issues.md** - Don't attempt to fix issues marked as known/intentional
-8. **Suggest patterns** - When 3+ identical issues appear in same path, suggest adding to known-issues.md
-9. **CONVENTIONS.md <= 300 lines** - Strictly enforce line limit; trim ruthlessly if exceeded
-10. **Evidence-based conventions** - Only document patterns with 3+ occurrences in codebase
-
-## Edge Cases
-
-### Multiple Languages / Monorepo
-
-Handling:
-- Detect monorepo structure first
-- Run appropriate tooling for each package's stack
-- Report results per-package
-
-### No Recognizable Stack
-
-Handling:
-- Report: "Unable to detect tech stack"
-- Check for generic tools (.editorconfig, .gitignore)
-- Suggest user specify stack or add manifest file
-
-### Tool Conflicts
-
-Example: Both ESLint and Biome configured
-
-Handling:
-- Detect both, note in report
-- Run the one with more complete config
-- Warn: "Multiple {category} tools detected. Using {tool}."
-
-### CONVENTIONS.md Over Limit
-
-When CONVENTIONS.md exceeds 300 lines:
-
-Handling:
-- First pass: Merge duplicate/similar conventions
-- Second pass: Remove obvious or unenforced rules
-- Third pass: Condense verbose entries to single lines
-- If still over: Remove lowest-impact conventions until compliant
-- Report: "CONVENTIONS.md trimmed from {n} to {m} lines"
-
-### CONVENTIONS.md Severely Outdated
-
-When >50% of documented conventions conflict with actual code patterns:
-
-Handling:
-- Don't attempt wholesale rewrite in single audit
-- Make up to 10 surgical changes per audit run
-- Flag in report: "CONVENTIONS.md needs major revision ({n} stale patterns)"
-- Suggest user review manually or run multiple audits
-
-### Stale Known Issues
-
-When a known-issues.md entry no longer matches any actual issues:
-
-Handling:
-- Note in report: "Stale: `{pattern}` - no matching issues found"
-- Suggest removal in the SUGGESTED section
-- Do not auto-remove (user may want to keep for documentation)
-
-## Error Handling
-
-| Error | Severity | Response |
-|-------|----------|----------|
-| Tool not found | Low | Attempt install, else provide instructions |
-| Tool execution error | Medium | Log error, continue with other tools |
-| Syntax broken after fix | High | Revert changes (2 tries first), report failure |
-| Test fix made things worse | Medium | Revert fix, log for manual review |
-| Permission denied | High | Provide chmod/sudo instructions |
-| Network/registry unavailable | Low | Skip install, use existing tools |
-| CONVENTIONS.md over 300 lines | Medium | Trim until compliant, report changes |
-| CONVENTIONS.md severely stale | Low | Make up to 10 changes, flag for manual review |
-
-## Output
-
-Display the structured audit report to console and save to `.spec_system/audit/` by default. Include:
-- Phase-by-phase summary
-- Statistics (issues found/fixed/remaining/known)
-- Known issues summary (if known-issues.md loaded)
-- CONVENTIONS.md changes (added/removed/updated patterns, line count)
-- Suggestions for known-issues.md additions (patterns with 3+ occurrences)
-- Stale known-issues.md entries (no longer matching)
-- Actionable items for manual follow-up
-- If audit is clean, recommend running /carryforward next
-- File path where report was saved
+1. **One bundle per run** - Add one, validate all, fix all
+2. **Never break syntax** - Revert after 2 failed attempts
+3. **Respect known-issues.md** - Don't fix intentional exceptions
+4. **Update CONVENTIONS.md** - Record what was added
+5. **Continue on failure** - One tool failing doesn't stop the audit
+6. **Monorepo aware** - Run per package, report per package
