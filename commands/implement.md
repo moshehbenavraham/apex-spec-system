@@ -123,6 +123,7 @@ For each incomplete task:
 Find the first unchecked `- [ ]` task in tasks.md
 
 #### B. Implement Task
+- When writing code: Make NO assumptions. Do not be lazy.  Pattern match precisely.  Do not skim when you need detailed info from documents. Validate systematically.
 - Follow CLAUDE.md guidelines
 - Follow CONVENTIONS.md standards (naming, structure, error handling, comments, etc.)
 - Read the task description carefully

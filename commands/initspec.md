@@ -201,6 +201,7 @@ Create `.spec_system/CONVENTIONS.md` (coding standards and team conventions):
 - Code is written once, read many times
 - Consistency beats personal preference
 - If it can be automated, automate it
+- When writing code: Make NO assumptions. Do not be lazy.  Pattern match precisely.  Do not skim when you need detailed info from documents. Validate systematically.
 
 ## Naming
 
