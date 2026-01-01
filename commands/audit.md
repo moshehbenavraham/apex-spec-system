@@ -7,7 +7,7 @@ description: Analyze tech stack, run dev tooling, and remediate code quality iss
 
 Add and validate local dev tooling one bundle at a time. Follows the universal 9-step flow shared with /pipeline and /infra.
 
-## Master List (5 Bundles)
+## Master List (6 Bundles)
 
 Industry standard order (fast to slow, format before validate):
 
@@ -17,7 +17,8 @@ Industry standard order (fast to slow, format before validate):
 | 2 | **Linting** | Linter (ESLint, Biome, Ruff, Clippy) |
 | 3 | **Type Safety** | Type checker (TypeScript, mypy, Pyright) |
 | 4 | **Testing** | Test runner + coverage (Jest, Vitest, pytest, pytest-cov) |
-| 5 | **Git Hooks** | Pre-commit hooks (husky, pre-commit, lefthook) |
+| 5 | **Observability** | Structured logger + error capture (structlog, pino, tracing, slog) |
+| 6 | **Git Hooks** | Pre-commit hooks (husky, pre-commit, lefthook) |
 
 ## Flags
 
@@ -48,7 +49,7 @@ Industry standard order (fast to slow, format before validate):
 
 ### Step 2: COMPARE
 
-Compare Local Dev Tools table against 5-bundle master list:
+Compare Local Dev Tools table against 6-bundle master list:
 - For each bundle, check if Tool column has a value or shows "not configured" / "-"
 - Build list of missing bundles in priority order
 
@@ -62,23 +63,58 @@ Output: "Selected: [Bundle Name] - not yet configured"
 
 ### Step 4: IMPLEMENT
 
-Install and configure the selected bundle.
+Install and configure the single selected bundle missing.
 
 **Detection by language** (from CONVENTIONS.md Stack section):
 
-| Language | Formatter | Linter | Type Checker | Test Framework | Git Hooks |
-|----------|-----------|--------|--------------|----------------|-----------|
-| Python | Ruff | Ruff | mypy | pytest + pytest-cov | pre-commit |
-| TypeScript | Biome | Biome | tsc (strict) | Vitest | husky + lint-staged |
-| JavaScript | Biome | Biome | - | Vitest | husky + lint-staged |
-| Rust | rustfmt | Clippy | (built-in) | cargo test | pre-commit |
-| Go | gofmt | golangci-lint | (built-in) | go test | pre-commit |
+| Language | Formatter | Linter | Type Checker | Test Framework | Logger | Git Hooks |
+|----------|-----------|--------|--------------|----------------|--------|-----------|
+| Python | Ruff | Ruff | mypy | pytest + pytest-cov | structlog | pre-commit |
+| TypeScript | Biome | Biome | tsc (strict) | Vitest | pino | husky + lint-staged |
+| JavaScript | Biome | Biome | - | Vitest | pino | husky + lint-staged |
+| Rust | rustfmt | Clippy | (built-in) | cargo test | tracing | pre-commit |
+| Go | gofmt | golangci-lint | (built-in) | go test | log/slog | pre-commit |
 
 **For monorepos**: Install at root if shared, or per-package if stack differs.
 
 1. Install tool via detected package manager
 2. Generate config file with sensible defaults
 3. If install fails and not `--skip-install`: Provide manual instructions, continue
+
+#### Observability Bundle Implementation ("Logger")
+
+**Purpose**: Set up structured logging with AI-friendly error capture.
+
+**For all languages, create:**
+1. `logs/` directory in project root
+2. Proper `logs/.gitignore` with content
+3. Logger configuration file (language-specific)
+4. Error handler that writes to `logs/last_error_<timestamp>.json`, ex: `logs/last_error_2025-01-01T12:00:00.000Z.json`
+
+**last_error.json schema** (AI-friendly structured error context):
+```json
+{
+  "timestamp": "2025-01-01T12:00:00.000Z",
+  "level": "error",
+  "msg": "Error description",
+  "error": {
+    "type": "ErrorClassName",
+    "message": "Detailed error message",
+    "stack": "Stack trace..."
+  },
+  "context": {}
+}
+```
+
+**Language-specific setup examples:**
+
+| Language | Install | Config File | Error Handler |
+|----------|---------|-------------|---------------|
+| Python | `pip install structlog` | `src/logging_config.py` | `write_last_error()` processor |
+| TypeScript | `npm install pino` | `src/logger.ts` | `logMethod` hook |
+| JavaScript | `npm install pino` | `src/logger.js` | `logMethod` hook |
+| Rust | Add `tracing`, `tracing-subscriber` to Cargo.toml | `src/logging.rs` | `capture_error()` function |
+| Go | (stdlib) | `internal/logging/logging.go` | `CaptureError()` function |
 
 ### Step 5: VALIDATE
 
@@ -88,7 +124,15 @@ Run ALL configured tools (not just the new one):
 2. **Linter** (if configured): Run with auto-fix flag
 3. **Type checker** (if configured): Run in check mode
 4. **Tests** (if configured): Run full suite
-5. **Git hooks** (if configured): Verify hooks are installed
+5. **Observability** (if configured): Verify logger and error capture
+6. **Git hooks** (if configured): Verify hooks are installed
+
+**Observability validation:**
+- Run logger initialization (language-specific)
+- Trigger test error to verify capture
+- Confirm `logs/` directory exists
+- Confirm `logs/.gitignore` has correct patterns
+- Confirm `logs/last_error_<timestamp>.json` is created with valid JSON
 
 **For monorepos**: Run per package, collect results.
 
@@ -153,7 +197,7 @@ New dev tool bundle configured and all tools passing.
 Recommendation: Run /pipeline
 ```
 
-**If all 5 bundles configured and passing:**
+**If all 6 bundles configured and passing:**
 ```
 All local dev tools configured and all tools passing.
 
@@ -170,12 +214,14 @@ Packages: apps/web, apps/api, packages/shared
 Stack: Python 3.12, Node 20
 Package managers: uv, pnpm
 
-Configured: Formatting, Linting
-Missing: Type Safety, Testing, Git Hooks
+Configured: Formatting, Linting, Type Safety, Testing
+Missing: Observability, Git Hooks
 
-Would add: Type Safety
-Would install: mypy (apps/api), typescript strict (apps/web, packages/shared)
-Would run: ruff format, ruff check, biome format, biome lint, mypy, tsc
+Would add: Observability
+Would install: structlog (apps/api), pino (apps/web, packages/shared)
+Would create: logs/ directory with .gitignore
+Would create: src/logging_config.py (apps/api), src/logger.ts (apps/web)
+Would run: ruff format, ruff check, biome format, biome lint, mypy, tsc, pytest, vitest
 
 Run without --dry-run to apply.
 ```

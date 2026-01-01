@@ -273,6 +273,17 @@ Create `.spec_system/CONVENTIONS.md` (coding standards and team conventions):
 - Justify additions; prefer well-maintained, focused libraries
 - Pin versions; update intentionally
 
+## Local Dev Tools
+
+| Category | Tool | Config |
+|----------|------|--------|
+| Formatter | not configured | - |
+| Linter | not configured | - |
+| Type Safety | not configured | - |
+| Testing | not configured | - |
+| Observability | not configured | - |
+| Git Hooks | not configured | - |
+
 ## When In Doubt
 
 - Ask

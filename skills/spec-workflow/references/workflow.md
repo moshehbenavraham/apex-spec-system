@@ -230,12 +230,13 @@
 
 **Purpose**: Add and validate local dev tooling one bundle at a time.
 
-**Master List (5 Bundles)**:
+**Master List (6 Bundles)**:
 1. Formatting (Prettier, Biome, Ruff)
 2. Linting (ESLint, Biome, Ruff, Clippy)
 3. Type Safety (TypeScript, mypy, Pyright)
 4. Testing (Jest, Vitest, pytest + coverage)
-5. Git Hooks (husky, pre-commit, lefthook)
+5. Observability (structlog, pino, tracing, slog)
+6. Git Hooks (husky, pre-commit, lefthook)
 
 **Universal 9-Step Flow**:
 
@@ -518,13 +519,13 @@ The workflow has **3 distinct stages**:
 ### Stage 3: PHASE TRANSITION (After All Previous Phase's Sessions Are Complete)
 
 ```
-[Phase Complete] --/audit--> [Dev Tooling Ready]
+[Phase Complete] --/audit--> [Dev Tooling Ready] (optional)
     |
     v
-[Dev Tooling Ready] --/pipeline--> [CI/CD Ready]
+[Dev Tooling Ready] --/pipeline--> [CI/CD Ready] (optional)
     |
     v
-[CI/CD Ready] --/infra--> [Infrastructure Ready]
+[CI/CD Ready] --/infra--> [Infrastructure Ready] (optional)
     |
     v
 [Infrastructure Ready] --/documents--> [Docs Updated]
@@ -543,7 +544,7 @@ The workflow has **3 distinct stages**:
 ```
 
 **Phase Transition Commands** (universal 9-step flow):
-- `/audit` - Local dev tooling (5 bundles: format, lint, types, test, hooks)
+- `/audit` - Local dev tooling (6 bundles: format, lint, types, test, observability, hooks)
 - `/pipeline` - CI/CD workflows (5 bundles: quality, build, security, integration, ops)
 - `/infra` - Production infrastructure (4 bundles: health, security, backup, deploy)
 
