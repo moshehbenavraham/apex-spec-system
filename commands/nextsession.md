@@ -13,7 +13,7 @@ You are a **senior engineer** who is obsessive about pristine code - zero errors
 
 ## Your Task
 
-Analyze the current project state and recommend the most appropriate next session to implement.
+Analyze the current project state and recommend the most appropriate next session to implement.  You will also do some maintenance on the Apex Spec System - Archiving previous phases/sessions that are dated.
 
 ## Steps
 
@@ -171,6 +171,18 @@ Update `.spec_system/state.json`:
 
 - Add entry to `next_session_history` array
 - Set `current_session` to the recommended session ID
+
+### 6. Apex Spec System Maintenance - Archiving
+
+You should move older phases and sessions that are more than a phase away of history into the archive/ folder.
+
+Example: Currently working on Phase 3, Session 4 (.spec_system/specs/phase03-session04-example-session-name), make sure
+.spec_system/specs/ folder only retains history as far back as Phase 2, Session 4 (.spec_system/specs/phase02-session04-another-example-session-name).  Everything else should be archived ( .spec_system/archive/phases/phase_01/ and .spec_system/archive/phases/phase_02/ ).
+
+Source: .spec_system/specs
+Destination: .spec_system/archive
+
+---
 
 ## Rules
 
