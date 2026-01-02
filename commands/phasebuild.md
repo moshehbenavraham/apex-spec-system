@@ -22,6 +22,7 @@ Per Steps below **Check** current work progress (`.spec_system/state.json`) and 
 **Check** current work progress (`.spec_system/state.json`) and then current/historic PRD (`.spec_system/PRD/`).
 
 Pay attention to:
+- What has been accomplished
 - Phase number (next sequential)
 - Phase name
 - Phase description
@@ -220,7 +221,9 @@ Merge into `.spec_system/state.json` (add to existing `phases` object):
 
 ### 5. Update Master PRD
 
-Add phase reference to `.spec_system/PRD/PRD.md`:
+#### Make sure Master PRD is fully accurate and up to date
+
+#### Add phase reference to `.spec_system/PRD/PRD.md`:
 
 ```markdown
 ## Phases
