@@ -92,6 +92,13 @@ Run the project's test suite:
 - Calculate coverage if available
 - Note any failures
 
+**CRITICAL -- NO "PRE-EXISTING" EXCUSE**: If ANY test fails, you MUST:
+1. Investigate the root cause -- determine whether the session's changes caused or contributed to the failure
+2. NEVER dismiss a failure as "pre-existing" or "environment issue" -- if tests passed before this session and fail now, THIS SESSION BROKE THEM
+3. FIX the failure before continuing validation. If you changed a Docker image, a dependency, a config file, or any shared code, failures in existing tests are YOUR responsibility
+4. Only after all tests pass (0 failures) may you mark Test Verification as PASS
+5. If a failure is genuinely unrelated (e.g., flaky network test), you must PROVE it by showing the test also fails on the pre-session commit -- do not assume
+
 #### E. Success Criteria
 From spec.md success criteria:
 - Check each functional requirement
