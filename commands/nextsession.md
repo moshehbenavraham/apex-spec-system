@@ -142,7 +142,7 @@ Create `.spec_system/NEXT_SESSION.md` with:
 
 ## Alternative Sessions
 
-If this session is blocked:
+If this session is blocked by something only the USER can resolve (credentials, external access, human decisions):
 1. **[alt session]** - [reason]
 2. **[alt session]** - [reason]
 

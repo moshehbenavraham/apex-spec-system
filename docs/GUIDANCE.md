@@ -53,21 +53,11 @@ Practical guidance for getting the most out of the Apex Spec System.
 
 ---
 
-## Workflow Modes
-
-Apex Spec offers two workflow modes to match your needs.
-
-### Full Workflow (Default)
+## Workflow
 
 ```
 /nextsession -> /sessionspec -> /tasks -> /implement -> /validate -> /updateprd
 ```
-
-**Best for:**
-- Complex sessions with multiple considerations
-- Sessions requiring careful scoping decisions
-- When you want detailed documentation
-- Learning the system (see each step clearly)
 
 **Artifacts created:**
 - NEXT_SESSION.md (recommendation)
@@ -76,57 +66,6 @@ Apex Spec offers two workflow modes to match your needs.
 - implementation-notes.md (progress log)
 - validation.md (quality verification)
 - IMPLEMENTATION_SUMMARY.md (completion record)
-
-### Quick Session (/quicksesh)
-
-```
-/quicksesh
-```
-
-Single command that runs all 6 phases automatically:
-1. Analyze and recommend session
-2. Create specification
-3. Generate task list
-4. Implement all tasks
-5. Validate completion
-6. Update PRD and commit
-
-**Best for:**
-- Straightforward sessions with clear scope
-- Experienced users who trust the system
-- When iteration speed matters more than step-by-step control
-- Sessions where you don't need to pause between phases
-
-**Same artifacts, faster flow** - /quicksesh creates all the same documentation, just without stopping between phases.
-
-### Resuming /quicksesh
-
-If interrupted, resume from any phase:
-
-```
-/quicksesh --from 4    # Resume from implementation
-/quicksesh --from 5    # Resume from validation
-```
-
-| Flag | Resumes From |
-|------|--------------|
-| `--from 1` | Fresh analysis |
-| `--from 2` | Specification (skips analysis) |
-| `--from 3` | Tasks (skips spec) |
-| `--from 4` | Implementation (reads existing tasks.md) |
-| `--from 5` | Validation (skips implementation) |
-| `--from 6` | Completion (skips validation) |
-
-### Which to Choose?
-
-| Situation | Recommendation |
-|-----------|----------------|
-| First time using Apex Spec | Full workflow (learn the steps) |
-| Complex/risky session | Full workflow (more control) |
-| Simple, well-understood session | /quicksesh |
-| Time pressure | /quicksesh |
-| Want to review spec before tasks | Full workflow |
-| Debugging a failed session | Full workflow (isolate the issue) |
 
 ---
 
@@ -257,7 +196,6 @@ Session Velocity:
 | Implement tasks | `/implement` |
 | Verify completion | `/validate` |
 | Mark session complete | `/updateprd` |
-| Run full session workflow | `/quicksesh` |
 | Add dev tooling | `/audit` |
 | Add CI/CD | `/pipeline` |
 | Add infrastructure | `/infra` |

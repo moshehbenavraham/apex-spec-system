@@ -14,6 +14,13 @@ Verify that all session requirements are met before marking the session complete
 3. **Script first** - run `analyze-project.sh --json` before any analysis
 4. Conventions compliance is a spot-check, not exhaustive - flag obvious violations only
 
+### No Deferral Policy
+
+- If a validation check fails and YOU can fix it (encoding issues, missing directories, failing tests with obvious fixes), FIX IT and re-validate
+- The ONLY valid reason to report a FAIL back to the user is when the fix requires their input, credentials, or decisions only a human can make
+- "The environment isn't set up" is NOT a valid FAIL -- setting it up IS the task
+- If you report a FAIL for something you could have fixed, that is a **critical failure**
+
 ## Steps
 
 ### 1. Get Deterministic Project State (REQUIRED FIRST STEP)
@@ -34,7 +41,7 @@ This returns structured JSON including:
 - `current_session_dir_exists` - Whether specs directory exists
 - `current_session_files` - Files already in the session directory
 
-**IMPORTANT**: Use the `current_session` value from this output. If `current_session` is `null`, inform the user they need to run `/nextsession` first.
+**IMPORTANT**: Use the `current_session` value from this output. If `current_session` is `null`, run `/nextsession` yourself to set one up. Only ask the user if `/nextsession` itself requires user input.
 
 ### 2. Read Session Files
 

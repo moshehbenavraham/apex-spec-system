@@ -19,6 +19,16 @@ Add and validate CI/CD workflows one bundle at a time.
 8. **Address reviews** - apply code changes from review comments when actionable
 9. **Questions need humans** - flag review questions for manual response, don't guess
 
+### No Deferral Policy
+
+- NEVER mark a task as "pending", "requires X", or "blocked" if the blocker is something YOU can resolve
+- If a dependency needs installing, INSTALL IT
+- If a workflow file needs creating, CREATE IT
+- If a config needs generating, GENERATE IT
+- "The environment isn't set up" is NOT a blocker -- setting it up IS the task
+- The ONLY valid blocker is something that requires USER input, credentials/secrets you don't have, or sudo access
+- If you skip a task that was executable, that is a **critical failure**
+
 ## Master List (5 Bundles)
 
 Industry standard order (fast feedback to comprehensive):
@@ -45,7 +55,7 @@ Industry standard order (fast feedback to comprehensive):
 ### Step 1: DETECT
 
 1. Check for `.spec_system/CONVENTIONS.md`
-   - If missing: "No CONVENTIONS.md found. Run /initspec first."
+   - If missing: Run `/initspec` yourself to create it. Only ask the user if `/initspec` requires user input you don't have.
    - Read Repository section for monorepo detection
    - Read Stack section for languages/runtimes
    - Read CI/CD section for platform and configured workflows
@@ -184,7 +194,7 @@ CI in progress. Rerun /pipeline to check status.
 - **Documentation**: Add/update comments or docs
 - **Questions**: If clarification needed, note in report for manual response
 
-**After 3 failed attempts per issue**: Log for manual review, continue.
+**After 3 failed attempts per issue**: Try a completely different approach. Only log for manual review if the fix requires secrets, platform access, or credentials you don't have.
 
 Filter out workflows in known-issues.md Skipped Workflows section.
 

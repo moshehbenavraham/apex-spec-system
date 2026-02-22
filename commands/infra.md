@@ -11,10 +11,20 @@ Add and validate production infrastructure one bundle at a time.
 
 1. **One bundle per run** - add one, validate all
 2. **Stack agnostic** - read platform from CONVENTIONS.md, adapt
-3. **Document manual steps** - some platforms require UI configuration
+3. **Document manual steps** - only for things that genuinely require UI access or sudo you don't have
 4. **Don't store secrets** - document required env vars, don't create them
 5. **Validate everything** - verify infra actually works, not just exists
 6. **Respect known-issues.md** - skip items marked as manual-only
+
+### No Deferral Policy
+
+- NEVER mark a task as "pending", "requires X", or "blocked" if the blocker is something YOU can resolve
+- If a service needs to be running, START IT (e.g., `docker compose up -d db`)
+- If a dependency needs installing, INSTALL IT
+- If a config file needs generating, GENERATE IT
+- "The environment isn't set up" is NOT a blocker -- setting it up IS the task
+- The ONLY valid blocker is something that requires USER input, credentials you don't have, or sudo access
+- If you skip a task that was executable, that is a **critical failure**
 
 ## Master List (4 Bundles)
 
@@ -40,7 +50,7 @@ Industry standard order (availability to automation):
 ### Step 1: DETECT
 
 1. Check for `.spec_system/CONVENTIONS.md`
-   - If missing: "No CONVENTIONS.md found. Run /initspec first."
+   - If missing: Run `/initspec` yourself to create it. Only ask the user if `/initspec` requires user input you don't have.
    - Read Infrastructure table for configured components
    - Identify: CDN, hosting platform, database, cache, backup, deploy
 
@@ -155,7 +165,7 @@ For each validation failure:
 4. **Backup missing/stale**: Run backup manually, fix schedule
 5. **Deploy webhook fails**: Verify URL, check platform logs
 
-**After 3 failed attempts**: Log for manual review.
+**After 3 failed attempts**: Try a different approach entirely. Only log for manual review if the fix requires sudo, platform UI access, or credentials you don't have.
 
 Filter out items in known-issues.md Skipped Infra section.
 

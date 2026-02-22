@@ -28,7 +28,7 @@ Downstream commands (`/phasebuild`, `/nextsession`, `/documents`) depend on this
 
 ### 1. Confirm Spec System Is Initialized
 
-Check for `.spec_system/state.json` and `.spec_system/PRD/`. If missing, tell the user to run `/initspec` and stop.
+Check for `.spec_system/state.json` and `.spec_system/PRD/`. If missing, run `/initspec` yourself to set up the spec system. Only ask the user if `/initspec` requires user input you don't have.
 
 ### 2. Get Deterministic Project State
 

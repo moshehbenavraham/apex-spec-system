@@ -16,6 +16,16 @@ Execute each task in the session's task list, updating progress as you go.
 5. **Update tasks.md immediately** after completing each task - never batch checkbox updates
 6. **Write tests as specified** - ensure they pass before moving on
 
+### No Deferral Policy
+
+- NEVER mark a task as "pending", "requires X", or "blocked" if the blocker is something YOU can resolve
+- If a service needs to be running, START IT (e.g., `docker compose up -d db`)
+- If a dependency needs installing, INSTALL IT
+- If a directory needs creating, CREATE IT
+- "The environment isn't set up" is NOT a blocker -- setting it up IS the task
+- The ONLY valid blocker is something that requires USER input or credentials you don't have
+- If you skip a task that was executable, that is a **critical failure**
+
 ## Steps
 
 ### 1. Get Deterministic Project State (REQUIRED FIRST STEP)
@@ -36,7 +46,7 @@ This returns structured JSON including:
 - `current_session_dir_exists` - Whether specs directory exists
 - `current_session_files` - Files already in the session directory
 
-**IMPORTANT**: Use the `current_session` value from this output. If `current_session` is `null`, inform the user they need to run `/nextsession` and `/sessionspec` first.
+**IMPORTANT**: Use the `current_session` value from this output. If `current_session` is `null`, run `/nextsession` and `/sessionspec` yourself to set one up. Only ask the user if those commands require user input.
 
 ### 2. Verify Environment Prerequisites (REQUIRED)
 
@@ -56,7 +66,7 @@ This verifies:
 - `jq` is installed (required for scripts)
 - `git` availability (optional)
 
-**If any environment check fails**: Report the issues to the user and do NOT proceed until resolved.
+**If any environment check fails**: FIX the issues yourself. Install missing tools, create missing directories, start required services. The ONLY reason to stop is if you need credentials or input only the user can provide.
 
 **Optional - Tool Verification**: After reading spec.md (next step), if the Prerequisites section lists required tools, also run:
 
@@ -157,24 +167,27 @@ Add to `.spec_system/specs/[current-session]/implementation-notes.md`:
 
 ### 6. Handle Blockers
 
-If you encounter a blocker:
+If you encounter an obstacle, RESOLVE IT YOURSELF before documenting:
 
-1. Document in implementation-notes.md:
+- **Service not running?** Start it (e.g., `docker compose up -d db`)
+- **Dependency missing?** Install it
+- **Directory missing?** Create it
+- **Config file missing?** Generate it from the spec
+- **"The environment isn't set up"** is NOT a blocker -- setting it up IS the task
+
+The ONLY valid reason to pause and ask the user is when you need credentials, API keys, or decisions only a human can make. If you skip a task that was executable, that is a **critical failure**.
+
+After resolving, document in implementation-notes.md:
 ```markdown
 ## Blockers & Solutions
 
 ### Blocker N: [Title]
 
-**Description**: [What's blocking]
+**Description**: [What was blocking]
 **Impact**: [Which tasks affected]
-**Resolution**: [How resolved / workaround]
+**Resolution**: [How YOU resolved it]
 **Time Lost**: [Duration]
 ```
-
-2. Either:
-   - Resolve and continue
-   - Skip and document for later
-   - Ask user for guidance
 
 ### 7. Track Design Decisions
 

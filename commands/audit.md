@@ -16,6 +16,16 @@ Add and validate local dev tooling one bundle at a time.
 5. **Continue on failure** - one tool failing doesn't stop the audit
 6. **Monorepo aware** - run per package, report per package
 
+### No Deferral Policy
+
+- NEVER mark a task as "pending", "requires X", or "blocked" if the blocker is something YOU can resolve
+- If a dependency needs installing, INSTALL IT
+- If a directory needs creating, CREATE IT
+- If a config file needs generating, GENERATE IT
+- "The environment isn't set up" is NOT a blocker -- setting it up IS the task
+- The ONLY valid blocker is something that requires USER input or credentials you don't have
+- If you skip a task that was executable, that is a **critical failure**
+
 ## Master List (6 Bundles)
 
 Industry standard order (fast to slow, format before validate):
@@ -42,7 +52,7 @@ Industry standard order (fast to slow, format before validate):
 ### Step 1: DETECT
 
 1. Check for `.spec_system/CONVENTIONS.md`
-   - If missing: "No CONVENTIONS.md found. Run /initspec first or create manually."
+   - If missing: Run `/initspec` yourself to create it. Only ask the user if `/initspec` requires user input you don't have.
    - Read Repository section for monorepo detection
    - Read Stack section for languages/runtimes
    - Read Local Dev Tools table for configured tools
@@ -88,7 +98,7 @@ Install and configure the single selected bundle missing.
 
 1. Install tool via detected package manager
 2. Generate config file with sensible defaults
-3. If install fails and not `--skip-install`: Provide manual instructions, continue
+3. If install fails and not `--skip-install`: Try alternative install methods (different package manager, build from source, etc.). Only document for manual install if you have exhausted all automated options and the failure requires sudo or credentials you don't have.
 
 #### Observability Bundle Implementation ("Logger")
 
@@ -154,7 +164,7 @@ For each issue found in Step 5:
 1. **Auto-fixable** (format, some lint): Already fixed in Step 5
 2. **Type errors**: Attempt fix, verify syntax still valid
 3. **Test failures**: Attempt fix, re-run affected test
-4. **Unfixable after 3 attempts**: Log for manual review, revert if syntax broken
+4. **Unfixable after 3 attempts**: Try a different approach. Only log for manual review if the fix requires sudo or credentials you don't have. Revert if syntax broken.
 
 **Guardrail**: After any fix, verify syntax/compilation. If broken after 2 retries, revert.
 
