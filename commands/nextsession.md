@@ -5,15 +5,16 @@ description: Analyze project state and recommend the next session to implement
 
 # /nextsession Command
 
-You are an AI assistant helping to identify the next implementation session for a spec-driven project.
+Analyze project state, recommend the next session to implement, and archive stale specs.
 
-## Role & Mindset
+## Rules
 
-You are a **senior engineer** who is obsessive about pristine code - zero errors, zero warnings, zero lint issues. You are known for **clean project scaffolding**, rigorous **structure discipline**, and treating implementation as a craft: methodical, patient, and uncompromising on quality.
-
-## Your Task
-
-Analyze the current project state and recommend the most appropriate next session to implement.  You will also do some maintenance on the Apex Spec System - Archiving previous phases/sessions that are dated.
+1. **Script first** - Always run `analyze-project.sh --json` before any analysis
+2. **Trust the script** - Use JSON output as authoritative state; do not parse `state.json` directly
+3. **One session at a time** - Only recommend one session
+4. **Respect dependencies** - Don't skip prerequisites
+5. **MVP focus** - Recommend core features before polish
+6. **Scope discipline** - Sessions must be 12-25 tasks, 2-4 hours
 
 ## Steps
 
@@ -172,40 +173,14 @@ Update `.spec_system/state.json`:
 - Add entry to `next_session_history` array
 - Set `current_session` to the recommended session ID
 
-### 6. Apex Spec System Maintenance - Archiving
+### 6. Archive Stale Specs
 
-You should move older phases and sessions that are more than a phase away of history into the archive/ folder.
+Keep `.spec_system/specs/` lean by archiving old session specs. **Retention rule**: only keep specs from the current phase and one phase back. Move everything older to `.spec_system/archive/sessions/`.
 
-Example: Currently working on Phase 3, Session 4 (.spec_system/specs/phase03-session04-example-session-name), make sure
-.spec_system/specs/ folder only retains history as far back as Phase 2, Session 4 (.spec_system/specs/phase02-session04-another-example-session-name).  Everything else should be archived ( .spec_system/archive/phases/phase_01/ and .spec_system/archive/phases/phase_02/ ).
-
-Source: .spec_system/specs
-Destination: .spec_system/archive
+Example: If currently on Phase 3, keep Phase 2 and Phase 3 specs. Archive Phase 0 and Phase 1 specs.
 
 ---
 
-## Rules
-
-1. **Script first** - Always run analyze-project.sh --json before any analysis
-2. **Trust the script** - Use JSON output as authoritative state facts
-3. **One session at a time** - Only recommend one session
-4. **Respect dependencies** - Don't skip prerequisites
-5. **MVP focus** - Recommend core features before polish
-6. **Scope discipline** - Sessions should be 12-25 tasks, 2-4 hours
-7. **Logical progression** - Follow natural build order
-
-## Error Handling
-
-If the script fails:
-1. Check that `.spec_system/` directory exists
-2. Verify `state.json` is valid JSON
-3. Ensure `jq` is installed
-4. Report the specific error to the user
-
 ## Output
 
-After analysis, create the NEXT_SESSION.md file and summarize your recommendation to the user, including:
-- The recommended session name
-- Why it's the logical next step
-- Key deliverables
-- Next command to run (`/sessionspec`)
+After creating `NEXT_SESSION.md`, summarize to the user: recommended session name, why it's next, key deliverables, and prompt them to run `/sessionspec`.

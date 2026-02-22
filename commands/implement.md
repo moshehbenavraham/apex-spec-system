@@ -5,15 +5,16 @@ description: AI-led task-by-task implementation of the current session
 
 # /implement Command
 
-You are an AI assistant implementing a session specification task by task.
+Execute each task in the session's task list, updating progress as you go.
 
-## Role & Mindset
+## Rules
 
-You are a **senior engineer** who is obsessive about pristine code — zero errors, zero warnings, zero lint issues. You are known for **clean project scaffolding**, rigorous **structure discipline**, and treating implementation as a craft: methodical, patient, and uncompromising on quality.
-
-## Your Task
-
-Implement each task in the session's task list, updating progress as you go.
+1. **Make NO assumptions.** Do not be lazy. Pattern match precisely. Do not skim when you need detailed info. Validate systematically.
+2. **Follow CONVENTIONS.md** - all code must follow project-specific coding standards
+3. **ASCII-only characters** and Unix LF line endings in all output
+4. **Implement exactly what's in the spec** - no extra features, no refactoring unrelated code
+5. **Update tasks.md immediately** after completing each task - never batch checkbox updates
+6. **Write tests as specified** - ensure they pass before moving on
 
 ## Steps
 
@@ -74,11 +75,11 @@ This catches missing tools BEFORE implementation starts, preventing mid-session 
 
 Using the `current_session` value from the script output, read:
 - `.spec_system/specs/[current-session]/spec.md` - Full specification
-- `.spec_system/specs/[current-session]/tasks.md` - Task checklist (whether started or continuing)
+- `.spec_system/specs/[current-session]/tasks.md` - Task checklist
 - `.spec_system/specs/[current-session]/implementation-notes.md` - Progress log (if exists)
 - `.spec_system/CONVENTIONS.md` - Project coding conventions (if exists)
 
-**CONVENTIONS.md** contains project-specific coding standards (naming conventions, file structure, error handling patterns, testing philosophy, git practices, etc.). All code you write MUST follow these conventions. If the file doesn't exist, follow standard best practices.
+**Resuming?** If `implementation-notes.md` and completed tasks already exist, read them to understand current state and resume from the next incomplete task.
 
 ### 4. Initialize Implementation Notes
 
@@ -123,13 +124,9 @@ For each incomplete task:
 Find the first unchecked `- [ ]` task in tasks.md
 
 #### B. Implement Task
-- When writing code: Make NO assumptions. Do not be lazy.  Pattern match precisely.  Do not skim when you need detailed info from documents. Validate systematically.
-- Follow CLAUDE.md guidelines
-- Follow CONVENTIONS.md standards (naming, structure, error handling, comments, etc.)
 - Read the task description carefully
+- Follow the spec's technical approach and CONVENTIONS.md standards
 - Implement the required changes
-- Follow the spec's technical approach
-- Ensure ASCII-only output
 
 #### C. Update Task Status
 In `tasks.md`, change:
@@ -197,80 +194,16 @@ When making implementation choices:
 **Rationale**: [Why]
 ```
 
-### 8. Continuous Progress Updates
+### 8. Track Progress and Checkpoint
 
-After each task or group of tasks:
-- Update the Progress Summary table in tasks.md
-- Update implementation-notes.md Session Progress
-- Inform user of status
+After each task:
+- Update Progress Summary table in tasks.md
+- Update implementation-notes.md
+- Report status to user: tasks done (X of Y), next task
 
-### 9. Checkpoint Progress
-
-Save progress at natural breakpoints to ensure work is preserved:
-
-**When to Checkpoint**:
-- After completing each task (update tasks.md immediately)
-- Before starting complex multi-file changes
-- Every 3-5 tasks minimum
-- Before any risky operations
-
-**Checkpoint Actions**:
-1. Save all file changes
-2. Update tasks.md with completed items
-3. Update implementation-notes.md with progress
-4. Commit changes if appropriate (user discretion)
-
-**Context Limits**:
-If approaching context limits during long sessions:
-- Document current state in implementation-notes.md
-- Note the next task to resume from
-- List any in-progress work that needs completion
-
----
-
-## Implementation Rules
-
-### Code Quality
-- Follow CLAUDE.md guidelines
-- Follow `.spec_system/CONVENTIONS.md` (naming, structure, error handling, testing, git, etc.)
-- ASCII-only characters
-- Unix LF line endings
-- Clear, readable code
-- Appropriate comments (industry standard for code language)
-
-### Scope Discipline
-- Implement exactly what's in the spec
-- Don't add extra features
-- Don't refactor unrelated code
-
-### Testing
-- Write tests as specified
-- Ensure tests pass
-- Document test results
-
-### Progress Communication
-After completing tasks, report:
-- Tasks done (X of Y)
-- Current progress percentage
-- Next task preview
-- Any blockers or concerns
-
-## Resuming Implementation
-
-If implementation was interrupted:
-1. Read implementation-notes.md for context
-2. Check tasks.md for last completed task
-3. Resume from next incomplete task
-4. Continue logging progress
+**Checkpoint every 3-5 tasks minimum** and before any risky operations. If approaching context limits, document current state and next task in implementation-notes.md.
 
 ## Output
-
-As you implement:
-1. Show task being worked on
-2. Show implementation progress
-3. Mark tasks complete in tasks.md
-4. Update implementation-notes.md
-5. Report status to user
 
 When all tasks complete:
 ```

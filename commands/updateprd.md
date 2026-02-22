@@ -5,20 +5,14 @@ description: Mark session complete and sync documentation
 
 # /updateprd Command
 
-You are an AI assistant marking a session as complete and updating project documentation.
+After successful validation, mark the session complete, update all tracking documents, increment the project version, and commit to the repository.
 
-## Role & Mindset
+## Rules
 
-You are a **senior engineer** who is obsessive about pristine code — zero errors, zero warnings, zero lint issues. You are known for **clean project scaffolding**, rigorous **structure discipline**, and treating implementation as a craft: methodical, patient, and uncompromising on quality.
-
-## Your Task
-
-After successful validation, mark the session complete, update all tracking documents, increment the project version, and commit everything to the repository.
-
-## Prerequisites
-
-- Session must have passed `/validate`
-- `validation.md` must show PASS status
+1. **Validation must have PASSED** - if `validation.md` shows FAIL, stop and instruct user to fix issues first
+2. **ASCII-only characters** and Unix LF line endings in all output
+3. **No co-authors or attributions** in commit messages
+4. **Increment patch version** by default (X.Y.Z -> X.Y.Z+1), preserve pre-release suffixes
 
 ## Steps
 
@@ -168,14 +162,9 @@ Increment the project's patch version in standard version files. Check for these
 
 ### 7. Commit and Push to Repo
 
-Do NOT add co-authors!  Do NOT add any attributions!
+Commit and push all non-gitignored repo changes (implementation work, state/PRD updates, version increment).
 
-Commit and push all non-gitignored repo changes. This commit should include:
-- All session implementation work
-- State and PRD updates from steps 2-5
-- Version increment from step 6
-
-Use a commit message format:
+Commit message format:
 ```
 Complete phaseNN-sessionNN-name: [brief description]
 
@@ -183,8 +172,6 @@ Complete phaseNN-sessionNN-name: [brief description]
 - [key deliverable 2]
 - Version: X.Y.Z -> X.Y.Z+1
 ```
-
-Do NOT add co-authors!  Do NOT add any attributions!
 
 ### 8. Report Completion
 
@@ -195,56 +182,6 @@ Tell the user:
 - Phase progress
 - Next recommended action
 
-## Quick Reference
-
-### Phase PRD Progress Tracker Update
-```markdown
-| Session | Name | Status | Validated |
-|---------|------|--------|-----------|
-| 01 | Name | Complete | 2025-01-15 |
-```
-
 ## Output
 
-Report to user:
-
-```
-Session Completed: phaseNN-sessionNN-name
-
-Updates Made:
-- .spec_system/state.json: Added to completed_sessions
-- Phase PRD: Marked session complete
-- Created: IMPLEMENTATION_SUMMARY.md
-- Version: 1.2.3 -> 1.2.4 (package.json)
-
-Phase Progress: N/M sessions (X%)
-
-Next Steps:
-- Run `/nextsession` if phase is not complete
-- If phase completed, we are now in transition between phases - run `/audit`
-```
-
-## Error Handling
-
-If validation not passed:
-```
-Cannot mark session complete.
-
-Validation status: FAIL
-
-Please fix validation issues and run `/validate` again.
-```
-
-If state inconsistent:
-```
-State inconsistency detected.
-
-Current session in .spec_system/state.json doesn't match.
-Please verify .spec_system/state.json and try again.
-```
-
-If no version file found:
-```
-Note: No standard version file found. Skipping version increment.
-Consider adding package.json, pyproject.toml, or version.txt to track versions.
-```
+Report: session marked complete, updated files, version change, phase progress, and next action (`/nextsession` if phase continues, `/audit` if phase complete).

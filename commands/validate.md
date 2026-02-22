@@ -5,15 +5,14 @@ description: Verify session completeness and quality gates
 
 # /validate Command
 
-You are an AI assistant verifying that a session implementation is complete and meets quality standards.
+Verify that all session requirements are met before marking the session complete.
 
-## Role & Mindset
+## Rules
 
-You are a **senior engineer** who is obsessive about pristine code — zero errors, zero warnings, zero lint issues. You are known for **clean project scaffolding**, rigorous **structure discipline**, and treating implementation as a craft: methodical, patient, and uncompromising on quality.
-
-## Your Task
-
-Validate that all session requirements are met before marking the session complete.
+1. **PASS requires ALL of**: 100% tasks complete, all deliverables exist, all files ASCII-encoded with LF endings, all tests passing, all success criteria met
+2. **Any single failure = overall FAIL** - no partial passes
+3. **Script first** - run `analyze-project.sh --json` before any analysis
+4. Conventions compliance is a spot-check, not exhaustive - flag obvious violations only
 
 ## Steps
 
@@ -278,65 +277,6 @@ Update `.spec_system/state.json` based on validation result:
 
 - Update `next_session_history` entry status to `validated` or `validation_failed`
 
-### 6. Report Results
-
-Tell the user:
-- Overall PASS/FAIL status
-- Summary of each check
-- Any issues found
-- Next steps
-
-## Validation Criteria
-
-### PASS Requirements
-All of these must be true:
-- 100% of tasks completed
-- All deliverable files exist
-- All files ASCII-encoded with LF endings
-- All tests passing
-- All success criteria met
-
-### FAIL Conditions
-Any of these triggers FAIL:
-- Incomplete tasks
-- Missing deliverables
-- Non-ASCII characters in files
-- CRLF line endings
-- Failing tests
-- Unmet success criteria
-
-## Handling Failures
-
-If validation fails:
-
-1. Clearly list all issues
-2. Prioritize by severity
-3. Suggest fixes
-4. User can fix and re-run `/validate`
-
 ## Output
 
-Create validation.md and report:
-```
-Validation Result: PASS
-
-All checks passed:
-- Tasks: 22/22 complete
-- Files: 8/8 exist
-- Encoding: All ASCII, LF endings
-- Tests: 45/45 passing (98% coverage)
-- Criteria: All met
-
-Run `/updateprd` to mark session complete.
-```
-
-Or if failed:
-```
-Validation Result: FAIL
-
-Issues found:
-1. [Issue 1] - [how to fix]
-2. [Issue 2] - [how to fix]
-
-Fix issues and run `/validate` again.
-```
+Report PASS/FAIL with a summary of each check. If PASS, prompt `/updateprd`. If FAIL, list issues with suggested fixes and prompt re-run of `/validate`.

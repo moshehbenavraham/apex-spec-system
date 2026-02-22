@@ -5,7 +5,19 @@ description: Add and validate CI/CD workflows one bundle at a time
 
 # /pipeline Command
 
-Add and validate CI/CD workflows one bundle at a time. Follows the universal 9-step flow shared with /audit and /infra.
+Add and validate CI/CD workflows one bundle at a time.
+
+## Rules
+
+1. **One bundle per run** - add one workflow, validate all
+2. **GitHub Actions first** - GitLab CI noted but limited support
+3. **Respect known-issues.md** - skip workflows marked as flaky
+4. **Document secrets, never create them** - just document requirements
+5. **3-minute timeout** - if CI still running, report and exit
+6. **Monorepo aware** - matrix builds or path filters
+7. **PR-aware** - check and fix open PRs with failing CI or pending reviews
+8. **Address reviews** - apply code changes from review comments when actionable
+9. **Questions need humans** - flag review questions for manual response, don't guess
 
 ## Master List (5 Bundles)
 
@@ -222,48 +234,11 @@ REPORT
 
 ### Step 9: RECOMMEND
 
-**If CI failures remain:**
-```
-ACTION REQUIRED:
-1. Fix test failures in apps/web (see logs above)
-2. Review security finding: CVE-2024-1234 in lodash
-
-Rerun /pipeline after addressing these issues.
-```
-
-**If PR has unresolved items:**
-```
-PR #42 STATUS:
-- CI: All passing
-- Reviews: 1 unresolved (question requires manual response)
-
-Manual action needed:
-1. Respond to reviewer question on src/auth.ts:45
-
-After responding, rerun /pipeline --pr 42 or request re-review.
-```
-
-**If PR is ready:**
-```
-PR #42 is ready for merge:
-- CI: All checks passing
-- Reviews: All comments addressed
-- No merge conflicts
-
-Recommendation: Merge PR or request final approval.
-```
-
-**If all clean but bundles remain:**
-```
-More bundles remain, they will be added in further runs! Recommendation: Run /infra
-```
-
-**If all 5 bundles configured and passing:**
-```
-All CI/CD workflows configured and passing.
-
-Recommendation: Run /infra
-```
+- **CI failures remain**: List required actions, prompt rerun of `/pipeline`
+- **PR has unresolved items**: Report status, note what needs manual response
+- **PR is ready**: Confirm all checks passing and reviews addressed, recommend merge
+- **Bundles remain**: Recommend rerun of `/pipeline` for next bundle
+- **All 5 bundles configured and passing**: Recommend `/infra`
 
 ## Dry Run Output
 
@@ -331,15 +306,3 @@ Workflows will fail until secrets are configured.
 
 Do NOT attempt to create or manage secrets.
 
-## Rules
-
-1. **One bundle per run** - Add one workflow, validate all
-2. **GitHub Actions first** - GitLab CI noted but limited support
-3. **Respect known-issues.md** - Skip workflows marked as flaky
-4. **Document secrets** - Never create them, just document requirements
-5. **3-minute timeout** - If CI still running, report and exit
-6. **Monorepo aware** - Matrix builds or path filters
-7. **PR-aware** - Check and fix open PRs with failing CI or pending reviews
-8. **Address reviews** - Apply code changes from review comments when actionable
-9. **Preserve intent** - When addressing reviews, don't over-engineer or scope-creep
-10. **Questions need humans** - Flag review questions for manual response, don't guess
