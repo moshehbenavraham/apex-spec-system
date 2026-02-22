@@ -15,6 +15,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build artifacts
+        run: make build
+
+      - name: Validate build artifacts
+        run: bash test/validate-install.sh
+
       - name: Extract version info
         id: version
         run: |
@@ -26,27 +37,57 @@ jobs:
             echo "prerelease=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Package per-tool distributions
+        run: |
+          mkdir -p release-artifacts
+          for tool_dir in dist/*/; do
+            tool=$(basename "$tool_dir")
+            tar -czf "release-artifacts/apex-spec-${tool}.tar.gz" \
+              -C dist "$tool" \
+              -C .. commands scripts AGENTS.md install.sh
+          done
+          # Full bundle with everything
+          tar -czf "release-artifacts/apex-spec-full.tar.gz" \
+            dist commands scripts skills docs mcp-server \
+            AGENTS.md Makefile install.sh README.md CONTRIBUTING.md
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           name: "v${{ steps.version.outputs.version }}"
           generate_release_notes: true
           prerelease: ${{ steps.version.outputs.prerelease == 'true' }}
+          files: release-artifacts/*
           body: |
             ## Apex Spec System v${{ steps.version.outputs.version }}
 
             A specification-driven workflow system for AI-assisted development.
+            Works with Codex CLI, Gemini CLI, Cursor, Copilot, Cline, Windsurf, and any MCP-capable tool.
 
-            ### Installation
+            ### Downloads
+
+            | Package | Contents |
+            |---------|----------|
+            | `apex-spec-full.tar.gz` | Everything (all tools + MCP server + docs) |
+            | `apex-spec-codex.tar.gz` | Codex CLI skills + AGENTS.md |
+            | `apex-spec-cursor.tar.gz` | Cursor commands + rules |
+            | `apex-spec-gemini.tar.gz` | Gemini CLI commands + extension |
+            | `apex-spec-copilot.tar.gz` | GitHub Copilot instructions |
+            | `apex-spec-cline.tar.gz` | Cline rules |
+            | `apex-spec-windsurf.tar.gz` | Windsurf Cascade rules |
+            | `apex-spec-mcp.tar.gz` | MCP config snippets (6 clients) |
+
+            ### Quick Install
 
             ```bash
-            # Clone and use as plugin directory
-            git clone https://github.com/ai-with-apex/apex-spec-system.git
-            claude --plugin-dir /path/to/apex-spec-system
-
-            # Or add to your plugins
-            cp -r apex-spec-system ~/.claude/plugins/
+            bash install.sh          # Auto-detects your tools
+            bash install.sh --tool codex   # Target specific tool
             ```
+
+            ### Setup Guides
+
+            - [Codex CLI](docs/codex.md) | [Cursor](docs/cursor.md) | [Gemini CLI](docs/gemini.md) | [MCP Clients](docs/mcp.md)
+            - [Full Compatibility Matrix](docs/COMPATIBILITY-MATRIX.md)
 
             ### What's Changed
 

@@ -80,17 +80,17 @@ Check for the presence and quality of standard documentation files.
 
 ```
 docs/
-├── ARCHITECTURE.md        # System diagram, service relationships, tech stack
-├── CODEOWNERS             # Who owns what
-├── onboarding.md          # Zero-to-hero checklist
-├── development.md         # Local environment, dev scripts
-├── environments.md        # Dev/staging/prod differences
-├── deployment.md          # CI/CD pipelines, release process
-├── adr/                   # Architecture Decision Records
-│   └── NNNN-title.md
-├── runbooks/              # "If X breaks, do Y"
-│   └── incident-response.md
-└── api/                   # API contracts, OpenAPI links
+|-- ARCHITECTURE.md        # System diagram, service relationships, tech stack
+|-- CODEOWNERS             # Who owns what
+|-- onboarding.md          # Zero-to-hero checklist
+|-- development.md         # Local environment, dev scripts
+|-- environments.md        # Dev/staging/prod differences
+|-- deployment.md          # CI/CD pipelines, release process
+|-- adr/                   # Architecture Decision Records
+|   \-- NNNN-title.md
+|-- runbooks/              # "If X breaks, do Y"
+|   \-- incident-response.md
+\-- api/                   # API contracts, OpenAPI links
 ```
 
 #### Per-Package/Service READMEs
@@ -144,9 +144,9 @@ For each missing required file:
 
 ```
 .
-├── [dir1]/          # [Purpose]
-├── [dir2]/          # [Purpose]
-└── [dir3]/          # [Purpose]
+|-- [dir1]/          # [Purpose]
+|-- [dir2]/          # [Purpose]
+\-- [dir3]/          # [Purpose]
 ```
 
 ## Documentation

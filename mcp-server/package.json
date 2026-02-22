@@ -1,0 +1,26 @@
+{
+  "name": "apex-spec-mcp-server",
+  "version": "1.0.1-beta",
+  "description": "MCP server exposing Apex Spec System tools for any MCP-capable client",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "apex-spec-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
+}

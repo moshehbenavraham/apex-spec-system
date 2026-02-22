@@ -1,9 +1,13 @@
-# .gitignore
-
 # AI assistant instruction/memory files
 CLAUDE.md
-AGENTS.md
 GEMINI.md
+
+# Generated build artifacts
+/dist/
+
+# MCP server build artifacts
+mcp-server/node_modules/
+mcp-server/dist/
 
 # Project root directories
 /tmp/

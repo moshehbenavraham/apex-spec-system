@@ -33,8 +33,8 @@ Use CONSIDERATIONS.md to identify active concerns, relevant lessons, and tool no
 Create the session directory structure:
 ```
 .spec_system/specs/phaseNN-sessionNN-name/
-├── spec.md
-└── (tasks.md, etc. created by later commands)
+|-- spec.md
+\-- (tasks.md, etc. created by later commands)
 ```
 
 ### 3. Generate Specification

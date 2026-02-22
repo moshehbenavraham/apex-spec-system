@@ -129,10 +129,10 @@ Phase complete when:
 For each session, create `session_NN_name.md` (use `snake_case` for name):
 
 .spec_system/PRD/phase_NN/
-├── PRD_phase_NN.md
-├── session_01_name.md
-├── session_02_name.md
-└── ...
+|-- PRD_phase_NN.md
+|-- session_01_name.md
+|-- session_02_name.md
+\-- ...
 
 ```markdown
 # Session NN: Session Name

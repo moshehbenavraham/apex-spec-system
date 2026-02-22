@@ -56,7 +56,7 @@
 2. **Create Session Directory**
    ```
    .spec_system/specs/phaseNN-sessionNN-name/
-   └── spec.md
+   \-- spec.md
    ```
 
 3. **Generate Specification**
@@ -462,10 +462,10 @@
 2. **Create Directory Structure**
    ```
    .spec_system/PRD/phase_NN/
-   ├── README.md
-   ├── session_01_name.md
-   ├── session_02_name.md
-   └── ...
+   |-- README.md
+   |-- session_01_name.md
+   |-- session_02_name.md
+   \-- ...
    ```
 
 3. **Create Phase PRD**

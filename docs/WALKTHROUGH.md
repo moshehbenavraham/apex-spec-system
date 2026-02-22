@@ -466,6 +466,18 @@ The title_clerk project progressed through 16 phases:
 
 ---
 
+## Multi-Tool Workflows
+
+The Apex Spec System is tool-agnostic. The `.spec_system/` directory, `state.json`, specs, and tasks are plain files -- any AI coding tool can read and write them.
+
+**Switching tools mid-project**: You can use Codex CLI for one phase and Cursor for the next. The workflow state lives in `.spec_system/state.json`, not in any tool-specific config.
+
+**Team with mixed tools**: One developer can use Gemini CLI while another uses Copilot. Both read the same specs and update the same task checklists. Run `bash install.sh --tool all` to set up every tool at once.
+
+**MCP as a universal layer**: The MCP server exposes `analyze_project`, `check_prereqs`, `get_state`, `update_state`, and `list_commands` as tools. Any MCP-capable client (Cursor, VS Code, Cline, Windsurf, Codex, Gemini) can call these directly.
+
+See [docs/COMPATIBILITY-MATRIX.md](COMPATIBILITY-MATRIX.md) for feature support across all tools.
+
 ## Key Takeaways
 
 1. **Sessions are atomic** - Each session has clear scope (12-25 tasks, 2-4 hours)
@@ -479,6 +491,8 @@ The title_clerk project progressed through 16 phases:
 5. **Phase transitions matter** - /audit, /pipeline, /infra ensure production readiness
 
 6. **Trust the system** - Follow the workflow, resist scope creep
+
+7. **Tool-agnostic** - Switch AI tools freely; the workflow state is portable
 
 ---
 

@@ -1,29 +1,93 @@
 # Apex Spec System
 
-**Version: 0.35.12-beta**
+**Version: 1.0.1-beta**
 
-A Claude Code plugin providing a specification-driven workflow system for AI-assisted development. Think Github Spec Kit (our source inspiration) simplified.
+A specification-driven workflow system for AI-assisted development. Works with any AI coding tool that supports AGENTS.md, rules files, or MCP.
 
-## Overview
+**Philosophy**: `1 session = 1 spec = 2-4 hours (12-25 tasks) = safe context window`
 
-The Apex Spec System breaks large projects into manageable, well-scoped implementation sessions that fit within AI context windows and human attention spans.
+## Supported Tools
 
-**Philosophy**: `1 session = 1 spec = 2-4 hours (12-25 tasks) = safe context window of AI`
+| Tool | Integration | Setup Guide |
+|------|------------|-------------|
+| **Codex CLI** | AGENTS.md + skills | [docs/codex.md](docs/codex.md) |
+| **Cursor** | Commands + rules | [docs/cursor.md](docs/cursor.md) |
+| **Gemini CLI** | TOML commands + extension | [docs/gemini.md](docs/gemini.md) |
+| **GitHub Copilot** | Instructions files | [docs/COMPATIBILITY-MATRIX.md](docs/COMPATIBILITY-MATRIX.md) |
+| **Cline** | Rules files | [docs/COMPATIBILITY-MATRIX.md](docs/COMPATIBILITY-MATRIX.md) |
+| **Windsurf** | Cascade rules | [docs/COMPATIBILITY-MATRIX.md](docs/COMPATIBILITY-MATRIX.md) |
+| **Antigravity** | Skills + GEMINI.md | [docs/COMPATIBILITY-MATRIX.md](docs/COMPATIBILITY-MATRIX.md) |
+| **Amazon Q** | Rules files | [docs/COMPATIBILITY-MATRIX.md](docs/COMPATIBILITY-MATRIX.md) |
+| **Goose** | .goosehints | [docs/COMPATIBILITY-MATRIX.md](docs/COMPATIBILITY-MATRIX.md) |
+| **Kiro** | Steering files | [docs/COMPATIBILITY-MATRIX.md](docs/COMPATIBILITY-MATRIX.md) |
+| **Aider** | --read flag + MCP | [docs/aider.md](docs/aider.md) |
+| **MCP Clients** | MCP server (5 tools) | [docs/mcp.md](docs/mcp.md) |
 
-**Video Tutorial**: [Watch on YouTube](https://youtu.be/iY6ySesmOCg) - Installation and workflow walkthrough
+## Architecture
 
-**Real-World Example**: See [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md) - Complete walkthrough using a production project (79+ sessions, 16 phases)
+```
+ Canonical Sources              Build Pipeline              Per-Tool Outputs
++------------------+                                  +------------------------+
+| commands/*.md    |----+                             | dist/codex/            |
+| (14 commands,    |    |                             |   .agents/skills/      |
+|  YAML + markdown)|    |    +------------------+    +------------------------+
++------------------+    +--->| build/           |    | dist/cursor/           |
+                        |    | generate.sh      |--->|   .cursor/commands/    |
++------------------+    |    | (pure bash,      |    +------------------------+
+| skills/          |----+    |  no dependencies)|    | dist/gemini/           |
+|   spec-workflow/ |    |    +------------------+    |   .gemini/commands/    |
+|   SKILL.md       |    |             |              +------------------------+
++------------------+    |             v              | dist/copilot/          |
+                        |    +------------------+    | dist/cline/            |
++------------------+    |    | AGENTS.md        |    | dist/windsurf/         |
+| scripts/         |----+    | (root, <32KB)    |    | dist/antigravity/      |
+|   analyze-       |         +------------------+    | dist/amazonq/          |
+|   project.sh     |                                 | dist/goose/            |
+|   check-         |         +------------------+    | dist/kiro/             |
+|   prereqs.sh     |-------->| mcp-server/      |    +------------------------+
++------------------+         | (TypeScript,     |    | dist/mcp/              |
+                             |  5 tools, stdio) |    |   cursor.json          |
+                             +------------------+    |   vscode.json          |
+                                                     |   cline.json ...       |
+                                                     +------------------------+
+```
 
-**Usage Guidance**: See [docs/GUIDANCE.md](docs/GUIDANCE.md) - When to use, workflow modes, team patterns
+## Quick Start
 
-## Installation
+### Option A: Universal Installer (recommended)
 
 ```bash
-# Install from local directory
-claude --plugin-dir /path/to/apex-spec-system
+git clone https://github.com/ai-with-apex/apex-spec-system.git
+cd apex-spec-system
+bash install.sh              # Auto-detects your tools
+```
 
-# Or copy to your plugins directory
-cp -r apex-spec-system ~/.claude/plugins/
+The installer detects which AI tools you have and sets up the right configuration. Use `--tool <name>` to target a specific tool, or `--dry-run` to preview.
+
+### Option B: Manual Build
+
+```bash
+git clone https://github.com/ai-with-apex/apex-spec-system.git
+cd apex-spec-system
+make build                   # Generate all outputs in dist/
+```
+
+Then follow the [per-tool setup guide](#supported-tools) for your AI coding tool.
+
+### Start the Workflow
+
+Once installed, initialize in your project and follow the workflow:
+
+```
+/initspec        # Initialize spec system
+/createprd       # Generate PRD from requirements
+/phasebuild      # Set up phases and sessions
+/nextsession     # Get next session recommendation
+/sessionspec     # Create formal specification
+/tasks           # Generate task checklist
+/implement       # AI-led implementation
+/validate        # Verify completeness
+/updateprd       # Mark complete, sync docs
 ```
 
 ## Requirements
@@ -32,71 +96,11 @@ cp -r apex-spec-system ~/.claude/plugins/
 |------------|----------|---------|
 | **jq** | Yes | `apt install jq` or `brew install jq` |
 | **git** | Optional | Usually pre-installed |
+| **bash** | Yes | Pre-installed on macOS/Linux |
 
-The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.sh --env`
+Verify with: `bash scripts/check-prereqs.sh --env`
 
-## Quick Start
-
-1. **Install the plugin** (see above)
-
-2. **Initialize in your project**:
-   ```
-   /initspec OR /apex-spec:initspec
-   ```
-   This creates the spec system structure in your project.
-
-   **Optional but recommended**: Customize `.spec_system/CONVENTIONS.md` with your project's coding standards (naming, structure, error handling, testing philosophy, etc.)
-
-   ```
-   /createprd OR /apex-spec:createprd OR Manually fill out .spec_system/PRD/PRD.md
-   ```
-   Optional:  Turn argument or file path into a technical PRD for development.
-   Example: /createprd "a habit trackker app"
-            /createprd @docs/requirements.md
-
-   ```
-   /phasebuild OR /apex-spec:phasebuild
-   ```
-   This will set up the initial Phase and Sessions for that initial Phase
-
-3. **Run the session workflow and repeat until all sessions inside the Phase are completed, thus completing the Phase**:
-   ```
-   /nextsession OR /apex-spec:nextsession    # Get recommendation for next session
-   /sessionspec OR /apex-spec:sessionspec    # Create formal specification
-   /tasks OR /apex-spec:tasks                # Generate task checklist
-   /implement OR /apex-spec:implement        # Start implementation
-   /validate OR /apex-spec:validate          # Verify completeness
-   /updateprd OR /apex-spec:updateprd        # Mark complete, update system
-   ```
-
- 4. **Between Phases**
-   ```
-   /audit OR /apex-spec:audit                # Local dev tooling (formatter, linter, types, tests, hooks)
-   /pipeline OR /apex-spec:pipeline          # CI/CD workflows (quality, build, security, integration, ops)
-   /infra OR /apex-spec:infra                # Production infrastructure (health, security, backup, deploy)
-   /documents OR /apex-spec:documents        # Create, maintain project documentation
-   -- Optional but recommended, do manual testing HERE --
-   /carryforward OR /apex-spec:carryforward  # Capture lessons learned (optional)
-   /phasebuild OR /apex-spec:phasebuild      # Set up next Phase and Phase's sessions
-   ```
-
- 5. **Repeat until all phases complete!**
-
-## Features
-
-- **14-Command Workflow**: Structured process from initialization to completion
-- **Session Scoping**: Keep work manageable with 12-25 tasks per session
-- **Progress Tracking**: State file and checklists track progress
-- **Validation Gates**: Verify completeness before marking done
-- **Coding Conventions**: Customizable standards enforced during implementation and validation
-- **Auto-Activating Skill**: Provides workflow guidance automatically
-- **Dev Tooling**: Regular code quality audits
-- **Documentation Maintenance**: Keep project documentation up to date
-- **ASCII Enforcement**: Avoid encoding issues that break code generation
-
-## Plugin Components
-
-### Commands (14 total)
+## Commands (14 total)
 
 | Command | Purpose |
 |---------|---------|
@@ -115,88 +119,70 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 | `/carryforward` | Extract lessons learned between phases |
 | `/phasebuild` | Create structure for new phase |
 
-### Skill
-
-The **spec-workflow** skill auto-activates when:
-- Working in projects with `.spec_system/` directory
-- User mentions spec system concepts
-- User asks about session workflow
-
-### Bundled Resources
-
-- **scripts/**: Bash utilities for project analysis
-
-## Project Structure
-
-After running `/initspec`, your project will have:
+## Repository Structure
 
 ```
-your-project/
-├── .spec_system/               # All spec system files
-│   ├── state.json              # Project state tracking
-│   ├── CONSIDERATIONS.md       # Institutional memory (lessons learned)
-│   ├── CONVENTIONS.md          # Project coding standards and conventions
-│   ├── PRD/                    # Product requirements
-│   │   ├── PRD.md              # Master PRD
-│   │   └── phase_00/           # Phase definitions
-│   ├── specs/                  # Implementation specs
-│   │   └── phaseNN-sessionNN-name/
-│   │       ├── spec.md
-│   │       ├── tasks.md
-│   │       ├── implementation-notes.md
-│   │       └── validation.md
-│   └── archive/                # Completed work
-└── (your project source files)
+apex-spec-system/
+  AGENTS.md                 # Generated -- committed for tools that read it natively
+  Makefile                  # Build entry point (build, validate, clean)
+  install.sh                # Universal installer (auto-detects tools)
+  README.md
+  build/
+    generate.sh             # Build script (pure bash, no dependencies)
+    templates/              # Output templates
+  commands/                 # Canonical command sources (14 files, YAML + markdown)
+  docs/
+    CANONICAL-FORMAT.md     # Command file format specification
+    COMPATIBILITY-MATRIX.md # Feature support across all tools
+    GUIDANCE.md             # Usage guidance and workflow modes
+    WALKTHROUGH.md          # Production walkthrough (79+ sessions, 16 phases)
+    aider.md                # Aider integration guide
+    codex.md                # Codex CLI setup
+    cursor.md               # Cursor setup
+    gemini.md               # Gemini CLI setup
+    mcp.md                  # MCP client setup
+  mcp-server/               # TypeScript MCP server (5 tools, stdio transport)
+  scripts/                  # Bash utilities (analyze-project, check-prereqs)
+  skills/
+    spec-workflow/           # Auto-activating workflow skill
+  test/
+    validate-install.sh     # 125-check validation suite
+  dist/                     # Generated (gitignored)
+    codex/ cursor/ gemini/ copilot/ cline/ windsurf/
+    antigravity/ amazonq/ goose/ kiro/ mcp/ universal/
 ```
+
+## Building
+
+```bash
+make build    # Generate all outputs in dist/ and AGENTS.md at root
+make clean    # Remove dist/
+```
+
+The build script is pure bash with no external dependencies beyond standard Unix tools.
 
 ## Session Scope
 
-### Hard Limits
 - Maximum 25 tasks per session
 - Maximum 4 hours estimated time
 - Single clear objective
+- Ideal: 12-25 tasks (sweet spot: 20)
 
-### Ideal Targets
-- 12-25 tasks (sweet spot: 20)
-- 2-3 hours typical
-- Stable/late MVP focus
+## ASCII Encoding (Non-Negotiable)
 
-## Session Naming
+All files must use ASCII-only characters (0-127). No Unicode, emoji, or smart quotes.
 
-**Format**: `phaseNN-sessionNN-name`
+## Video Tutorial
 
-Examples:
-- `phase00-session01-project-setup`
-- `phase01-session03-user-authentication`
+[Watch on YouTube](https://youtu.be/iY6ySesmOCg) - Installation and workflow walkthrough
 
-## Critical Rules
+## Documentation
 
-### ASCII Encoding (Non-Negotiable)
-
-All files must use ASCII-only characters (0-127):
-- NO Unicode characters
-- NO emoji
-- NO smart quotes - use straight quotes
-- Unix LF line endings only
-
-## Best Practices
-
-1. **One session at a time** - Complete before starting next
-2. **MVP first** - Defer polish and optimizations
-3. **Follow conventions** - Customize and follow CONVENTIONS.md for consistency
-4. **Validate encoding** - Check ASCII before committing
-5. **Update tasks continuously** - Mark checkboxes immediately
-6. **Do manual testing** - Best judgment, but at least manual testing per Phase
-7. **Trust the system** - Follow workflow, resist scope creep
-
-## Recovery
-
-Worried about mistakes? Every `/updateprd` automatically commits and pushes your progress. Git is your safety net:
-
-- **Undo a completed session**: `git revert <commit>`
-- **Mid-session issues**: Resume with `/implement` or delete the session directory and re-run `/nextsession`
-
-No special recovery procedures - standard git workflows apply.
+- [Usage Guidance](docs/GUIDANCE.md) - When to use, workflow modes, team patterns
+- [Production Walkthrough](docs/WALKTHROUGH.md) - Real-world example (79+ sessions, 16 phases)
+- [Compatibility Matrix](docs/COMPATIBILITY-MATRIX.md) - Feature support across all tools
+- [Canonical Format](docs/CANONICAL-FORMAT.md) - Command and skill file format
+- [Contributing](CONTRIBUTING.md) - How to add support for new tools
 
 ## License
 
