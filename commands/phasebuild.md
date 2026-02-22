@@ -5,50 +5,28 @@ description: Create structure for a new phase
 
 # /phasebuild Command
 
-You are an AI assistant creating the structure for a new project phase.
+Create the directory structure, phase PRD, and session stubs for a new phase. Ensures alignment with completed work and lessons learned.
 
-## Role & Mindset
+## Rules
 
-You are a **senior engineer** who is obsessive about pristine code — zero errors, zero warnings, zero lint issues. You are known for **clean project scaffolding**, rigorous **structure discipline**, and treating implementation as a craft: methodical, patient, and uncompromising on quality.
-
-## Your Task
-
-Per Steps below **Check** current work progress (`.spec_system/state.json`) and then PRD (`.spec_system/PRD/`). Set up the directory structure and documentation for a new phase and respective sessions checking to make sure its in line with your **check**.
+1. **ASCII-only characters** and Unix LF line endings in all output
+2. **Resolve misalignment before building** - as projects progress, later phases may drift from reality. Reconcile with actual progress before creating artifacts.
+3. **If interrupted mid-process**, delete partial artifacts before retrying
+4. Each session must have a single clear objective, 12-25 tasks, 2-4 hours scope
 
 ## Steps
 
-### 1. Gather and Check Phase Information
+### 1. Assess Current State
 
-**Check** current work progress (`.spec_system/state.json`) and then current/historic PRD (`.spec_system/PRD/`).
-
-Pay attention to:
+Read `.spec_system/state.json` and `.spec_system/PRD/` to understand:
 - What has been accomplished
-- Phase number (next sequential)
-- Phase name
-- Phase description
-- Estimated session count
-- High-level objectives
+- Next sequential phase number
+- High-level objectives remaining
 
-### 1b. Review Institutional Memory (If Exists)
-
-Read `.spec_system/CONSIDERATIONS.md` if it exists. This contains lessons learned from previous phases.
-
-**Extract and apply:**
-- **Active Concerns** - Issues that may affect this phase's sessions (technical debt, external dependencies, performance/security requirements, architectural constraints)
-- **Lessons Learned** - Patterns to follow or avoid when planning sessions
-- **Tool/Library Notes** - Relevant insights for technologies used in this phase
-
-**Use this to inform:**
-- Session ordering (address Active Concerns early if relevant)
-- Technical Considerations section in PRD
-- Risk identification
-- Session scope decisions
-
-#### Make Sure Phase is Aligned, Accurate and Up to Date
-
-As the project progresses, it's normal that deeper Phases could be mis-aligned.
-
-It is **critical** to resolve that at this point. If interrupted mid-process, delete partial artifacts before retrying.
+If `.spec_system/CONSIDERATIONS.md` exists, review it for:
+- **Active Concerns** that should influence session ordering or scope
+- **Lessons Learned** (patterns to follow or avoid)
+- **Tool/Library Notes** relevant to this phase
 
 ### 2. Create Phase Directory and PRD Markdown
 
@@ -221,9 +199,7 @@ Merge into `.spec_system/state.json` (add to existing `phases` object):
 
 ### 5. Update Master PRD
 
-#### Make sure Master PRD is fully accurate and up to date
-
-#### Add phase reference to `.spec_system/PRD/PRD.md`:
+Add the new phase to the Phases table in `.spec_system/PRD/PRD.md`. Also update any stale info (completed phases marked as such, session counts reflecting reality):
 
 ```markdown
 ## Phases

@@ -5,29 +5,9 @@ description: Generate the master PRD from a user-provided requirements document
 
 # /createprd Command
 
-Convert a user-provided requirements document into the Apex Spec System master PRD.
+Convert a user-provided document (notes, PRD, spec, RFC, meeting notes) into the Apex Spec System master PRD at `.spec_system/PRD/PRD.md`.
 
-## Role & Mindset
-
-You are a **senior engineer** who is obsessive about pristine code - zero errors, zero warnings, zero lint issues. You are known for **clean project scaffolding**, rigorous **structure discipline**, and treating implementation as a craft: methodical, patient, and uncompromising on quality.
-
-## Your Task
-
-Convert a user-provided document (notes, existing PRD, spec, RFC, meeting notes) into the Apex Spec System master PRD at `.spec_system/PRD/PRD.md`.
-
-This PRD is used by the rest of the workflow:
-
-- `/phasebuild` uses it to plan phases and sessions
-- `/nextsession` uses it to choose the next session
-- `/documents` links to it as the roadmap source of truth
-
-## Prerequisites
-
-- The project must be initialized with `/initspec`
-- `.spec_system/state.json` must exist
-- `.spec_system/PRD/` directory must exist
-
-If any prerequisite is missing, stop and instruct the user to run `/initspec` first.
+Downstream commands (`/phasebuild`, `/nextsession`, `/documents`) depend on this PRD as the source of truth.
 
 ## Flags
 
@@ -35,15 +15,20 @@ If any prerequisite is missing, stop and instruct the user to run `/initspec` fi
 |------|---------|-------------|
 | `--skip-conventions` | false | Skip CONVENTIONS.md fine-tuning |
 
+## Rules
+
+1. **Never overwrite a real PRD** without explicit user confirmation (template placeholders can be overwritten silently)
+2. **Do not invent requirements** - ask 3-8 targeted questions for missing info
+3. **ASCII-only characters** and Unix LF line endings in all output
+4. **Do not create phase directories or session stubs** - that's `/phasebuild`'s job
+5. **CONVENTIONS.md must stay under 300 lines** - trim ruthlessly if exceeded
+6. Only add conventions with clear evidence from the tech stack - no speculative additions
+
 ## Steps
 
 ### 1. Confirm Spec System Is Initialized
 
-Check for:
-- `.spec_system/state.json`
-- `.spec_system/PRD/`
-
-If missing, tell the user to run `/initspec` and stop.
+Check for `.spec_system/state.json` and `.spec_system/PRD/`. If missing, tell the user to run `/initspec` and stop.
 
 ### 2. Get Deterministic Project State
 
@@ -82,18 +67,9 @@ Check whether `.spec_system/PRD/PRD.md` already exists.
 
 **Detecting Template Placeholder PRD**:
 
-The `/initspec` command creates a placeholder PRD with markers like `[Goal 1]`, `[Goal 2]`, `[PROJECT_DESCRIPTION]`, `[Objective 1]`, `[Criterion 1]`, etc.
+The `/initspec` command creates a placeholder PRD with bracket markers like `[Goal 1]`, `[PROJECT_DESCRIPTION]`, `[Objective 1]`, etc. If **2 or more** such markers are present, it's a template - overwrite without confirmation.
 
-Read the existing PRD and check for these template markers:
-- `[Goal 1]` or `[Goal 2]` or `[Goal 3]`
-- `[PROJECT_DESCRIPTION]`
-- `[Objective 1]` or `[Objective 2]`
-- `[Criterion 1]` or `[Criterion 2]`
-- `[Technology 1]` or `[Technology 2]`
-
-If **2 or more** of these markers are present, the PRD is a template placeholder with no real value. Proceed to overwrite it **without asking for confirmation** (no backup needed for templates).
-
-If the PRD appears to have real content (fewer than 2 template markers), ask for explicit user confirmation before overwriting.
+If the PRD has real content (fewer than 2 template markers), ask for explicit user confirmation before overwriting.
 
 **If overwriting real content (confirmation given)**:
 1. Create a timestamped backup in `.spec_system/archive/PRD/` before writing
@@ -231,32 +207,15 @@ Notes:
 
 ### 7. Customize CONVENTIONS.md for Tech Stack
 
-After generating the PRD, customize `.spec_system/CONVENTIONS.md` to reflect the project's tech stack and domain.
-
-This is **initial customization**, not maintenance. The `/audit` command handles ongoing maintenance with surgical edits; here we have more freedom to reshape the document.
+Customize `.spec_system/CONVENTIONS.md` to reflect the project's actual tech stack and domain. This is **initial customization** (more freedom to reshape) vs `/audit` which makes surgical edits later.
 
 #### 7.1 Detect Tech Stack
 
-From the PRD's Technical Stack section and the source requirements, identify:
-- **Primary language(s)**: JavaScript/TypeScript, Python, Go, Rust, Java, etc.
-- **Framework(s)**: React, Next.js, FastAPI, Express, Django, Spring, etc.
-- **Runtime**: Node.js, Deno, Bun, browser, Python 3.x, etc.
-- **Package manager**: npm, pnpm, yarn, pip, poetry, cargo, etc.
-- **Testing framework**: Jest, Vitest, pytest, Go test, etc.
-- **Project domain**: CLI tool, web app, API service, library, mobile app, etc.
-- **etc**
+From the PRD's Technical Stack section and source requirements, identify: primary language(s), framework(s), runtime, package manager, testing framework, and project domain.
 
 #### 7.2 Transform Generic Template
 
-Read `.spec_system/CONVENTIONS.md` (the generic template from /initspec).
-
-**Transformation principles:**
-- **Replace** generic conventions with stack-specific equivalents
-- **Add** new conventions required by the detected stack
-- **Remove** generic conventions that don't apply to this stack
-- **Restructure** sections if the stack warrants different organization
-- Keep each convention to 1-2 lines
-- Do not add speculative or aspirational conventions
+Read `.spec_system/CONVENTIONS.md` (the generic template from /initspec). Replace generic conventions with stack-specific equivalents, add new ones required by the stack, remove ones that don't apply. Keep each convention to 1-2 lines. No speculative additions.
 
 **Stack-specific transformations (examples):**
 
@@ -342,17 +301,6 @@ LC_ALL=C grep -n '[^[:print:][:space:]]' .spec_system/PRD/PRD.md && echo "Non-AS
 
 If checks fail, fix the PRD content and re-check.
 
-## Rules
-
-1. Do not run `/phasebuild` for the user - only generate the master PRD
-2. Never overwrite a real PRD without explicit confirmation (template placeholders from /initspec can be overwritten silently)
-3. Do not invent requirements - ask targeted questions instead
-4. ASCII-only characters and Unix LF line endings only
-5. Do not create phase directories or session stubs
-6. CONVENTIONS.md must stay under 300 lines - trim ruthlessly if exceeded
-7. CONVENTIONS.md customization can be significant (this is initial setup, not maintenance like /audit)
-8. Only add conventions with clear evidence from the tech stack - no speculative additions
-
 ## Output
 
 Report to user:
@@ -374,54 +322,10 @@ Summary:
 [If conventions were customized:]
 Conventions:
 - .spec_system/CONVENTIONS.md customized for [stack] (N/300 lines)
-- Stack: [detected languages/frameworks]
 - Key additions: [brief list, max 3]
-- Sections modified: [list affected sections]
 
 Next Steps:
 1. Review the generated PRD and refine as needed
-2. Review CONVENTIONS.md and adjust for team preferences
-3. Run /phasebuild to define Phase 00 sessions
-4. Run /nextsession to begin implementation
-```
-
-## Error Handling
-
-If `.spec_system/` is missing:
-
-```
-Cannot create PRD.
-
-Reason: .spec_system/ not initialized
-
-Please run /initspec first.
-```
-
-If the source document is incomplete:
-
-```
-Source document incomplete.
-
-Missing critical information:
-- [missing item 1]
-- [missing item 2]
-
-Please provide:
-1. [question 1]
-2. [question 2]
-
-I can produce a draft PRD with an "Open Questions" section populated if you prefer.
-```
-
-If overwrite not confirmed:
-
-```
-PRD already exists at .spec_system/PRD/PRD.md
-
-Options:
-1. Confirm overwrite (backup will be created)
-2. Create review copy at .spec_system/PRD/PRD-draft.md
-3. Cancel
-
-Please choose an option.
+2. Run /phasebuild to define Phase 00 sessions
+3. Run /nextsession to begin implementation
 ```

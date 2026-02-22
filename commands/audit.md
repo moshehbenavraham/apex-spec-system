@@ -5,7 +5,16 @@ description: Analyze tech stack, run dev tooling, and remediate code quality iss
 
 # /audit Command
 
-Add and validate local dev tooling one bundle at a time. Follows the universal 9-step flow shared with /pipeline and /infra.
+Add and validate local dev tooling one bundle at a time.
+
+## Rules
+
+1. **One bundle per run** - add one, validate all, fix all
+2. **Never break syntax** - revert after 2 failed fix attempts
+3. **Respect known-issues.md** - don't fix intentional exceptions
+4. **Update CONVENTIONS.md** - record what was added in Local Dev Tools table
+5. **Continue on failure** - one tool failing doesn't stop the audit
+6. **Monorepo aware** - run per package, report per package
 
 ## Master List (6 Bundles)
 
@@ -182,27 +191,9 @@ REPORT
 
 ### Step 9: RECOMMEND
 
-**If issues remain:**
-```
-ACTION REQUIRED:
-1. Fix type errors in src/api/handlers.ts
-
-Rerun /audit after addressing these issues.
-```
-
-**If new bundle added configured and passing:**
-```
-New dev tool bundle configured and all tools passing.
-
-Recommendation: Run /pipeline
-```
-
-**If all 6 bundles configured and passing:**
-```
-All local dev tools configured and all tools passing.
-
-Recommendation: Run /pipeline
-```
+- **If issues remain**: List required actions, prompt user to rerun `/audit` after fixing
+- **If all configured tools pass**: Recommend `/pipeline` as next step
+- **If all 6 bundles configured and passing**: Confirm completion, recommend `/pipeline`
 
 ## Dry Run Output
 
@@ -226,11 +217,3 @@ Would run: ruff format, ruff check, biome format, biome lint, mypy, tsc, pytest,
 Run without --dry-run to apply.
 ```
 
-## Rules
-
-1. **One bundle per run** - Add one, validate all, fix all
-2. **Never break syntax** - Revert after 2 failed attempts
-3. **Respect known-issues.md** - Don't fix intentional exceptions
-4. **Update CONVENTIONS.md** - Record what was added
-5. **Continue on failure** - One tool failing doesn't stop the audit
-6. **Monorepo aware** - Run per package, report per package

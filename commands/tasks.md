@@ -5,15 +5,16 @@ description: Generate a 12-25 task checklist for the current session
 
 # /tasks Command
 
-You are an AI assistant generating an implementation task checklist.
+Generate a sequenced, 12-25 task checklist for implementing the current session specification.
 
-## Role & Mindset
+## Rules
 
-You are a **senior engineer** who is obsessive about pristine code — zero errors, zero warnings, zero lint issues. You are known for **clean project scaffolding**, rigorous **structure discipline**, and treating implementation as a craft: methodical, patient, and uncompromising on quality.
-
-## Your Task
-
-Create a detailed, sequenced task list (12-25 tasks) for implementing the session specification.
+1. **Task count**: 12 minimum, 25 maximum, 20 sweet spot
+2. **Task sizing**: ~20-25 minutes each, single file focus when possible, clear atomic action
+3. **ASCII-only characters** and Unix LF line endings
+4. **Every task must have**: task ID (`TNNN`), session ref (`[SPPSS]`), action verb, target file path
+5. **Mark `[P]`** when tasks create independent files with no interdependency
+6. **Sequence by**: dependencies first, then setup -> foundation -> implementation -> testing
 
 ## Steps
 
@@ -124,67 +125,21 @@ Before marking session complete:
 
 ---
 
-## Notes
-
-### Parallelization
-Tasks marked `[P]` can be worked on simultaneously.
-
-### Task Timing
-Target ~20-25 minutes per task.
-
-### Dependencies
-Complete tasks in order unless marked `[P]`.
-
----
-
 ## Next Steps
 
 Run `/implement` to begin AI-led implementation.
 ```
 
-## Task Design Rules
+## Category Budgets
 
-### Quantity
-- **Minimum**: 12 tasks
-- **Maximum**: 25 tasks
-- **Sweet spot**: 20 tasks
+| Category | Tasks | Purpose |
+|----------|-------|---------|
+| Setup | 2-4 | Environment, directories, config |
+| Foundation | 4-8 | Core types, interfaces, base classes |
+| Implementation | 8-15 | Main feature logic |
+| Testing | 3-5 | Tests, validation, verification |
 
-### Task Sizing
-- Each task: ~20-25 minutes
-- Single file focus when possible
-- Clear, atomic action
-
-### Categories
-1. **Setup** (2-4 tasks): Environment, directories, config
-2. **Foundation** (4-8 tasks): Core types, interfaces, base classes
-3. **Implementation** (8-15 tasks): Main feature logic
-4. **Testing** (3-5 tasks): Tests, validation, verification
-
-### Task Format
-```
-- [ ] TNNN [SPPSS] [P] Action verb + what + where (`path/to/file`)
-```
-
-Components:
-- `TNNN`: Sequential task ID (T001, T002, ...)
-- `[SPPSS]`: Session reference (e.g., S0103 = Phase 01, Session 03)
-- `[P]`: Optional parallelization marker
-- Description: Action verb + clear description
-- Path: File being created/modified
-
-### Parallelization Markers
-Mark tasks `[P]` when they:
-- Create independent files
-- Don't depend on each other's output
-- Can be done in any order
-
-### Sequencing
-Order tasks by:
-1. Dependencies (prerequisite tasks first)
-2. Logical flow (setup -> foundation -> implementation -> testing)
-3. File dependencies (create before modify)
-
-## Update State
+## 4. Update State
 
 Update `.spec_system/state.json`:
 

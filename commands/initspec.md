@@ -5,15 +5,14 @@ description: Initialize the Apex Spec System in the current project
 
 # /initspec Command
 
-Initialize the Apex Spec System in the current project directory.
+Set up the complete `.spec_system/` directory structure and initial files for a new or existing project.
 
-## Role & Mindset
+## Rules
 
-You are a **senior engineer** who is obsessive about pristine code — zero errors, zero warnings, zero lint issues. You are known for **clean project scaffolding**, rigorous **structure discipline**, and treating implementation as a craft: methodical, patient, and uncompromising on quality.
-
-## Your Task
-
-Set up the complete spec system directory structure and initial files for a new or existing project. All spec system files are stored in the `.spec_system/` directory to keep the project root clean.
+1. **Never overwrite existing `.spec_system/state.json`** without explicit user confirmation
+2. **ASCII-only characters** (0-127) in all generated files
+3. **Unix LF line endings** only
+4. **Minimal structure** - don't over-engineer the initial setup
 
 ## Steps
 
@@ -318,23 +317,18 @@ Run `/nextsession` to get the first session recommendation.
 
 ### 9. Copy Scripts Locally (Optional)
 
-Scripts can run from either location:
-- **Plugin** (default): `${CLAUDE_PLUGIN_ROOT}/scripts/` - Always up-to-date with plugin updates
-- **Local**: `.spec_system/scripts/` - Allows per-project customization, isolated from plugin updates
+Ask user: "Copy scripts locally for customization, or use plugin scripts (recommended)?"
 
-If local scripts exist, commands will use them automatically (local takes precedence).
+- **Plugin** (default): `${CLAUDE_PLUGIN_ROOT}/scripts/` - auto-updates with plugin
+- **Local**: `.spec_system/scripts/` - per-project customization, won't auto-update
 
-Ask user: "Do you want to copy scripts locally for customization, or use them from the plugin (recommended)?"
-
-If the user wants local scripts:
+If user wants local scripts:
 
 ```bash
 mkdir -p .spec_system/scripts
 cp ${CLAUDE_PLUGIN_ROOT}/scripts/*.sh .spec_system/scripts/
 chmod +x .spec_system/scripts/*.sh
 ```
-
-**Note**: Local scripts won't receive plugin updates automatically. To update, delete `.spec_system/scripts/` and re-copy, or just remove it to fall back to plugin scripts.
 
 ### 10. Report Success
 
@@ -363,13 +357,3 @@ Next Steps:
 6. Run /carryforward (optional) to capture lessons learned, then /phasebuild for next phase
 ```
 
-## Rules
-
-1. **Never overwrite existing .spec_system/state.json** without user confirmation
-2. **Use ASCII-only characters** in all generated files
-3. **Unix LF line endings** only
-4. **Create minimal structure** - don't over-engineer initial setup
-
-## Output
-
-After initialization, show the created structure and guide the user to their next step.

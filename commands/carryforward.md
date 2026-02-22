@@ -5,23 +5,18 @@ description: Extract lessons learned and update CONSIDERATIONS.md between phases
 
 # /carryforward Command
 
-Analyze the just-completed phase and update the living CONSIDERATIONS.md document with institutional knowledge.
+Extract key insights from the just-completed phase and update `.spec_system/CONSIDERATIONS.md` - the institutional memory for AI assistants working on future phases. Be ruthlessly selective: only the most impactful lessons deserve space.
 
-## Role & Mindset
+Run after completing a phase, before `/phasebuild`. Optional but recommended for phases with significant discoveries, novel problems, or 4+ sessions.
 
-You are a **senior engineer** conducting a phase retrospective. Your job is to extract the most valuable insights from completed work and preserve them for future phases. Be ruthlessly selective - only the most impactful lessons deserve space in this document.
+## Rules
 
-## Your Task
-
-Review the completed phase, extract key insights, and update `.spec_system/CONSIDERATIONS.md` while maintaining the strict 600-line limit. This document serves as institutional memory for AI assistants working on future phases.
-
-## When to Run
-
-Run `/carryforward` after completing a phase, before starting `/phasebuild` for the next phase. This is optional but recommended for:
-- Phases with significant technical discoveries
-- Phases where you encountered and solved novel problems
-- Phases with decisions that affect future work
-- Any phase over 4 sessions
+1. **600-line limit STRICT** - trim older/less relevant items if needed
+2. **Active Concerns**: max 20 items total (5 per subcategory)
+3. **Lessons Learned**: max 30 items total
+4. **Resolved**: max 15 items, rotate out after 2 phases
+5. **Conciseness**: each item 1-3 lines max, include phase number `[PNN]`
+6. **ASCII-only characters** and Unix LF line endings
 
 ## Steps
 
@@ -77,15 +72,7 @@ Read `.spec_system/CONSIDERATIONS.md`:
 
 ### 5. Update Document
 
-Update `.spec_system/CONSIDERATIONS.md` following the format below.
-
-**Rules for updates:**
-1. **Active Concerns**: Add new, remove resolved, keep max 20 items
-2. **Lessons Learned**: Add new, merge similar, keep max 30 items
-3. **Resolved**: Add newly resolved, rotate out items older than 2 phases (keep max 15 items)
-4. **Total line limit**: 600 lines STRICT - trim older/less relevant items if needed
-5. **Conciseness**: Each item should be 1-3 lines max
-6. **Context**: Include phase number where item originated
+Update `.spec_system/CONSIDERATIONS.md` following the format below. Add new items, remove resolved ones, merge similar entries, and enforce the limits in Rules above.
 
 ### 6. Report Summary
 
@@ -198,30 +185,3 @@ Key additions:
 Ready for /documents to maintain project documentation.
 ```
 
-## Error Handling
-
-If CONSIDERATIONS.md doesn't exist:
-```
-CONSIDERATIONS.md not found.
-
-This file should be created by /initspec. Creating from template...
-[Creates file using template from initspec]
-```
-
-If phase not complete:
-```
-Cannot run /carryforward.
-
-Current phase (NN) status: [status]
-Complete all sessions and run /validate on final session first.
-```
-
-If no insights found:
-```
-Phase NN Review Complete
-
-No significant insights identified for carryforward.
-CONSIDERATIONS.md unchanged.
-
-This is fine for straightforward phases. Proceed with /phasebuild.
-```

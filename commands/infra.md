@@ -5,7 +5,16 @@ description: Add and validate production infrastructure one bundle at a time
 
 # /infra Command
 
-Add and validate production infrastructure one bundle at a time. Follows the universal 9-step flow shared with /audit and /pipeline.
+Add and validate production infrastructure one bundle at a time.
+
+## Rules
+
+1. **One bundle per run** - add one, validate all
+2. **Stack agnostic** - read platform from CONVENTIONS.md, adapt
+3. **Document manual steps** - some platforms require UI configuration
+4. **Don't store secrets** - document required env vars, don't create them
+5. **Validate everything** - verify infra actually works, not just exists
+6. **Respect known-issues.md** - skip items marked as manual-only
 
 ## Master List (4 Bundles)
 
@@ -189,28 +198,9 @@ Required setup:
 
 ### Step 9: RECOMMEND
 
-**If validation failures remain:**
-```
-ACTION REQUIRED:
-1. Database connectivity failing - check DATABASE_URL env var
-2. Cache check timing out - verify Valkey is running
-
-Rerun /infra after addressing these issues.
-```
-
-**If all clean but bundles remain:**
-```
-Note: more bundles remain, they will be added in future runs!
-
-Recommendation: Run /documents
-```
-
-**If all 4 bundles configured and validated:**
-```
-All infrastructure configured and validated.
-
-Recommendation: Run /documents
-```
+- **Validation failures remain**: List required actions, prompt rerun of `/infra`
+- **Bundles remain**: Note remaining bundles, recommend rerun of `/infra`
+- **All 4 bundles configured and validated**: Recommend `/documents`
 
 ## Dry Run Output
 
@@ -260,11 +250,3 @@ Run without --dry-run to apply.
 - WAF via AWS WAF
 - Backups via RDS snapshots or custom scripts
 
-## Rules
-
-1. **One bundle per run** - Add one, validate all
-2. **Stack agnostic** - Read platform from CONVENTIONS.md, adapt
-3. **Document manual steps** - Some platforms require UI configuration
-4. **Don't store secrets** - Document required env vars, don't create them
-5. **Validate everything** - Verify infra actually works, not just exists
-6. **Respect known-issues.md** - Skip items marked as manual-only

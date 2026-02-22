@@ -5,20 +5,16 @@ description: Create and maintain project documentation according to monorepo sta
 
 # /documents Command
 
-You are an AI assistant responsible for creating, auditing, and maintaining project documentation according to monorepo documentation standards.
+Audit, create, and update project documentation. Documentation is code - stale docs are worse than no docs.
 
-## Role & Mindset
+## Rules
 
-You are a **senior engineer** who is obsessive about pristine code — zero errors, zero warnings, zero lint issues. You are known for **clean project scaffolding**, rigorous **structure discipline**, and treating implementation as a craft: methodical, patient, and uncompromising on quality.
-
-Documentation is code. Stale docs are worse than no docs. Your job is to ensure documentation is accurate, concise, and current.
-
-## Your Task
-
-1. Audit existing documentation against the monorepo standard
-2. Create any missing standard documentation
-3. Update existing documentation to reflect current project state
-4. Remove redundancy and wordiness — keep it concise
+1. **Never invent technical details** - only document what actually exists in the codebase
+2. **ASCII-only characters** and Unix LF line endings
+3. **Current over complete** - a smaller, accurate doc beats a comprehensive stale one
+4. **One source of truth** - don't duplicate information; link instead
+5. **README naming** - only root gets `README.md`; subdirectories use `README_<dirname>.md`
+6. **One command runs everything** - document it prominently in root README
 
 ## Steps
 
@@ -39,7 +35,7 @@ Also read:
 - `.spec_system/state.json` - Project state and phase/session progress
 - `.spec_system/PRD/PRD.md` - Product requirements for context
 
-### 1b. Determine Audit Scope (Phase-Focused vs Full)
+### 2. Determine Audit Scope (Phase-Focused vs Full)
 
 Check if a phase was recently completed:
 
@@ -66,7 +62,7 @@ Focus Areas:
 - src/middleware/ (modified - session 02, 05)
 ```
 
-### 2. Audit Existing Documentation
+### 3. Audit Existing Documentation
 
 Check for the presence and quality of standard documentation files.
 
@@ -110,7 +106,7 @@ services/auth/README_auth.md     # Auth service details
 
 Pattern: `[parent]/[dirname]/README_[dirname].md`
 
-### 3. Generate Audit Report
+### 4. Generate Audit Report
 
 Create a mental checklist of:
 - Missing files (need to create)
@@ -120,7 +116,7 @@ Create a mental checklist of:
 
 Report findings to the user before proceeding.
 
-### 4. Create Missing Documentation
+### 5. Create Missing Documentation
 
 For each missing required file:
 
@@ -550,7 +546,7 @@ Trade-offs, what this enables, what it prevents.
 [Brief description and signature]
 ```
 
-### 5. Update Existing Documentation
+### 6. Update Existing Documentation
 
 For each existing documentation file:
 
@@ -565,7 +561,7 @@ For each existing documentation file:
 4. **Update to reflect current state**
 5. **Remove redundancy and wordiness**
 
-### 6. Sync with Spec System Progress
+### 7. Sync with Spec System Progress
 
 Cross-reference documentation with:
 - Completed sessions (should be documented)
@@ -601,7 +597,7 @@ When in Phase-Focused Mode, use implementation-notes.md files as the primary sou
 
 4. **Skip deep-audit** for unchanged areas - verify file exists, don't rewrite content
 
-### 7. Quality Checks
+### 8. Quality Checks
 
 For all documentation files:
 
@@ -621,7 +617,7 @@ For all documentation files:
 - All sections filled in (no TODO placeholders left)
 - Env var inventory complete
 
-### 8. Generate Documentation Report
+### 9. Generate Documentation Report
 
 Create `.spec_system/docs-audit.md`:
 
@@ -676,7 +672,7 @@ Recommend re-running `/documents` after:
 - Making architectural changes
 ```
 
-### 9. Report to User
+### 10. Report to User
 
 Show:
 - Files created
@@ -684,70 +680,6 @@ Show:
 - Current documentation coverage
 - Any gaps requiring human input
 
-## Rules
-
-1. **Never invent technical details** - Only document what actually exists in the codebase
-2. **Use ASCII-only characters** in all generated files
-3. **Unix LF line endings** only
-4. **Keep it minimal** - Resist adding more than the standard requires
-5. **Current over complete** - A smaller, accurate doc beats a comprehensive stale one
-6. **One source of truth** - Don't duplicate information; link instead
-7. **README naming** - Only root gets `README.md`; subdirectories use `README_<dirname>.md`
-
-## What Makes Documentation Actually Work
-
-1. **One command runs everything** - Document it prominently in root README
-2. **Env var inventory** - List every secret/config needed, where to get them
-3. **Dependency graph** - Visual or textual map of what talks to what
-4. **Keep it current** - Stale docs are worse than no docs
-
 ## Output
 
-After completing the audit and updates:
-
-```
-Documentation Audit Complete
-Mode: Phase-Focused (Phase 01 just completed)
-
-Phase 01 Changes Documented:
-- apps/api/ -> Created README_api.md
-- packages/auth/ -> Created README_auth.md
-- ARCHITECTURE.md -> Added auth service diagram
-
-Other Updates:
-- docs/onboarding.md (new env vars from Phase 01)
-- docs/development.md (new dev scripts)
-
-Standard Files Verified: 8/9 present
-
-Gaps requiring input:
-- docs/CODEOWNERS: Need team assignments
-
-Full report: .spec_system/docs-audit.md
-```
-
-For Full Audit mode:
-
-```
-Documentation Audit Complete
-Mode: Full Audit
-
-Created:
-- README.md (root)
-- docs/onboarding.md
-- docs/development.md
-
-Updated:
-- docs/ARCHITECTURE.md (synced with current implementation)
-- docs/deployment.md (updated CI pipeline steps)
-
-Coverage: 8/9 standard files present
-
-Gaps requiring input:
-- docs/CODEOWNERS: Need team assignments
-- docs/api/: Need OpenAPI spec location
-
-If all documents are satisfactory, please run /phasebuild to generate the next phase!
-
-Full report: .spec_system/docs-audit.md
-```
+Report: audit mode used, files created/updated, documentation coverage, gaps requiring human input, and link to `.spec_system/docs-audit.md`. If all documents are satisfactory, recommend `/phasebuild` for the next phase.

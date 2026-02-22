@@ -5,11 +5,29 @@ description: Complete session workflow - analyze, spec, tasks, implement, valida
 
 # /quicksesh Command
 
-Execute (or continue) the complete session workflow from analysis through completion in a single command.
+Execute the complete session workflow - analyze, spec, tasks, implement, validate, and complete - in a single command. Use `--from <phase>` to resume from a specific phase.
 
-## Role & Mindset
+## Rules
 
-You are a **senior engineer** obsessive about pristine code - zero errors, zero warnings, zero lint issues. Known for **clean project scaffolding**, rigorous **structure discipline**, and treating implementation as a craft: methodical, patient, and uncompromising on quality.
+1. **Make NO assumptions.** Pattern match precisely. Do not skim when you need detailed info. Validate systematically.
+2. **Script first** - run `analyze-project.sh --json` before any analysis; JSON output is authoritative
+3. **Follow CONVENTIONS.md** - all code must follow project-specific coding standards
+4. **ASCII-only characters** (0-127) and Unix LF line endings in all output
+5. **Implement exactly what's in the spec** - no extra features, no refactoring unrelated code
+6. **Update tasks.md immediately** after completing each task
+7. **Scope discipline** - 12-25 tasks, 2-4 hours max, single objective
+8. **Checkpoint every 3-5 tasks** - update all artifacts
+9. **No co-authors or attributions** in commit messages
+
+## Resumption
+
+Use `--from <phase>` to resume:
+- `--from 1` - Start fresh analysis
+- `--from 2` - Skip analysis, create spec
+- `--from 3` - Skip spec, generate tasks
+- `--from 4` - Skip tasks, implement (reads existing tasks.md)
+- `--from 5` - Skip implement, validate
+- `--from 6` - Skip validate, complete
 
 ## Overview
 
@@ -157,16 +175,7 @@ Set `current_session` and add to `next_session_history` with status `recommended
 - `.spec_system/CONSIDERATIONS.md` - Institutional memory (if exists)
 - `.spec_system/CONVENTIONS.md` - Project coding conventions (if exists)
 
-**From CONSIDERATIONS.md, identify:**
-- Active Concerns relevant to this session's scope
-- Lessons Learned that should inform implementation approach
-- Tool/Library Notes for technologies being used
-
-**From CONVENTIONS.md, incorporate:**
-- Naming conventions that affect file/function/variable naming in deliverables
-- File structure conventions that inform where deliverables should be placed
-- Testing philosophy that shapes the Testing Strategy section
-- Any patterns or anti-patterns relevant to the technical approach
+Use CONSIDERATIONS.md to identify active concerns, relevant lessons, and tool notes. Use CONVENTIONS.md to inform naming, file placement, and testing approach.
 
 ### 2.2 Create Session Directory
 
@@ -283,12 +292,9 @@ Set `current_session` and add to `next_session_history` with status `recommended
 - [Challenge]: [Mitigation]
 
 ### Relevant Considerations
-<!-- From CONSIDERATIONS.md - remove section if none apply -->
+<!-- From CONSIDERATIONS.md - omit section if none apply -->
 - [P##] **[Active Concern]**: How it affects this session and mitigation
 - [P##] **[Lesson Learned]**: How we're applying it in this implementation
-
-### ASCII Reminder
-All output files must use ASCII-only characters (0-127).
 
 ---
 
@@ -441,18 +447,6 @@ Before marking session complete:
 - [ ] implementation-notes.md updated
 - [ ] Ready for `/validate`
 
----
-
-## Notes
-
-### Parallelization
-Tasks marked `[P]` can be worked on simultaneously.
-
-### Task Timing
-Target ~20-25 minutes per task.
-
-### Dependencies
-Complete tasks in order unless marked `[P]`.
 ```
 
 ### 3.4 Update State
@@ -526,10 +520,8 @@ If spec.md Prerequisites lists required tools, also run `--tools "tool1,tool2"` 
 For each task in order:
 
 **A. Implement**
-- Follow CLAUDE.md guidelines
-- Follow CONVENTIONS.md standards (naming, structure, error handling, comments)
-- ASCII-only output, LF line endings
-- Implement exactly what's in spec - no extras
+- Follow spec's technical approach and CONVENTIONS.md standards
+- Implement the required changes
 
 **B. Update tasks.md**
 Change `- [ ]` to `- [x]` immediately after completing.
@@ -582,22 +574,6 @@ Change `- [ ]` to `- [x]` immediately after completing.
 - Save all changes
 - Update tasks.md and implementation-notes.md
 - If approaching context limits, document state for resumption
-
-### 4.6 Progress Communication
-
-After completing tasks, report:
-- Tasks done (X of Y)
-- Current progress percentage
-- Next task preview
-- Any blockers or concerns
-
-### 4.7 Resuming Implementation
-
-If implementation was interrupted:
-1. Read implementation-notes.md for context
-2. Check tasks.md for last completed task
-3. Resume from next incomplete task
-4. Continue logging progress
 
 **After all tasks complete**: Proceed to Phase 5.
 
@@ -773,24 +749,7 @@ From spec.md:
 [If FAIL]: Address required actions and run `/validate` again.
 ```
 
-### 5.4 Validation Criteria
-
-**PASS Requirements** (all must be true):
-- 100% of tasks completed
-- All deliverable files exist
-- All files ASCII-encoded with LF endings
-- All tests passing
-- All success criteria met
-
-**FAIL Conditions** (any triggers FAIL):
-- Incomplete tasks
-- Missing deliverables
-- Non-ASCII characters in files
-- CRLF line endings
-- Failing tests
-- Unmet success criteria
-
-### 5.5 Update State
+### 5.4 Update State
 
 Update `next_session_history` status to `validated` or `validation_failed`.
 
@@ -945,39 +904,3 @@ Next: Run `/quicksesh` for next session or `/phasebuild` for new phase
 
 ---
 
-## Error Handling
-
-| Error | Action |
-|-------|--------|
-| Script fails | Check `.spec_system/` exists, `state.json` valid, `jq` installed |
-| Environment check fails | Report issues, STOP - do not proceed |
-| Validation FAIL | Report issues, STOP at Phase 5 |
-| State inconsistency | Verify `.spec_system/state.json` matches expected state |
-| No version file | Skip increment, note in report |
-
-## Resumption
-
-Use `--from <phase>` to resume:
-- `--from 1` - Start fresh analysis
-- `--from 2` - Skip analysis, create spec
-- `--from 3` - Skip spec, generate tasks
-- `--from 4` - Skip tasks, implement (reads existing tasks.md)
-- `--from 5` - Skip implement, validate
-- `--from 6` - Skip validate, complete
-
-Read existing artifacts (tasks.md, implementation-notes.md) to resume mid-phase.
-
----
-
-## Rules
-
-1. **Script first** - Run analyze-project.sh before any analysis
-2. **Trust scripts** - JSON output is authoritative
-3. **One session** - Complete fully before starting next
-4. **Respect dependencies** - Don't skip prerequisites
-5. **MVP focus** - Core features before polish
-6. **Scope discipline** - 12-25 tasks, 2-4 hours max, single objective
-7. **ASCII only** - All output files 0-127 bytes, LF endings
-8. **Checkpoint often** - Update artifacts after each task
-9. **No extras** - Implement exactly what's in spec
-10. **Follow conventions** - CLAUDE.md and CONVENTIONS.md are mandatory

@@ -5,15 +5,15 @@ description: Create a formal specification for the recommended session
 
 # /sessionspec Command
 
-You are an AI assistant creating a formal technical specification for an implementation session.
+Convert the session recommendation (`NEXT_SESSION.md`) into a detailed, actionable specification (`spec.md`).
 
-## Role & Mindset
+## Rules
 
-You are a **senior engineer** who is obsessive about pristine code — zero errors, zero warnings, zero lint issues. You are known for **clean project scaffolding**, rigorous **structure discipline**, and treating implementation as a craft: methodical, patient, and uncompromising on quality.
-
-## Your Task
-
-Convert the session recommendation into a detailed, actionable specification.
+1. **ASCII-only characters** and Unix LF line endings in all output
+2. **Hard limits**: max 25 tasks, max 4 hours, single clear objective
+3. **Do not invent scope** - derive everything from NEXT_SESSION.md, PRD, and session stub
+4. **Incorporate CONVENTIONS.md** - naming, file structure, and testing philosophy must be reflected in the spec
+5. **Incorporate CONSIDERATIONS.md** - address relevant active concerns and lessons learned
 
 ## Steps
 
@@ -26,16 +26,7 @@ Read the following:
 - `.spec_system/CONSIDERATIONS.md` - Institutional memory (if exists)
 - `.spec_system/CONVENTIONS.md` - Project coding conventions (if exists)
 
-**From CONSIDERATIONS.md, identify:**
-- Active Concerns relevant to this session's scope
-- Lessons Learned that should inform implementation approach
-- Tool/Library Notes for technologies being used
-
-**From CONVENTIONS.md, incorporate:**
-- Naming conventions that affect file/function/variable naming in deliverables
-- File structure conventions that inform where deliverables should be placed
-- Testing philosophy that shapes the Testing Strategy section
-- Any patterns or anti-patterns relevant to the technical approach
+Use CONSIDERATIONS.md to identify active concerns, relevant lessons, and tool notes. Use CONVENTIONS.md to inform naming, file placement, and testing approach in the spec.
 
 ### 2. Create Session Directory
 
@@ -151,12 +142,9 @@ Create `spec.md` with all sections filled in:
 - [Challenge]: [Mitigation]
 
 ### Relevant Considerations
-<!-- From CONSIDERATIONS.md - remove section if none apply -->
+<!-- From CONSIDERATIONS.md - omit section if none apply -->
 - [P##] **[Active Concern]**: How it affects this session and mitigation
 - [P##] **[Lesson Learned]**: How we're applying it in this implementation
-
-### ASCII Reminder
-All output files must use ASCII-only characters (0-127).
 
 ---
 
@@ -216,13 +204,6 @@ Update `.spec_system/state.json`:
 - Set `current_session` to the session ID
 - Update `next_session_history` entry status to `spec_created`
 
-## Scope Rules
-
-### Hard Limits (Reject if exceeded)
-- Maximum 25 tasks
-- Maximum 4 hours
-- Clear objective(s) [try to keep it at one]
-
 ## Output
 
-Create the spec.md file and confirm to the user. Show them the session overview and deliverables summary.
+Create spec.md and confirm to the user. Show the session overview and deliverables summary.
