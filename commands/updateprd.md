@@ -184,4 +184,4 @@ Tell the user:
 
 ## Output
 
-Report: session marked complete, updated files, version change, phase progress, and next action (`/nextsession` if phase continues, `/audit` if phase complete).
+Report: session marked complete, updated files, version change, phase progress, and next action (`/plansession` if phase continues, `/audit` if phase complete).

@@ -9,7 +9,7 @@ Verify that all session requirements are met before marking the session complete
 
 ## Rules
 
-1. **PASS requires ALL of**: 100% tasks complete, all deliverables exist, all files ASCII-encoded with LF endings, all tests passing, all success criteria met
+1. **PASS requires ALL of**: 100% tasks complete, all deliverables exist, all files ASCII-encoded with LF endings, all tests passing, all success criteria met, no security or GDPR violations
 2. **Any single failure = overall FAIL** - no partial passes
 3. **Script first** - run `analyze-project.sh --json` before any analysis
 4. Conventions compliance is a spot-check, not exhaustive - flag obvious violations only
@@ -41,7 +41,7 @@ This returns structured JSON including:
 - `current_session_dir_exists` - Whether specs directory exists
 - `current_session_files` - Files already in the session directory
 
-**IMPORTANT**: Use the `current_session` value from this output. If `current_session` is `null`, run `/nextsession` yourself to set one up. Only ask the user if `/nextsession` itself requires user input.
+**IMPORTANT**: Use the `current_session` value from this output. If `current_session` is `null`, run `/plansession` yourself to set one up. Only ask the user if `/plansession` itself requires user input.
 
 ### 2. Read Session Files
 
@@ -49,6 +49,7 @@ Using the `current_session` value from the script output, read all session docum
 - `.spec_system/specs/[current-session]/spec.md` - Requirements
 - `.spec_system/specs/[current-session]/tasks.md` - Task checklist
 - `.spec_system/specs/[current-session]/implementation-notes.md` - Progress log
+- `.spec_system/specs/[current-session]/security-compliance.md` - Prior security report (if exists from previous validation run)
 - `.spec_system/CONVENTIONS.md` - Project coding conventions (if exists)
 
 **CONVENTIONS.md** is used in the Quality Gates check (section 3.E) to verify code follows project conventions for naming, structure, error handling, testing, etc.
@@ -92,6 +93,13 @@ Run the project's test suite:
 - Calculate coverage if available
 - Note any failures
 
+**CRITICAL -- NO "PRE-EXISTING" EXCUSE**: If ANY test fails, you MUST:
+1. Investigate the root cause -- determine whether the session's changes caused or contributed to the failure
+2. NEVER dismiss a failure as "pre-existing" or "environment issue" -- if tests passed before this session and fail now, THIS SESSION BROKE THEM
+3. FIX the failure before continuing validation. If you changed a Docker image, a dependency, a config file, or any shared code, failures in existing tests are YOUR responsibility
+4. Only after all tests pass (0 failures) may you mark Test Verification as PASS
+5. If a failure is genuinely unrelated (e.g., flaky network test), you must PROVE it by showing the test also fails on the pre-session commit -- do not assume
+
 #### E. Success Criteria
 From spec.md success criteria:
 - Check each functional requirement
@@ -108,7 +116,129 @@ Spot-check deliverables against project conventions:
 
 Note: This is a spot-check, not exhaustive. Flag obvious violations only.
 
-### 4. Generate Validation Report
+#### G. Security & GDPR Compliance
+
+Review **only files created or modified in this session** (use deliverables from spec.md and git diff against the pre-session commit). Skip files not touched by this session.
+
+**Security (OWASP Top 10 spot-check):**
+- **Injection**: SQL, command, LDAP injection vectors -- unsanitized user input in queries or shell calls
+- **Broken Auth**: Hardcoded credentials, API keys, tokens, or secrets in source code
+- **Sensitive Data Exposure**: Unencrypted PII in logs, error messages, or responses; secrets in plaintext config
+- **Insecure Dependencies**: Known-vulnerable packages added in this session (`npm audit`, `pip audit`, `cargo audit` as applicable)
+- **Misconfiguration**: Debug modes enabled, overly permissive CORS, missing security headers
+
+**GDPR Compliance:**
+- **Data Collection**: Any new collection of personal data (names, emails, IPs, device IDs) must have a documented purpose and legal basis
+- **Consent**: If collecting user data, verify consent mechanism exists before data is stored
+- **Data Minimization**: Only the minimum necessary personal data is collected -- flag any over-collection
+- **Right to Erasure**: If storing personal data, verify a deletion path exists or is documented as a future requirement
+- **Data Logging**: Personal data must not appear in application logs -- check log statements for PII leakage
+- **Third-Party Sharing**: If sending data to external services, verify the transfer is documented
+
+**Scope rules:**
+- This is a targeted review of session deliverables, not a full codebase audit
+- Flag **clear violations** only -- do not speculate about edge cases
+- If the session added no user-facing data handling, mark GDPR as N/A with a brief justification
+- Hardcoded secrets and injection vulnerabilities are always FAIL regardless of scope
+
+### 4. Generate Security & Compliance Report
+
+Create `security-compliance.md` in the session directory (`.spec_system/specs/[current-session]/security-compliance.md`):
+
+```markdown
+# Security & Compliance Report
+
+**Session ID**: `phase_NN_session_NN_name`
+**Reviewed**: [YYYY-MM-DD]
+**Result**: PASS / FAIL / N/A
+
+---
+
+## Scope
+
+**Files reviewed** (session deliverables only):
+- `path/file1` - [brief description]
+- `path/file2` - [brief description]
+
+**Review method**: Static analysis of session deliverables + dependency audit (if applicable)
+
+---
+
+## Security Assessment
+
+### Overall: PASS / FAIL
+
+| Category | Status | Severity | Details |
+|----------|--------|----------|---------|
+| Injection (SQLi, CMDi, LDAPi) | PASS/FAIL | -- / Critical / High | [details] |
+| Hardcoded Secrets | PASS/FAIL | -- / Critical | [details] |
+| Sensitive Data Exposure | PASS/FAIL | -- / High / Medium | [details] |
+| Insecure Dependencies | PASS/FAIL | -- / High / Medium | [details] |
+| Security Misconfiguration | PASS/FAIL | -- / Medium | [details] |
+
+### Findings
+
+#### [Finding Title] (if any)
+- **Severity**: Critical / High / Medium / Low
+- **File**: `path/file:line`
+- **Description**: [what the issue is]
+- **Remediation**: [how to fix it]
+- **Status**: Open / Remediated
+
+[Repeat for each finding, or "No security findings."]
+
+---
+
+## GDPR Compliance Assessment
+
+### Overall: PASS / FAIL / N/A
+
+*N/A if session introduced no personal data handling.*
+
+| Category | Status | Details |
+|----------|--------|---------|
+| Data Collection & Purpose | PASS/FAIL/N/A | [details] |
+| Consent Mechanism | PASS/FAIL/N/A | [details] |
+| Data Minimization | PASS/FAIL/N/A | [details] |
+| Right to Erasure | PASS/FAIL/N/A | [details] |
+| PII in Logs | PASS/FAIL/N/A | [details] |
+| Third-Party Data Transfers | PASS/FAIL/N/A | [details] |
+
+### Personal Data Inventory (if applicable)
+
+| Data Element | Source | Storage | Purpose | Retention | Deletion Path |
+|-------------|--------|---------|---------|-----------|---------------|
+| [e.g., email] | [user input] | [database table] | [authentication] | [until account deletion] | [DELETE /api/user] |
+
+[Or "No personal data collected or processed in this session."]
+
+### Findings
+
+#### [Finding Title] (if any)
+- **Category**: [GDPR category]
+- **File**: `path/file:line`
+- **Description**: [what the issue is]
+- **Remediation**: [how to fix it]
+- **Status**: Open / Remediated
+
+[Repeat for each finding, or "No GDPR findings."]
+
+---
+
+## Recommendations
+
+[Actionable items for future sessions, or "None -- session is compliant."]
+
+---
+
+## Sign-Off
+
+- **Result**: PASS / FAIL / N/A
+- **Reviewed by**: AI validation (`/validate`)
+- **Date**: [YYYY-MM-DD]
+```
+
+### 5. Generate Validation Report
 
 Create `validation.md` in the session directory:
 
@@ -131,6 +261,7 @@ Create `validation.md` in the session directory:
 | Tests Passing | PASS/FAIL | X/Y tests |
 | Quality Gates | PASS/FAIL | [issues] |
 | Conventions | PASS/SKIP | [issues or "No CONVENTIONS.md"] |
+| Security & GDPR | PASS/FAIL/N/A | [issues] |
 
 **Overall**: PASS / FAIL
 
@@ -234,6 +365,23 @@ From spec.md:
 
 ---
 
+## 7. Security & GDPR Compliance
+
+### Status: PASS/FAIL/N/A
+
+**Full report**: See `security-compliance.md` in this session directory.
+
+#### Summary
+| Area | Status | Findings |
+|------|--------|----------|
+| Security | PASS/FAIL | [count] issues |
+| GDPR | PASS/FAIL/N/A | [count] issues |
+
+### Critical Violations (if any)
+[List critical/high severity items or "None"]
+
+---
+
 ## Validation Result
 
 ### PASS / FAIL
@@ -251,7 +399,7 @@ From spec.md:
 [If FAIL]: Address required actions and run `/validate` again.
 ```
 
-### 5. Update State
+### 6. Update State
 
 Update `.spec_system/state.json` based on validation result:
 

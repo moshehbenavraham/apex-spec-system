@@ -7,7 +7,7 @@ description: Generate the master PRD from a user-provided requirements document
 
 Convert a user-provided document (notes, PRD, spec, RFC, meeting notes) into the Apex Spec System master PRD at `.spec_system/PRD/PRD.md`.
 
-Downstream commands (`/phasebuild`, `/nextsession`, `/documents`) depend on this PRD as the source of truth.
+Downstream commands (`/phasebuild`, `/plansession`, `/documents`) depend on this PRD as the source of truth.
 
 ## Flags
 
@@ -98,7 +98,7 @@ From the source document, extract and normalize:
 
 Important:
 - Do not invent details. If the source doc is missing critical info, ask 3-8 targeted questions
-- Keep content high-level and stable. Session-level details belong in `/sessionspec`
+- Keep content high-level and stable. Session-level details belong in `/plansession`
 - Keep phases as planning scaffolding, not implementation plans
 
 ### 6. Generate Master PRD
@@ -327,5 +327,5 @@ Conventions:
 Next Steps:
 1. Review the generated PRD and refine as needed
 2. Run /phasebuild to define Phase 00 sessions
-3. Run /nextsession to begin implementation
+3. Run /plansession to begin implementation
 ```
