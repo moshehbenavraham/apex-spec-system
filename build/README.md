@@ -19,11 +19,18 @@ bash build/generate.sh
 
 ```
 dist/
-  codex/        # Codex CLI artifacts (AGENTS.md)
-  cursor/       # Cursor rules
-  gemini/       # Gemini CLI artifacts
-  mcp/          # MCP server definitions
+  amazonq/      # Amazon Q rules
+  antigravity/  # Antigravity skills + GEMINI.md
+  cline/        # Cline rules
+  codex/        # Codex CLI skills + AGENTS.md
+  copilot/      # GitHub Copilot instructions
+  cursor/       # Cursor commands + rules
+  gemini/       # Gemini CLI commands + skills + extension
+  goose/        # Goose AGENTS.md
+  kiro/         # Kiro steering files
+  mcp/          # MCP server config snippets
   universal/    # Shared assets (scripts/, AGENTS.md)
+  windsurf/     # Windsurf cascade rules
 ```
 
 ## How It Works

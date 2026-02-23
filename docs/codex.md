@@ -30,7 +30,7 @@ cd /path/to/your-project
 codex
 ```
 
-Codex CLI will automatically read `AGENTS.md` and discover all 14 skills.
+Codex CLI will automatically read `AGENTS.md` and discover all 12 skills.
 
 ## What Gets Generated
 
@@ -38,7 +38,7 @@ Codex CLI will automatically read `AGENTS.md` and discover all 14 skills.
 
 Placed at your project root. Contains:
 - Core philosophy and 3-stage workflow
-- Command reference table (all 14 commands)
+- Command reference table (all 12 commands)
 - Directory structure, session scope rules, task format
 - Scripts reference and troubleshooting
 
@@ -58,7 +58,7 @@ One skill per command, each containing:
     SKILL.md
     openai.yaml
     scripts/
-  ... (14 total)
+  ... (12 total)
 ```
 
 **SKILL.md** uses YAML frontmatter compatible with Codex CLI:
@@ -87,12 +87,10 @@ Once installed, use the spec system workflow in Codex CLI:
 1. `/initspec` -- Set up `.spec_system/` in your project
 2. `/createprd` -- Generate PRD from requirements
 3. `/phasebuild` -- Create phase structure
-4. `/nextsession` -- Get next session recommendation
-5. `/sessionspec` -- Create formal specification
-6. `/tasks` -- Generate task checklist
-7. `/implement` -- AI-led implementation
-8. `/validate` -- Verify completeness
-9. `/updateprd` -- Mark session complete, loop back to step 4
+4. `/plansession` -- Analyze, create spec and task checklist
+5. `/implement` -- AI-led implementation
+6. `/validate` -- Verify completeness
+7. `/updateprd` -- Mark session complete, loop back to step 4
 
 ## Updating
 

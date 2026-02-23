@@ -27,13 +27,14 @@ read:
   - AGENTS.md
   - .spec_system/CONVENTIONS.md
   - .spec_system/CONSIDERATIONS.md
+  - .spec_system/SECURITY-COMPLIANCE.md
 ```
 
 ## How It Works
 
 - `AGENTS.md` is loaded as **read-only context** (Aider will not edit it)
 - Read-only files benefit from **prompt caching** -- essentially free after first load
-- The file contains the full 14-command workflow reference, directory structure, and session scope rules
+- The file contains the full 12-command workflow reference, directory structure, and session scope rules
 - No special file generation is needed for Aider
 
 ## MCP Tools
@@ -53,6 +54,6 @@ bash scripts/check-prereqs.sh --json --env
 ## Workflow
 
 1. Start Aider with context: `aider --read AGENTS.md`
-2. Ask Aider to run spec system commands (e.g., "run /nextsession")
-3. Aider will follow the workflow guidance from AGENTS.md
+2. Ask Aider to run spec system commands (e.g., "run /plansession")
+3. Aider will follow the workflow guidance from AGENTS.md (e.g., "run /plansession")
 4. Use scripts directly for project analysis when needed

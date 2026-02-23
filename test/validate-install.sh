@@ -177,8 +177,8 @@ test_codex() {
     check_dir "$skills_dir" "Codex skills directory"
 
     if [ -d "$skills_dir" ]; then
-        check_file_count "$skills_dir" "SKILL.md" 14 "Codex SKILL.md files"
-        check_file_count "$skills_dir" "openai.yaml" 14 "Codex openai.yaml files"
+        check_file_count "$skills_dir" "SKILL.md" 12 "Codex SKILL.md files"
+        check_file_count "$skills_dir" "openai.yaml" 12 "Codex openai.yaml files"
 
         # Spot-check one skill
         local sample="$skills_dir/initspec/SKILL.md"
@@ -194,10 +194,10 @@ test_codex() {
         # Scripts copied
         local scripts_count
         scripts_count=$(find "$skills_dir" -name "scripts" -type d 2>/dev/null | wc -l)
-        if [ "$scripts_count" -ge 14 ]; then
+        if [ "$scripts_count" -ge 12 ]; then
             pass "Codex: scripts/ copied to all $scripts_count skills"
         else
-            warn "Codex: scripts/ found in $scripts_count skills (expected 14)"
+            warn "Codex: scripts/ found in $scripts_count skills (expected 12)"
         fi
     fi
 }
@@ -210,7 +210,7 @@ test_cursor() {
     check_dir "$cursor_dir/rules" "Cursor rules directory"
 
     if [ -d "$cursor_dir/commands" ]; then
-        check_file_count "$cursor_dir/commands" "*.md" 14 "Cursor command files"
+        check_file_count "$cursor_dir/commands" "*.md" 12 "Cursor command files"
 
         # Spot-check: commands should NOT have YAML frontmatter
         local sample="$cursor_dir/commands/initspec.md"
@@ -243,7 +243,7 @@ test_gemini() {
     check_dir "$gemini_dir/.gemini/commands" "Gemini commands directory"
 
     if [ -d "$gemini_dir/.gemini/commands" ]; then
-        check_file_count "$gemini_dir/.gemini/commands" "*.toml" 14 "Gemini TOML command files"
+        check_file_count "$gemini_dir/.gemini/commands" "*.toml" 12 "Gemini TOML command files"
 
         # Spot-check TOML validity
         local sample="$gemini_dir/.gemini/commands/initspec.toml"

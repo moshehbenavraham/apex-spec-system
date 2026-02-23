@@ -1,6 +1,6 @@
 # Apex Spec System
 
-**Version: 1.0.1-beta**
+**Version: 1.0.2-beta**
 
 A specification-driven workflow system for AI-assisted development. Works with any AI coding tool that supports AGENTS.md, rules files, or MCP.
 
@@ -29,7 +29,7 @@ A specification-driven workflow system for AI-assisted development. Works with a
  Canonical Sources              Build Pipeline              Per-Tool Outputs
 +------------------+                                  +------------------------+
 | commands/*.md    |----+                             | dist/codex/            |
-| (14 commands,    |    |                             |   .agents/skills/      |
+| (12 commands,    |    |                             |   .agents/skills/      |
 |  YAML + markdown)|    |    +------------------+    +------------------------+
 +------------------+    +--->| build/           |    | dist/cursor/           |
                         |    | generate.sh      |--->|   .cursor/commands/    |
@@ -79,15 +79,28 @@ Then follow the [per-tool setup guide](#supported-tools) for your AI coding tool
 Once installed, initialize in your project and follow the workflow:
 
 ```
+Start a project:
 /initspec        # Initialize spec system
 /createprd       # Generate PRD from requirements
-/phasebuild      # Set up phases and sessions
-/nextsession     # Get next session recommendation
-/sessionspec     # Create formal specification
-/tasks           # Generate task checklist
+/phasebuild      # Set up initial phase and sessions
+
+Process a session:
+/plansession     # Analyze, spec, and generate task checklist
 /implement       # AI-led implementation
-/validate        # Verify completeness
+/validate        # Verify completeness, security & compliance
 /updateprd       # Mark complete, sync docs
+
+<repeat /plansession /implement /validate /updateprd until all sessions of a phase are complete>
+
+Between Phases:
+/audit            # Local dev tooling (formatter, linter, types, tests, observability, hooks)
+/pipeline         # CI/CD workflows (quality, build, security, integration, ops)
+/infra            # Production infrastructure (health, security, backup, deploy)
+/carryforward     # Lessons learned, security/compliance records
+/documents        # Create/update project documentation
+/phasebuild       # Set up next phase
+
+<Return to 'Process a session'>
 ```
 
 ## Requirements
@@ -100,15 +113,13 @@ Once installed, initialize in your project and follow the workflow:
 
 Verify with: `bash scripts/check-prereqs.sh --env`
 
-## Commands (14 total)
+## Commands (12 total)
 
 | Command | Purpose |
 |---------|---------|
 | `/initspec` | Initialize spec system in current project |
 | `/createprd` | Generate master PRD from requirements document |
-| `/nextsession` | Analyze project and recommend next session |
-| `/sessionspec` | Create formal technical specification |
-| `/tasks` | Generate 12-25 task checklist |
+| `/plansession` | Analyze project, create spec and task checklist |
 | `/implement` | AI-led task-by-task implementation |
 | `/validate` | Verify session completeness |
 | `/updateprd` | Mark session complete, sync documentation |
@@ -116,7 +127,7 @@ Verify with: `bash scripts/check-prereqs.sh --env`
 | `/pipeline` | CI/CD workflows (quality, build, security, integration, ops) |
 | `/infra` | Production infrastructure (health, security, backup, deploy) |
 | `/documents` | Audit and update project documentation |
-| `/carryforward` | Extract lessons learned between phases |
+| `/carryforward` | Extract lessons learned, maintain security/compliance record between phases |
 | `/phasebuild` | Create structure for new phase |
 
 ## Repository Structure
@@ -130,7 +141,7 @@ apex-spec-system/
   build/
     generate.sh             # Build script (pure bash, no dependencies)
     templates/              # Output templates
-  commands/                 # Canonical command sources (14 files, YAML + markdown)
+  commands/                 # Canonical command sources (12 files, YAML + markdown)
   docs/
     CANONICAL-FORMAT.md     # Command file format specification
     COMPATIBILITY-MATRIX.md # Feature support across all tools

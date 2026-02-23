@@ -2,7 +2,7 @@
 
 ## Adding Support for a New Tool
 
-The system generates tool-specific configurations from 14 canonical command files. To add a new tool:
+The system generates tool-specific configurations from 12 canonical command files. To add a new tool:
 
 ### 1. Add a Generator Function
 
@@ -39,7 +39,7 @@ The build script provides these pure-bash helpers:
 |----------|---------|
 | `parse_frontmatter FILE FIELD` | Extract a YAML frontmatter field value |
 | `parse_body FILE` | Extract markdown body (everything after second `---`) |
-| `collect_commands` | Generate a markdown table of all 14 commands |
+| `collect_commands` | Generate a markdown table of all 12 commands |
 
 ### 3. Add Installer Detection
 

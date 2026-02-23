@@ -28,7 +28,7 @@ cp dist/cursor/AGENTS.md /path/to/your-project/
 # 4. Open your project in Cursor
 ```
 
-All 14 commands will appear in Cursor's `/` command menu. The rule loads automatically.
+All 12 commands will appear in Cursor's `/` command menu. The rule loads automatically.
 
 ## What Gets Generated
 
@@ -41,9 +41,7 @@ One markdown file per command, with YAML frontmatter stripped (Cursor commands a
   initspec.md
   createprd.md
   phasebuild.md
-  nextsession.md
-  sessionspec.md
-  tasks.md
+  plansession.md
   implement.md
   validate.md
   updateprd.md
@@ -85,8 +83,8 @@ Once installed, use the spec system workflow in Cursor:
 
 1. Type `/` in chat to see available commands
 2. Select `/initspec` to set up `.spec_system/` in your project
-3. Follow the workflow: `/nextsession` -> `/sessionspec` -> `/tasks` -> `/implement` -> `/validate` -> `/updateprd`
-4. Between phases: `/audit` -> `/pipeline` -> `/infra` -> `/documents` -> `/carryforward`
+3. Follow the workflow: `/plansession` -> `/implement` -> `/validate` -> `/updateprd`
+4. Between phases: `/audit` -> `/pipeline` -> `/infra` -> `/carryforward` -> `/documents`
 
 ## Updating
 

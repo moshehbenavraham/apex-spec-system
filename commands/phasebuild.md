@@ -28,6 +28,10 @@ If `.spec_system/CONSIDERATIONS.md` exists, review it for:
 - **Lessons Learned** (patterns to follow or avoid)
 - **Tool/Library Notes** relevant to this phase
 
+If `.spec_system/SECURITY-COMPLIANCE.md` exists, review it for:
+- **Open Findings** that should be addressed in this phase's sessions
+- **GDPR Status** that may affect data-handling session scope
+
 ### 2. Create Phase Directory and PRD Markdown
 
 Create directory `.spec_system/PRD/phase_NN/` and markdown `.spec_system/PRD/phase_NN/PRD_phase_NN.md`:
@@ -250,5 +254,5 @@ Sessions Defined: N
 Next Steps:
 - Review session definitions
 - Adjust scope as needed
-- Run `/nextsession` to begin
+- Run `/plansession` to begin
 ```

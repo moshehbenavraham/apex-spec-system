@@ -470,8 +470,8 @@ generate_windsurf() {
 
     # Stage groupings
     local plan_cmds="initspec createprd phasebuild"
-    local build_cmds="nextsession sessionspec tasks implement validate updateprd"
-    local harden_cmds="audit pipeline infra documents carryforward"
+    local build_cmds="plansession implement validate updateprd"
+    local harden_cmds="audit pipeline infra carryforward documents"
 
     # Helper: generate a condensed stage rule file (under 12K chars)
     # Includes command name + description + first section only
@@ -613,7 +613,7 @@ generate_copilot() {
 
     {
         echo "---"
-        echo "description: 'Apex Spec Workflow - specification-driven AI development system with 14 commands for structured project delivery'"
+        echo "description: 'Apex Spec Workflow - specification-driven AI development system with 12 commands for structured project delivery'"
         echo "applyTo: '**/*'"
         echo "---"
         echo ""
@@ -699,8 +699,8 @@ generate_goose() {
         echo ""
         echo "3-Stage Workflow: PLAN -> BUILD -> HARDEN"
         echo "  PLAN: /initspec, /createprd, /phasebuild"
-        echo "  BUILD: /nextsession, /sessionspec, /tasks, /implement, /validate, /updateprd"
-        echo "  HARDEN: /audit, /pipeline, /infra, /documents, /carryforward"
+        echo "  BUILD: /plansession, /implement, /validate, /updateprd"
+        echo "  HARDEN: /audit, /pipeline, /infra, /carryforward, /documents"
         echo ""
         echo "Key paths:"
         echo "  .spec_system/state.json    - Project state tracking"

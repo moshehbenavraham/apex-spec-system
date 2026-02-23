@@ -33,7 +33,7 @@ cd /path/to/your-project
 gemini
 ```
 
-Gemini CLI will automatically read `AGENTS.md` and discover all 14 commands.
+Gemini CLI will automatically read `AGENTS.md` and discover all 12 commands.
 
 ## What Gets Generated
 
@@ -41,7 +41,7 @@ Gemini CLI will automatically read `AGENTS.md` and discover all 14 commands.
 
 Placed at your project root. Contains:
 - Core philosophy and 3-stage workflow
-- Command reference table (all 14 commands)
+- Command reference table (all 12 commands)
 - Directory structure, session scope rules, task format
 - Scripts reference and troubleshooting
 
@@ -55,9 +55,7 @@ One TOML file per command:
 .gemini/commands/
   initspec.toml
   createprd.toml
-  nextsession.toml
-  sessionspec.toml
-  tasks.toml
+  plansession.toml
   implement.toml
   validate.toml
   updateprd.toml
@@ -79,7 +77,7 @@ Set up the complete `.spec_system/` directory structure...
 """
 ```
 
-All 14 commands are flat files (no nested directories).
+All 12 commands are flat files (no nested directories).
 
 ### Skill (`.gemini/skills/spec-workflow/`)
 
@@ -121,12 +119,10 @@ Once installed, use the spec system workflow in Gemini CLI:
 1. `/initspec` -- Set up `.spec_system/` in your project
 2. `/createprd` -- Generate PRD from requirements
 3. `/phasebuild` -- Create phase structure
-4. `/nextsession` -- Get next session recommendation
-5. `/sessionspec` -- Create formal specification
-6. `/tasks` -- Generate task checklist
-7. `/implement` -- AI-led implementation
-8. `/validate` -- Verify completeness
-9. `/updateprd` -- Mark session complete, loop back to step 4
+4. `/plansession` -- Analyze, create spec and task checklist
+5. `/implement` -- AI-led implementation
+6. `/validate` -- Verify completeness
+7. `/updateprd` -- Mark session complete, loop back to step 4
 
 ## Updating
 

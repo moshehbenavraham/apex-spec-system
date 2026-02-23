@@ -12,7 +12,7 @@ The Apex Spec System MCP server exposes 5 tools over stdio transport:
 | `check_prereqs` | Validate prerequisites for current session (wraps `check-prereqs.sh --json`) |
 | `get_state` | Read `.spec_system/state.json` |
 | `update_state` | Update specific state fields (current_phase, current_session, completed_sessions, phase_status) |
-| `list_commands` | Return all 14 command names and descriptions |
+| `list_commands` | Return all 12 command names and descriptions |
 
 ## Prerequisites
 
@@ -138,7 +138,7 @@ Merges updates into `.spec_system/state.json`.
 
 ### list_commands
 
-Lists all 14 canonical commands.
+Lists all 12 canonical commands.
 
 **Parameters:** None.
 

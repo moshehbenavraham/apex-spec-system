@@ -6,7 +6,7 @@ Apex Spec System feature support across AI coding tools.
 
 | Feature | Codex CLI | Gemini CLI | Cursor | VS Code / Copilot | Cline | Windsurf | Antigravity | GitHub Copilot | Amazon Q | Goose | Kiro | Aider |
 |---------|-----------|------------|--------|-------------------|-------|----------|-------------|----------------|----------|-------|------|-------|
-| **Commands (14)** | Skills (SKILL.md + openai.yaml) | TOML commands (.gemini/commands/) | Markdown commands (.cursor/commands/) | Via MCP only | Via AGENTS.md + MCP | Via rules (summaries) + MCP | Via skill + MCP | Via instructions + AGENTS.md | Via rules + AGENTS.md | Via .goosehints + AGENTS.md | Via steering + AGENTS.md | Via --read AGENTS.md |
+| **Commands (12)** | Skills (SKILL.md + openai.yaml) | TOML commands (.gemini/commands/) | Markdown commands (.cursor/commands/) | Via MCP only | Via AGENTS.md + MCP | Via rules (summaries) + MCP | Via skill + MCP | Via instructions + AGENTS.md | Via rules + AGENTS.md | Via .goosehints + AGENTS.md | Via steering + AGENTS.md | Via --read AGENTS.md |
 | **Skill / Rules** | Skills directory (.agents/skills/) | SKILL.md + references (.gemini/skills/) | MDC rule (.cursor/rules/) | Via MCP only | .clinerules/ (YAML frontmatter) | .windsurf/rules/ (3 stage files) | .agent/skills/ | .github/instructions/ | .amazonq/rules/ | .goosehints | .kiro/steering/ | Read-only context |
 | **AGENTS.md** | Native (project root) | Native (project root) | Native (project root) | Native (project root) | Auto-detected (project root) | Native (project root) | Native (project root) | Native (project root) | Native (project root) | Native (CONTEXT_FILE_NAMES) | Native (project root) | Via --read flag |
 | **MCP Tools (5)** | config.toml fragment | settings.json fragment | .cursor/mcp.json | .vscode/mcp.json | cline_mcp_settings.json | mcp_config.json | Via Gemini MCP config | .vscode/mcp.json | N/A | N/A | N/A | N/A |
@@ -32,9 +32,7 @@ All MCP-capable clients can access these 5 tools:
 | `/initspec` | Skill invocation | `/initspec` TOML | `/@initspec` cmd | Via AGENTS.md | Plan rule | Via skill | Via instructions | Via rules | Via hints | Via steering | Via context |
 | `/createprd` | Skill invocation | `/createprd` TOML | `/@createprd` cmd | Via AGENTS.md | Plan rule | Via skill | Via instructions | Via rules | Via hints | Via steering | Via context |
 | `/phasebuild` | Skill invocation | `/phasebuild` TOML | `/@phasebuild` cmd | Via AGENTS.md | Plan rule | Via skill | Via instructions | Via rules | Via hints | Via steering | Via context |
-| `/nextsession` | Skill invocation | `/nextsession` TOML | `/@nextsession` cmd | Via AGENTS.md | Build rule | Via skill | Via instructions | Via rules | Via hints | Via steering | Via context |
-| `/sessionspec` | Skill invocation | `/sessionspec` TOML | `/@sessionspec` cmd | Via AGENTS.md | Build rule | Via skill | Via instructions | Via rules | Via hints | Via steering | Via context |
-| `/tasks` | Skill invocation | `/tasks` TOML | `/@tasks` cmd | Via AGENTS.md | Build rule | Via skill | Via instructions | Via rules | Via hints | Via steering | Via context |
+| `/plansession` | Skill invocation | `/plansession` TOML | `/@plansession` cmd | Via AGENTS.md | Build rule | Via skill | Via instructions | Via rules | Via hints | Via steering | Via context |
 | `/implement` | Skill invocation | `/implement` TOML | `/@implement` cmd | Via AGENTS.md | Build rule | Via skill | Via instructions | Via rules | Via hints | Via steering | Via context |
 | `/validate` | Skill invocation | `/validate` TOML | `/@validate` cmd | Via AGENTS.md | Build rule | Via skill | Via instructions | Via rules | Via hints | Via steering | Via context |
 | `/updateprd` | Skill invocation | `/updateprd` TOML | `/@updateprd` cmd | Via AGENTS.md | Build rule | Via skill | Via instructions | Via rules | Via hints | Via steering | Via context |

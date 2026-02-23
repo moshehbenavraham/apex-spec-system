@@ -46,7 +46,7 @@ This returns structured JSON including:
 - `current_session_dir_exists` - Whether specs directory exists
 - `current_session_files` - Files already in the session directory
 
-**IMPORTANT**: Use the `current_session` value from this output. If `current_session` is `null`, run `/nextsession` and `/sessionspec` yourself to set one up. Only ask the user if those commands require user input.
+**IMPORTANT**: Use the `current_session` value from this output. If `current_session` is `null`, run `/plansession` yourself to set one up. Only ask the user if that command requires user input.
 
 ### 2. Verify Environment Prerequisites (REQUIRED)
 
@@ -87,6 +87,7 @@ Using the `current_session` value from the script output, read:
 - `.spec_system/specs/[current-session]/spec.md` - Full specification
 - `.spec_system/specs/[current-session]/tasks.md` - Task checklist
 - `.spec_system/specs/[current-session]/implementation-notes.md` - Progress log (if exists)
+- `.spec_system/specs/[current-session]/security-compliance.md` - Prior security report (if exists from previous validation run)
 - `.spec_system/CONVENTIONS.md` - Project coding conventions (if exists)
 
 **Resuming?** If `implementation-notes.md` and completed tasks already exist, read them to understand current state and resume from the next incomplete task.

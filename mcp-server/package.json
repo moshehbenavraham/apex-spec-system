@@ -1,6 +1,6 @@
 {
   "name": "apex-spec-mcp-server",
-  "version": "1.0.1-beta",
+  "version": "1.0.2-beta",
   "description": "MCP server exposing Apex Spec System tools for any MCP-capable client",
   "type": "module",
   "main": "dist/index.js",

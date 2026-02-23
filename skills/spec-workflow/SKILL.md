@@ -1,7 +1,7 @@
 ---
 name: Apex Spec Workflow
-description: This skill should be used when the user asks about "spec system", "session workflow", "createprd", "nextsession", "sessionspec", "implement session", "validate session", "phase build", "session scope", "task checklist", or when working in a project containing .spec_system/ directory. Provides guidance for specification-driven AI development workflows.
-version: 1.0.1-beta
+description: This skill should be used when the user asks about "spec system", "session workflow", "createprd", "plansession", "implement session", "validate session", "phase build", "session scope", "task checklist", or when working in a project containing .spec_system/ directory. Provides guidance for specification-driven AI development workflows.
+version: 1.0.2-beta
 ---
 
 # Apex Spec Workflow
@@ -16,7 +16,7 @@ Break large projects into manageable, well-scoped implementation sessions that f
 
 A collection of sessions is a phase. A collection of phases is a mature/late technical PRD.
 
-## The 14-Command Workflow
+## The 12-Command Workflow
 
 The workflow has **3 distinct stages**:
 
@@ -37,13 +37,7 @@ The workflow has **3 distinct stages**:
 ### Stage 2: SESSIONS WORKFLOW (Repeat Until Phase Complete)
 
 ```
-/nextsession   ->  Analyze project, recommend next session
-      |
-      v
-/sessionspec   ->  Convert to formal specification
-      |
-      v
-/tasks         ->  Generate 12-25 task checklist
+/plansession   ->  Analyze project, create spec + task checklist
       |
       v
 /implement     ->  AI-led task-by-task implementation
@@ -54,7 +48,7 @@ The workflow has **3 distinct stages**:
       v
 /updateprd     ->  Sync PRD, mark session complete
       |
-      +-------------> Loop back to /nextsession
+      +-------------> Loop back to /plansession
                       until ALL phase sessions complete
 ```
 
@@ -70,13 +64,13 @@ The workflow has **3 distinct stages**:
 /infra             ->  Production infrastructure (health, security, backup, deploy)
       |
       v
+/carryforward      ->  Capture lessons learned (optional but recommended)
+      |
+      v
 /documents         ->  Audit and update documentation
       |
       v
 [User Action]      ->  Manual testing (highly recommended)
-      |
-      v
-/carryforward      ->  Capture lessons learned (optional but recommended)
       |
       v
 /phasebuild        ->  Create next phase structure
@@ -94,6 +88,7 @@ project/
 |-- .spec_system/               # All spec system files
 |   |-- state.json              # Project state tracking
 |   |-- CONSIDERATIONS.md       # Institutional memory (lessons learned)
+|   |-- SECURITY-COMPLIANCE.md  # Security posture & GDPR compliance
 |   |-- CONVENTIONS.md          # Project coding standards and conventions
 |   |-- PRD/                    # Product requirements
 |   |   |-- PRD.md              # Master PRD
@@ -103,6 +98,7 @@ project/
 |   |       |-- spec.md
 |   |       |-- tasks.md
 |   |       |-- implementation-notes.md
+|   |       |-- security-compliance.md
 |   |       \-- validation.md
 |   |-- scripts/                # Bash automation (if copied locally)
 |   \-- archive/                # Completed work
@@ -221,17 +217,15 @@ The `.spec_system/state.json` file tracks project progress:
 |---------|---------|-------|--------|
 | `/initspec` | Initialize spec system | Project info | .spec_system/ structure |
 | `/createprd` | Generate master PRD | Requirements doc or user text | PRD/PRD.md |
-| `/nextsession` | Recommend next session | state.json, PRD | NEXT_SESSION.md |
-| `/sessionspec` | Create specification | NEXT_SESSION.md | specs/.../spec.md |
-| `/tasks` | Generate task list | spec.md | specs/.../tasks.md |
+| `/plansession` | Analyze, spec, and task list | state.json, PRD | specs/.../spec.md + tasks.md |
 | `/implement` | Code implementation | spec.md, tasks.md | implementation-notes.md |
-| `/validate` | Verify completeness | All session files | validation.md |
+| `/validate` | Verify completeness | All session files | security-compliance.md, validation.md |
 | `/updateprd` | Mark complete | validation.md | Updated state.json |
 | `/audit` | Local dev tooling | CONVENTIONS.md | Updated tools, report |
 | `/pipeline` | CI/CD workflows | CONVENTIONS.md | Workflow files, report |
 | `/infra` | Production infra | CONVENTIONS.md | Configs, report |
 | `/documents` | Audit/update docs | state.json, PRD, codebase | Updated docs, docs-audit.md |
-| `/carryforward` | Capture lessons | Completed phase artifacts | CONSIDERATIONS.md |
+| `/carryforward` | Capture lessons & security posture | Completed phase artifacts | CONSIDERATIONS.md, SECURITY-COMPLIANCE.md |
 | `/phasebuild` | Create new phase | PRD | PRD/phase_NN/ |
 
 ## Additional Resources
@@ -305,14 +299,14 @@ Commands use a **hybrid approach** for reliability:
 **Commands and their script usage:**
 | Command | analyze-project.sh | check-prereqs.sh |
 |---------|-------------------|------------------|
-| `/nextsession` | State + candidates | - |
+| `/plansession` | State + candidates | - |
 | `/implement` | Current session | Environment + tools |
 | `/validate` | Current session | - |
 | `/documents` | State + progress | - |
 
 ## Best Practices
 
-1. **Start with /nextsession** - Always analyze state before choosing work
+1. **Start with /plansession** - Always analyze state before choosing work
 2. **One session at a time** - Complete before starting next
 3. **MVP first** - Defer polish and optimizations
 4. **Validate encoding** - Check ASCII before committing
@@ -325,7 +319,7 @@ Commands use a **hybrid approach** for reliability:
 
 | Problem | Solution |
 |---------|----------|
-| Scope too large | Split session in PRD before /sessionspec |
+| Scope too large | Split session in PRD before /plansession |
 | ASCII validation fails | Run `grep -P '[^\x00-\x7F]'` to find issues |
 | State out of sync | Manually update .spec_system/state.json |
 | Commands not found | Verify plugin is enabled |
