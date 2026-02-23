@@ -55,17 +55,52 @@ Practical guidance for getting the most out of the Apex Spec System.
 
 ## Workflow
 
+The project is initiated, then iterates through phases. Each phase consists of sessions. Between phases, the system is hardened.
+
+### Start a Project
+
+Ran once at the beginning of the project.
+
 ```
-/nextsession -> /sessionspec -> /tasks -> /implement -> /validate -> /updateprd
+/initspec -> /createprd -> /phasebuild
 ```
 
 **Artifacts created:**
-- NEXT_SESSION.md (recommendation)
+- PRD.md (master requirements document)
+- state.json
+- Folder structure and templates
+- 1st Phase and Sessions
+
+### Session
+
+Ran repeatedly until all the sessions of the Phase are completed.
+
+```
+/plansession -> /implement -> /validate -> /updateprd
+```
+
+**Artifacts created:**
 - spec.md (detailed specification)
 - tasks.md (12-25 task checklist)
 - implementation-notes.md (progress log)
+- security-compliance.md (security & GDPR review)
 - validation.md (quality verification)
 - IMPLEMENTATION_SUMMARY.md (completion record)
+
+### Between Phases
+
+Ran once after all sessions of a Phase are completed, between each Phase.
+
+```
+/audit -> /pipeline -> /infra -> /carryforward -> /documents -> /phasebuild
+```
+
+**Artifacts created:**
+- CONSIDERATIONS.md
+- CONVENTIONS.md
+- SECURITY-COMPLIANCE.md
+- Documentation, potentially .github workflows, etc
+- Next Phase and Sessions
 
 ---
 
@@ -133,6 +168,7 @@ Treat Apex Spec as a **personal workflow tool** that produces **shareable artifa
 - specs, tasks, validation reports are reviewable
 - implementation-notes.md provides context
 - CONSIDERATIONS.md captures institutional memory
+- SECURITY-COMPLIANCE.md tracks cumulative security posture and GDPR compliance
 - Git commits provide natural integration points
 
 ---
@@ -190,9 +226,7 @@ Session Velocity:
 | Start new project | `/initspec` |
 | Generate PRD from requirements | `/createprd "description"` or `/createprd @file.md` |
 | Create phase structure | `/phasebuild` |
-| Get next session recommendation | `/nextsession` |
-| Create session specification | `/sessionspec` |
-| Generate task checklist | `/tasks` |
+| Analyze, spec, and generate tasks | `/plansession` |
 | Implement tasks | `/implement` |
 | Verify completion | `/validate` |
 | Mark session complete | `/updateprd` |
@@ -200,7 +234,7 @@ Session Velocity:
 | Add CI/CD | `/pipeline` |
 | Add infrastructure | `/infra` |
 | Update documentation | `/documents` |
-| Capture lessons learned | `/carryforward` |
+| Capture lessons & security posture | `/carryforward` |
 
 ### Session Limits
 

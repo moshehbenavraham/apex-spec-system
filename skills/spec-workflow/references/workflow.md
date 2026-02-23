@@ -2,111 +2,58 @@
 
 ## Command Workflows
 
-### /nextsession Workflow
+### /plansession Workflow
 
-**Purpose**: Analyze project state and recommend the next implementation session.
+**Purpose**: Analyze project state, create session specification, and generate task checklist in one step.
 
 **Steps**:
 
-1. **Read Project State**
-   - Read `.spec_system/state.json` for current phase and completed sessions
-   - Read `.spec_system/PRD/PRD.md` for master project requirements
+1. **Get Project State**
+   - Run `analyze-project.sh --json` for deterministic state facts
+   - Read `.spec_system/PRD/PRD.md` for master requirements
    - Read `.spec_system/PRD/phase_XX/` for current phase session definitions
+   - Read `.spec_system/CONSIDERATIONS.md`, `.spec_system/SECURITY-COMPLIANCE.md`, and `.spec_system/CONVENTIONS.md`
 
-2. **Analyze Progress**
-   - Determine current phase status
-   - Identify completed sessions
+2. **Analyze and Recommend**
+   - Determine current phase status and completed sessions
    - Find sessions with unmet prerequisites
-   - Determine natural next session based on dependencies
+   - Evaluate candidates by dependencies, complexity, project flow
+   - Choose the natural next session
 
-3. **Evaluate Candidates**
-   - Check prerequisites are met
-   - Verify dependencies completed
-   - Assess complexity and scope
-   - Consider logical flow
-
-4. **Generate Recommendation**
-   - Create `.spec_system/NEXT_SESSION.md` with full recommendation
-   - Include session ID, objectives, deliverables
-   - List alternatives if primary is blocked
-
-5. **Update State**
-   - Add entry to `next_session_history`
-   - Set `current_session` if appropriate
-
-**Decision Points**:
-- If multiple sessions ready: Choose based on dependencies, complexity, project flow
-- If session blocked: Recommend alternative with explanation
-- If phase complete: Suggest `/phasebuild` for next phase
-
----
-
-### /sessionspec Workflow
-
-**Purpose**: Convert session recommendation into detailed technical specification.
-
-**Steps**:
-
-1. **Read Inputs**
-   - `.spec_system/NEXT_SESSION.md` - Session recommendation
-   - `.spec_system/state.json` - Project state
-   - `.spec_system/PRD/phase_XX/session_XX.md` - Session definition (if exists)
-   - Scripts from `.spec_system/scripts/` (local) or `${CLAUDE_PLUGIN_ROOT}/scripts/` (plugin)
-
-2. **Create Session Directory**
+3. **Create Session Directory and Specification**
    ```
    .spec_system/specs/phaseNN-sessionNN-name/
-   └── spec.md
+   |-- spec.md
+   \-- tasks.md
    ```
-
-3. **Generate Specification**
-   - Fill all sections from template
+   - Fill all spec sections from template
    - Estimate deliverables and line counts
-   - Define success criteria
-   - Document technical approach
+   - Define success criteria and technical approach
 
-4. **Archive Recommendation**
-   - Move `.spec_system/NEXT_SESSION.md` to session directory
+4. **Generate Task List**
+   - Create `tasks.md` in session directory
+   - Organize by category (Setup, Foundation, Implementation, Testing)
+   - 12-25 tasks, each ~20-25 minutes
+   - Add parallelization markers where appropriate
+   - Include file paths for each task
 
 5. **Update State**
    - Set `current_session` to session ID
-   - Update `next_session_history` status
+   - Add entry to `next_session_history` with status `planned`
+
+6. **Archive Stale Specs**
+   - Keep specs from current phase and one phase back
+   - Move older specs to `.spec_system/archive/sessions/`
 
 **Scope Validation**:
 - Reject if > 25 tasks estimated
 - Reject if > 4 hours estimated
 - Reject if multiple objectives
 
----
-
-### /tasks Workflow
-
-**Purpose**: Generate detailed, sequenced task checklist (12-25 tasks).
-
-**Steps**:
-
-1. **Read Specification**
-   - Read `.spec_system/specs/[session]/spec.md`
-   - Get session ID from `.spec_system/state.json`
-
-2. **Analyze Requirements**
-   - Identify deliverables
-   - Extract success criteria
-   - Note technical approach
-   - Map testing requirements
-   - Determine task dependencies
-
-3. **Generate Task List**
-   - Create `tasks.md` in session directory
-   - Organize by category (Setup, Foundation, Implementation, Testing)
-   - Add parallelization markers where appropriate
-   - Include file paths for each task
-
-**Task Sizing Guidelines**:
-- Each task: ~20-25 minutes
-- Single file focus when possible
-- Clear, atomic action
-- Verifiable completion
+**Decision Points**:
+- If multiple sessions ready: Choose based on dependencies, complexity, project flow
+- If session blocked: Recommend alternative with explanation
+- If phase complete: Suggest `/phasebuild` for next phase
 
 ---
 
@@ -179,7 +126,12 @@
    - Verify testing requirements
    - Confirm quality gates
 
-**Output**: Create `validation.md` with PASS/FAIL status and detailed breakdown.
+6. **Security & GDPR Compliance**
+   - Review only files created/modified in this session
+   - OWASP Top 10 spot-check (injection, secrets, data exposure, dependencies, misconfig)
+   - GDPR check (data collection, consent, minimization, erasure, PII in logs, third-party)
+
+**Output**: Create `security-compliance.md` (detailed security/GDPR report) and `validation.md` (overall PASS/FAIL with summary referencing the security report).
 
 **PASS Requirements** (all must be true):
 - 100% tasks completed
@@ -187,6 +139,7 @@
 - All files ASCII-encoded with LF endings
 - All tests passing
 - All success criteria met
+- No security or GDPR violations
 
 ---
 
@@ -424,6 +377,7 @@
 1. **Gather Phase Artifacts**
    - Read all session implementation-notes.md files
    - Read all session validation.md files
+   - Read all session security-compliance.md files
    - Identify patterns, blockers, and decisions
 
 2. **Extract Lessons**
@@ -437,7 +391,13 @@
    - Update general guidelines if patterns are universal
    - Keep concise and actionable
 
-4. **Archive Phase**
+4. **Update SECURITY-COMPLIANCE.md**
+   - Synthesize all session security-compliance.md reports into cumulative record
+   - Move remediated findings to Resolved section
+   - Update Personal Data Inventory, Dependency Security, Phase History
+   - 1000-line limit -- re-synthesize, don't append
+
+5. **Archive Phase**
    - Move completed phase artifacts to archive if needed
 
 **Key Rules**:
@@ -462,10 +422,10 @@
 2. **Create Directory Structure**
    ```
    .spec_system/PRD/phase_NN/
-   ├── README.md
-   ├── session_01_name.md
-   ├── session_02_name.md
-   └── ...
+   |-- README.md
+   |-- session_01_name.md
+   |-- session_02_name.md
+   \-- ...
    ```
 
 3. **Create Phase PRD**
@@ -505,14 +465,12 @@ The workflow has **3 distinct stages**:
 ### Stage 2: SESSIONS WORKFLOW (Repeat Until Phase Complete)
 
 ```
-[Phase Created] --/nextsession--> [Recommended]
-[Recommended] --/sessionspec--> [Specified]
-[Specified] --/tasks--> [Ready]
-[Ready] --/implement--> [In Progress]
+[Phase Created] --/plansession--> [Planned]
+[Planned] --/implement--> [In Progress]
 [In Progress] --/validate--> [Validated]
 [Validated:PASS] --/updateprd--> [Session Complete]
 [Validated:FAIL] --fix issues--> [In Progress]
-[Session Complete] --more sessions?--> /nextsession --> [Recommended]
+[Session Complete] --more sessions?--> /plansession --> [Planned]
 [Session Complete] --all sessions done--> [Phase Complete]
 ```
 
@@ -528,13 +486,13 @@ The workflow has **3 distinct stages**:
 [CI/CD Ready] --/infra--> [Infrastructure Ready] (optional)
     |
     v
-[Infrastructure Ready] --/documents--> [Docs Updated]
+[Infrastructure Ready] --/carryforward--> [Lessons Captured] (optional)
+    |
+    v
+[Lessons Captured] --/documents--> [Docs Updated]
     |
     v
 [Docs Updated] --manual testing--> (highly recommended)
-    |
-    v
-[Tested] --/carryforward--> [Lessons Captured] (optional)
     |
     v
 [Ready] --/phasebuild--> [New Phase Created]

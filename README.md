@@ -1,6 +1,6 @@
 # Apex Spec System
 
-**Version: 0.35.12-beta**
+**Version: 1.0.2-beta**
 
 A Claude Code plugin providing a specification-driven workflow system for AI-assisted development. Think Github Spec Kit (our source inspiration) simplified.
 
@@ -9,12 +9,6 @@ A Claude Code plugin providing a specification-driven workflow system for AI-ass
 The Apex Spec System breaks large projects into manageable, well-scoped implementation sessions that fit within AI context windows and human attention spans.
 
 **Philosophy**: `1 session = 1 spec = 2-4 hours (12-25 tasks) = safe context window of AI`
-
-**Video Tutorial**: [Watch on YouTube](https://youtu.be/iY6ySesmOCg) - Installation and workflow walkthrough
-
-**Real-World Example**: See [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md) - Complete walkthrough using a production project (79+ sessions, 16 phases)
-
-**Usage Guidance**: See [docs/GUIDANCE.md](docs/GUIDANCE.md) - When to use, workflow modes, team patterns
 
 ## Installation
 
@@ -61,22 +55,20 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 
 3. **Run the session workflow and repeat until all sessions inside the Phase are completed, thus completing the Phase**:
    ```
-   /nextsession OR /apex-spec:nextsession    # Get recommendation for next session
-   /sessionspec OR /apex-spec:sessionspec    # Create formal specification
-   /tasks OR /apex-spec:tasks                # Generate task checklist
+   /plansession OR /apex-spec:plansession    # Analyze, spec, and generate task checklist
    /implement OR /apex-spec:implement        # Start implementation
-   /validate OR /apex-spec:validate          # Verify completeness
+   /validate OR /apex-spec:validate          # Verify completeness, security & compliance
    /updateprd OR /apex-spec:updateprd        # Mark complete, update system
    ```
 
  4. **Between Phases**
    ```
-   /audit OR /apex-spec:audit                # Local dev tooling (formatter, linter, types, tests, hooks)
+   /audit OR /apex-spec:audit                # Local dev tooling (formatter, linter, types, tests, observability, hooks)
    /pipeline OR /apex-spec:pipeline          # CI/CD workflows (quality, build, security, integration, ops)
    /infra OR /apex-spec:infra                # Production infrastructure (health, security, backup, deploy)
+   /carryforward OR /apex-spec:carryforward  # Lessons learned, security/compliance records
    /documents OR /apex-spec:documents        # Create, maintain project documentation
    -- Optional but recommended, do manual testing HERE --
-   /carryforward OR /apex-spec:carryforward  # Capture lessons learned (optional)
    /phasebuild OR /apex-spec:phasebuild      # Set up next Phase and Phase's sessions
    ```
 
@@ -84,10 +76,10 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 
 ## Features
 
-- **14-Command Workflow**: Structured process from initialization to completion
+- **12-Command Workflow**: Structured process from initialization to completion
 - **Session Scoping**: Keep work manageable with 12-25 tasks per session
 - **Progress Tracking**: State file and checklists track progress
-- **Validation Gates**: Verify completeness before marking done
+- **Validation Gates**: Verify completeness, security & GDPR compliance before marking done
 - **Coding Conventions**: Customizable standards enforced during implementation and validation
 - **Auto-Activating Skill**: Provides workflow guidance automatically
 - **Dev Tooling**: Regular code quality audits
@@ -96,23 +88,21 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 
 ## Plugin Components
 
-### Commands (14 total)
+### Commands (12 total)
 
 | Command | Purpose |
 |---------|---------|
 | `/initspec` | Initialize spec system in current project |
 | `/createprd` | Generate master PRD from requirements document |
-| `/nextsession` | Analyze project and recommend next session |
-| `/sessionspec` | Create formal technical specification |
-| `/tasks` | Generate 12-25 task checklist |
+| `/plansession` | Analyze project, create spec and task checklist |
 | `/implement` | AI-led task-by-task implementation |
 | `/validate` | Verify session completeness |
 | `/updateprd` | Mark session complete, sync documentation |
-| `/audit` | Local dev tooling (formatter, linter, types, tests, hooks) |
+| `/audit` | Local dev tooling (formatter, linter, types, tests, observability, hooks) |
 | `/pipeline` | CI/CD workflows (quality, build, security, integration, ops) |
 | `/infra` | Production infrastructure (health, security, backup, deploy) |
 | `/documents` | Audit and update project documentation |
-| `/carryforward` | Extract lessons learned between phases |
+| `/carryforward` | Extract lessons learned, maintain security/compliance record between phases |
 | `/phasebuild` | Create structure for new phase |
 
 ### Skill
@@ -132,71 +122,44 @@ After running `/initspec`, your project will have:
 
 ```
 your-project/
-├── .spec_system/               # All spec system files
-│   ├── state.json              # Project state tracking
-│   ├── CONSIDERATIONS.md       # Institutional memory (lessons learned)
-│   ├── CONVENTIONS.md          # Project coding standards and conventions
-│   ├── PRD/                    # Product requirements
-│   │   ├── PRD.md              # Master PRD
-│   │   └── phase_00/           # Phase definitions
-│   ├── specs/                  # Implementation specs
-│   │   └── phaseNN-sessionNN-name/
-│   │       ├── spec.md
-│   │       ├── tasks.md
-│   │       ├── implementation-notes.md
-│   │       └── validation.md
-│   └── archive/                # Completed work
-└── (your project source files)
+|-- .spec_system/               # All spec system files
+|   |-- state.json              # Project state tracking
+|   |-- CONSIDERATIONS.md       # Institutional memory (lessons learned)
+|   |-- SECURITY-COMPLIANCE.md  # Security posture & GDPR compliance
+|   |-- CONVENTIONS.md          # Project coding standards and conventions
+|   |-- PRD/                    # Product requirements
+|   |   |-- PRD.md              # Master PRD
+|   |   \-- phase_00/           # Phase definitions
+|   |-- specs/                  # Implementation specs
+|   |   \-- phaseNN-sessionNN-name/
+|   |       |-- spec.md
+|   |       |-- tasks.md
+|   |       |-- implementation-notes.md
+|   |       |-- security-compliance.md
+|   |       \-- validation.md
+|   \-- archive/                # Completed work
+\-- (your project source files)
 ```
 
 ## Session Scope
 
-### Hard Limits
 - Maximum 25 tasks per session
 - Maximum 4 hours estimated time
 - Single clear objective
+- Ideal: 12-25 tasks (sweet spot: 20)
 
-### Ideal Targets
-- 12-25 tasks (sweet spot: 20)
-- 2-3 hours typical
-- Stable/late MVP focus
+## ASCII Encoding (Non-Negotiable)
 
-## Session Naming
+All files must use ASCII-only characters (0-127). No Unicode, emoji, or smart quotes.
 
-**Format**: `phaseNN-sessionNN-name`
+## Video Tutorial
 
-Examples:
-- `phase00-session01-project-setup`
-- `phase01-session03-user-authentication`
+[Watch on YouTube](https://youtu.be/iY6ySesmOCg) - Installation and workflow walkthrough
 
-## Critical Rules
+## Documentation
 
-### ASCII Encoding (Non-Negotiable)
-
-All files must use ASCII-only characters (0-127):
-- NO Unicode characters
-- NO emoji
-- NO smart quotes - use straight quotes
-- Unix LF line endings only
-
-## Best Practices
-
-1. **One session at a time** - Complete before starting next
-2. **MVP first** - Defer polish and optimizations
-3. **Follow conventions** - Customize and follow CONVENTIONS.md for consistency
-4. **Validate encoding** - Check ASCII before committing
-5. **Update tasks continuously** - Mark checkboxes immediately
-6. **Do manual testing** - Best judgment, but at least manual testing per Phase
-7. **Trust the system** - Follow workflow, resist scope creep
-
-## Recovery
-
-Worried about mistakes? Every `/updateprd` automatically commits and pushes your progress. Git is your safety net:
-
-- **Undo a completed session**: `git revert <commit>`
-- **Mid-session issues**: Resume with `/implement` or delete the session directory and re-run `/nextsession`
-
-No special recovery procedures - standard git workflows apply.
+- [Usage Guidance](docs/GUIDANCE.md) - When to use, workflow modes, team patterns
+- [Production Walkthrough](docs/WALKTHROUGH.md) - Real-world example (79+ sessions, 16 phases)
 
 ## License
 
