@@ -15,6 +15,7 @@ Execute each task in the session's task list, updating progress as you go.
 4. **Implement exactly what's in the spec** - no extra features, no refactoring unrelated code
 5. **Update tasks.md immediately** after completing each task - never batch checkbox updates
 6. **Write tests as specified** - ensure they pass before moving on
+7. **Ensure logging and error handling** - no silent failures
 
 ### No Deferral Policy
 
