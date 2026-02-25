@@ -205,6 +205,49 @@ Notes:
 - Do not create phase directories here - that is `/phasebuild`'s job
 - Use `[PHASE_NAME]` placeholder - default to "Foundation" if not specified
 
+### 6a. Monorepo Detection from PRD Content
+
+**Skip this step if** `monorepo` in state.json is already `true` or `false` (already determined by `/initspec` or a previous run).
+
+When `monorepo` is `null` (unknown), scan for multi-package signals:
+
+1. **Check PRD content** for signals:
+   - Multiple services or applications mentioned (e.g., "web app", "API server", "worker service")
+   - Explicit monorepo language ("monorepo", "workspace", "packages")
+   - Multiple distinct tech stacks for different components
+   - References to shared libraries or cross-service code
+
+2. **Check `monorepo_detection`** from the `analyze-project.sh --json` output (Step 2):
+   - If `monorepo_detection.detected` is `true`, use it as supporting evidence
+
+3. **If signals found**: Present the user with a proposed package map:
+   ```
+   Monorepo signals detected in PRD:
+   - [signal 1]
+   - [signal 2]
+
+   Proposed package map:
+   | Package | Path | Stack |
+   |---------|------|-------|
+   | web | apps/web | TypeScript |
+   | api | apps/api | TypeScript |
+
+   Confirm / Edit / Reject?
+   ```
+
+   - **Confirmed**: Set `monorepo: true` in state.json, add `packages` array, add Package Map section to PRD after Technical Stack:
+     ```markdown
+     ## Package Map
+
+     | Package | Path | Stack | Purpose |
+     |---------|------|-------|---------|
+     | web | apps/web | TypeScript | Frontend application |
+     | api | apps/api | TypeScript | Backend API server |
+     ```
+   - **Rejected**: Set `monorepo: false` in state.json
+
+4. **If no signals found**: Set `monorepo: false` in state.json
+
 ### 7. Customize CONVENTIONS.md for Tech Stack
 
 Customize `.spec_system/CONVENTIONS.md` to reflect the project's actual tech stack and domain. This is **initial customization** (more freedom to reshape) vs `/audit` which makes surgical edits later.
@@ -230,7 +273,7 @@ Read `.spec_system/CONVENTIONS.md` (the generic template from /initspec). Replac
 | CLI | Add exit code standards; stdout vs stderr rules; flag naming; help text conventions |
 | API | Add REST conventions; status code usage; error response format; versioning approach |
 | Library | Add semantic versioning rules; public API stability; backwards compatibility; documentation requirements |
-| Monorepo | Add workspace conventions; shared dependency rules; cross-package imports |
+| Monorepo | Add Workspace Structure section (package table + cross-package rules); shared dependency rules; cross-package imports; workspace alias conventions |
 
 **Section-specific transformations:**
 
@@ -248,6 +291,7 @@ Read `.spec_system/CONVENTIONS.md` (the generic template from /initspec). Replac
 - **React**: Add "Components" section for component patterns
 - **API**: Add "Endpoints" section for API design conventions
 - **Database**: Add "Data" section for schema/query conventions
+- **Monorepo** (if confirmed in Step 6a): Add "Workspace Structure" section with package table and cross-package rules (import aliases, shared types location, test boundaries, cross-package session scope)
 
 #### 7.3 Enforce 300-Line Limit (STRICT)
 
@@ -324,8 +368,13 @@ Conventions:
 - .spec_system/CONVENTIONS.md customized for [stack] (N/300 lines)
 - Key additions: [brief list, max 3]
 
+[If monorepo determined:]
+Monorepo: [true - N packages detected | false - single-repo confirmed]
+[If monorepo true:]
+- Package Map added to PRD
+- Workspace Structure added to CONVENTIONS.md
+
 Next Steps:
 1. Review the generated PRD and refine as needed
 2. Run /phasebuild to define Phase 00 sessions
-3. Run /plansession to begin implementation
 ```

@@ -16,7 +16,7 @@ Break large projects into manageable, well-scoped implementation sessions that f
 
 A collection of sessions is a phase. A collection of phases is a mature/late technical PRD.
 
-## The 12-Command Workflow
+## The 13-Command Workflow
 
 The workflow has **3 distinct stages**:
 
@@ -29,6 +29,9 @@ The workflow has **3 distinct stages**:
 /createprd         ->  Generate PRD from requirements doc (optional)
   OR                   OR
 [User Action]      ->  Manually populate PRD with requirements
+      |
+      v
+/createuxprd       ->  Generate UX PRD from design docs (optional)
       |
       v
 /phasebuild        ->  Create first phase structure (session stubs)
@@ -104,6 +107,41 @@ project/
 |   \-- archive/                # Completed work
 \-- (project source files)
 ```
+
+### Monorepo Directory Structure
+
+Monorepo projects use the **same single `.spec_system/` at the repo root**. Sessions reference their target package in metadata (spec.md header and state.json), not in directory names.
+
+```
+monorepo-project/
+|-- .spec_system/               # Single spec system at repo root
+|   |-- state.json              # Includes monorepo flag + packages array
+|   |-- CONVENTIONS.md          # Includes Workspace Structure table
+|   |-- CONSIDERATIONS.md
+|   |-- SECURITY-COMPLIANCE.md
+|   |-- PRD/
+|   |   |-- PRD.md              # Includes Package Map section
+|   |   \-- phase_00/
+|   |       |-- session_01_project_setup.md
+|   |       |-- session_02_web_scaffold.md      # Package: apps/web
+|   |       \-- session_03_api_models.md        # Package: apps/api
+|   |-- specs/
+|   |   |-- phase00-session01-project-setup/    # Cross-cutting (no package)
+|   |   |-- phase00-session02-web-scaffold/     # Scoped to apps/web
+|   |   \-- phase00-session03-api-models/       # Scoped to apps/api
+|   \-- archive/
+|-- apps/
+|   |-- web/                    # Frontend package
+|   \-- api/                    # Backend package
+\-- packages/
+    \-- shared/                 # Shared library
+```
+
+Key differences from single-repo:
+- Session stubs gain optional `Package:` annotation
+- spec.md headers include `Package:` and `Package Stack:` fields
+- CONVENTIONS.md includes a Workspace Structure table
+- Session numbering is global within a phase (interleaved across packages)
 
 ## Session Naming Convention
 
@@ -211,12 +249,51 @@ The `.spec_system/state.json` file tracks project progress:
 }
 ```
 
+### Monorepo State Tracking
+
+When `monorepo` is confirmed `true`, state.json gains a `packages` array and uses object-form `completed_sessions`:
+
+```json
+{
+  "version": "2.0",
+  "project_name": "Acme Platform",
+  "monorepo": true,
+  "packages": [
+    { "name": "web", "path": "apps/web", "type": "frontend", "stack": "TypeScript + React" },
+    { "name": "api", "path": "apps/api", "type": "backend", "stack": "Python 3.12 + FastAPI" },
+    { "name": "shared", "path": "packages/shared", "type": "library", "stack": "TypeScript" }
+  ],
+  "current_phase": 0,
+  "current_session": "phase00-session04-api-models",
+  "phases": {
+    "0": { "name": "Foundation", "status": "in_progress", "session_count": 6 }
+  },
+  "completed_sessions": [
+    { "id": "phase00-session01-project-setup", "package": null },
+    { "id": "phase00-session02-web-scaffold", "package": "apps/web" },
+    { "id": "phase00-session03-shared-types", "package": "packages/shared" }
+  ],
+  "next_session_history": []
+}
+```
+
+The `monorepo` field uses three states:
+
+| Value | Meaning | Behavior |
+|-------|---------|----------|
+| `null` (or absent) | Unknown / not yet determined | Commands look for signals, prompt if found |
+| `true` | Confirmed monorepo | Commands use package-aware logic |
+| `false` | Confirmed single-repo | Commands skip package logic entirely |
+
+Single-repo projects see no `packages` field and keep string-form `completed_sessions`. Existing state files without `monorepo` are treated as `null` (unknown), which behaves identically to classic single-repo until the user confirms otherwise.
+
 ## Command Quick Reference
 
 | Command | Purpose | Input | Output |
 |---------|---------|-------|--------|
 | `/initspec` | Initialize spec system | Project info | .spec_system/ structure |
 | `/createprd` | Generate master PRD | Requirements doc or user text | PRD/PRD.md |
+| `/createuxprd` | Generate UX PRD | Design docs or user text | PRD/PRD_UX.md |
 | `/plansession` | Analyze, spec, and task list | state.json, PRD | specs/.../spec.md + tasks.md |
 | `/implement` | Code implementation | spec.md, tasks.md | implementation-notes.md |
 | `/validate` | Verify completeness | All session files | security-compliance.md, validation.md |
@@ -229,11 +306,6 @@ The `.spec_system/state.json` file tracks project progress:
 | `/phasebuild` | Create new phase | PRD | PRD/phase_NN/ |
 
 ## Additional Resources
-
-### Reference Files
-
-For detailed guidance, consult:
-- **`references/workflow.md`** - Detailed command workflows and decision points
 
 ### Scripts Directory
 
@@ -269,14 +341,24 @@ Commands use a **hybrid approach** for reliability:
 ```json
 {
   "project": "project-name",
+  "monorepo": true,
+  "packages": [
+    {"name": "web", "path": "apps/web", "type": "frontend", "stack": "TypeScript + React"}
+  ],
+  "active_package": {"name": "web", "path": "apps/web"},
+  "monorepo_detection": null,
   "current_phase": 1,
   "current_session": "phase01-session02-feature",
-  "completed_sessions": ["phase00-session01-setup"],
+  "completed_sessions": [
+    {"id": "phase00-session01-setup", "package": null}
+  ],
   "candidate_sessions": [
-    {"file": "session_01_auth", "completed": false}
+    {"file": "session_01_auth", "completed": false, "package": "apps/web"}
   ]
 }
 ```
+
+For single-repo projects: `monorepo` is `null` or `false`, `packages` is `[]`, `active_package` is `null`, and `completed_sessions` uses the string array format.
 
 **check-prereqs.sh JSON Output:**
 ```json
@@ -290,11 +372,24 @@ Commands use a **hybrid approach** for reliability:
     "node": {"status": "pass", "info": "v20.10.0"},
     "docker": {"status": "fail", "info": "not installed"}
   },
+  "package": {
+    "registered": {"status": "pass", "info": "apps/web"},
+    "directory": {"status": "pass", "info": "apps/web"},
+    "manifest": {"status": "pass", "info": "package.json"},
+    "stack": {"status": "pass", "info": "TypeScript"}
+  },
+  "workspace": {
+    "status": {"status": "pass", "info": "monorepo detected"},
+    "manager": {"status": "pass", "info": "pnpm"},
+    "runner": {"status": "pass", "info": "turbo"}
+  },
   "issues": [
     {"type": "tool", "name": "docker", "message": "required tool not installed"}
   ]
 }
 ```
+
+The `package` and `workspace` sections appear only when `--package` is used or monorepo is detected. For single-repo projects these sections are empty objects (`{}`).
 
 **Commands and their script usage:**
 | Command | analyze-project.sh | check-prereqs.sh |
@@ -303,6 +398,60 @@ Commands use a **hybrid approach** for reliability:
 | `/implement` | Current session | Environment + tools |
 | `/validate` | Current session | - |
 | `/documents` | State + progress | - |
+
+## Monorepo Support
+
+The system supports monorepo projects through a "gentle assumption" -- it auto-detects multi-package structures and offers package-aware workflows, but never requires them. Single-repo projects see zero behavioral change.
+
+### How It Works
+
+1. **Detection is layered across commands:**
+   - `/initspec` (brownfield): Detects existing workspace configs (pnpm, npm, turbo, nx, cargo, go, lerna)
+   - `/createprd` (greenfield): Parses PRD content for multi-package signals
+   - `/phasebuild`: Checkpoint -- warns if PRD references packages but state lacks them
+   - Later commands: Opportunistic detection if workspace configs appear
+
+2. **Package context flows through sessions:**
+   - `/plansession` determines the target package (user input, stub annotation, or prompt)
+   - spec.md headers include `Package:` and `Package Stack:` fields
+   - Task file paths are scoped to the package directory (e.g., `apps/web/src/auth.ts`)
+   - `/implement` validates files stay within declared package scope
+   - `/updateprd` records package in completed_sessions
+
+3. **Session numbering is global within a phase:**
+   - Sessions interleave across packages (session 02 might be `apps/web`, session 03 `apps/api`)
+   - Phase completion requires ALL sessions done, regardless of which packages they target
+   - One ordered list of sessions per phase -- simple progress tracking
+
+4. **Scripts accept `--package` flag for scoped operations:**
+   - `analyze-project.sh --json --package apps/web` -- filters candidates by package
+   - `check-prereqs.sh --json --package apps/web` -- validates package-specific tools
+
+### Supported Workspace Managers
+
+| Manager | Detection File |
+|---------|---------------|
+| pnpm | `pnpm-workspace.yaml` |
+| npm/yarn | `package.json` with `"workspaces"` field |
+| Turborepo | `turbo.json` |
+| Nx | `nx.json` |
+| Cargo | `Cargo.toml` with `[workspace]` |
+| Go | `go.work` |
+| Lerna | `lerna.json` |
+
+### Per-Package Stack Detection
+
+Each package gets a `stack` field based on its manifest files:
+
+| Stack | Indicator |
+|-------|-----------|
+| TypeScript | `tsconfig.json` |
+| JavaScript | `package.json` (no tsconfig) |
+| Rust | `Cargo.toml` |
+| Go | `go.mod` |
+| Python | `pyproject.toml`, `setup.py`, or `requirements.txt` |
+| Ruby | `Gemfile` |
+| Java | `pom.xml`, `build.gradle`, or `build.gradle.kts` |
 
 ## Best Practices
 
@@ -331,3 +480,34 @@ Commands use a **hybrid approach** for reliability:
 | Lint/format issues | Run `/audit` to add tooling and auto-fix |
 | CI failures | Run `/pipeline` to add workflows and fix errors |
 | Infra not validated | Run `/infra` to configure health, security, backup, deploy |
+| Monorepo not detected | Run `/initspec` on an existing repo or describe packages in PRD for `/createprd` |
+| Wrong package context | Specify package when running `/plansession` (e.g., "plan for apps/web") |
+| Cross-package session | Set package to null for sessions spanning multiple packages |
+| Package tools missing | Run `check-prereqs.sh --json --package apps/web` to diagnose |
+
+### Monorepo Error Recovery
+
+**Monorepo not detected by `/initspec`**: Workspace config may have been added after init, or uses a non-standard layout. Manually set `"monorepo": true` in state.json, add a `packages` array, add the Workspace Structure table to CONVENTIONS.md, then run `/createprd` or `/plansession` to pick up the config.
+
+**Session planned for wrong package**: If caught before `/updateprd`, delete the session spec directory and re-run `/plansession` with the correct package. If caught after `/updateprd`, manually edit the `package` field in the relevant `completed_sessions` entry in state.json.
+
+**Package added mid-project**: Add the package entry to state.json's `packages` array, update CONVENTIONS.md's Workspace Structure table, add session stubs to `PRD/phase_NN/` with `Package:` annotations, and increment `session_count` in the phase's state entry.
+
+**Cross-package dependency discovered mid-session**: Complete the current session with stubs/interfaces, note the dependency in implementation-notes.md, and plan the shared package session next. Use a cross-cutting session (package: null) when work genuinely spans packages.
+
+**Different packages need different tool versions**: Use workspace-level version management (`.nvmrc` per package, `engines` in package.json). `/audit` handles shared tools at root with per-package overrides. Validate with `check-prereqs.sh --package apps/web`.
+
+**State disagrees with workspace configs**: Run `analyze-project.sh --json` -- it reports both the state.json `monorepo` flag and live `monorepo_detection`. Compare them and update state.json manually if needed.
+
+### Decision Quick Reference
+
+| Situation | Action |
+|-----------|--------|
+| New empty project | `/initspec` sets `monorepo: null`, deferred to `/createprd` |
+| Existing monorepo project | `/initspec` auto-detects, confirms with user |
+| PRD describes multiple services | `/createprd` prompts to confirm monorepo |
+| Session targets one package | `/plansession` scopes spec and tasks to that package |
+| Session spans packages | Use cross-cutting session (package: null) |
+| Need to add a package mid-project | Manually update state.json and CONVENTIONS.md |
+| Phase has mixed-package sessions | Normal -- sessions interleave, phase completes when all done |
+| Different stacks per package | `/audit` and `/pipeline` handle per-package tool config |

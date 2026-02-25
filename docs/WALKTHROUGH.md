@@ -430,11 +430,237 @@ The title_clerk project progressed through 16 phases:
 
 ---
 
+## Monorepo Walkthrough
+
+A walkthrough showing how Apex Spec handles a monorepo project: **Acme SaaS Platform** with a React frontend, Python API, and shared TypeScript library.
+
+### The Project
+
+| Detail | Value |
+|--------|-------|
+| Structure | pnpm monorepo with Turborepo |
+| Packages | `apps/web` (React + Next.js), `apps/api` (Python + FastAPI), `packages/shared` (TypeScript) |
+| Workspace Config | `pnpm-workspace.yaml` + `turbo.json` |
+
+### Initialization (Brownfield)
+
+```
+User: /initspec
+```
+
+The system detects the existing monorepo structure:
+
+```
+Detected monorepo structure:
+  Workspace manager: pnpm (pnpm-workspace.yaml)
+  Task runner: Turborepo (turbo.json)
+
+Detected packages:
+  1. apps/web       (TypeScript)
+  2. apps/api       (Python)
+  3. packages/shared (TypeScript)
+
+Confirm this package list? [confirm / edit / skip]
+```
+
+After confirmation, state.json includes:
+
+```json
+{
+  "monorepo": true,
+  "packages": [
+    { "name": "web", "path": "apps/web", "type": "frontend", "stack": "TypeScript + React" },
+    { "name": "api", "path": "apps/api", "type": "backend", "stack": "Python 3.12 + FastAPI" },
+    { "name": "shared", "path": "packages/shared", "type": "library", "stack": "TypeScript" }
+  ]
+}
+```
+
+CONVENTIONS.md gains a Workspace Structure table:
+
+```markdown
+## Workspace Structure (Monorepo)
+
+| Package | Path | Type | Stack |
+|---------|------|------|-------|
+| web | apps/web | Frontend | TypeScript + React |
+| api | apps/api | Backend | Python 3.12 + FastAPI |
+| shared | packages/shared | Library | TypeScript |
+```
+
+### PRD and Phase Build
+
+```
+User: /createprd @docs/requirements.md
+```
+
+The PRD includes a Package Map section showing which packages are involved in each phase. Then:
+
+```
+User: /phasebuild
+```
+
+Creates phase stubs with package annotations:
+
+```
+.spec_system/PRD/phase_00/
+  session_01_project_setup.md              # No Package: annotation (cross-cutting)
+  session_02_shared_types.md               # Package: packages/shared
+  session_03_api_models.md                 # Package: apps/api
+  session_04_web_scaffold.md               # Package: apps/web
+  session_05_api_endpoints.md              # Package: apps/api
+  session_06_web_auth.md                   # Package: apps/web
+```
+
+### Session Workflow (Per-Package)
+
+#### Planning a cross-cutting session
+
+```
+User: /plansession
+```
+
+The system recommends session 01 (project-setup). No package annotation -- this is cross-cutting:
+
+```markdown
+# Session Specification
+
+**Session ID**: phase00-session01-project-setup
+**Phase**: 00 - Foundation
+**Created**: 2026-01-10
+
+## Scope
+- pnpm workspace configuration
+- Turborepo pipeline setup
+- Shared ESLint/Prettier config at root
+- Docker Compose for local development
+```
+
+Tasks reference files across the entire repo:
+
+```markdown
+- [ ] T001 [S0001] Configure pnpm-workspace.yaml (`pnpm-workspace.yaml`)
+- [ ] T002 [S0001] Set up Turborepo pipeline (`turbo.json`)
+- [ ] T003 [S0001] Create root ESLint config (`.eslintrc.js`)
+- [ ] T004 [S0001] Create Docker Compose for local dev (`docker-compose.yml`)
+```
+
+#### Planning a package-scoped session
+
+```
+User: /plansession
+      "Plan session for apps/api"
+```
+
+The system picks up the package context:
+
+```markdown
+# Session Specification
+
+**Session ID**: phase00-session03-api-models
+**Phase**: 00 - Foundation
+**Package**: apps/api
+**Package Stack**: Python 3.12 + FastAPI
+**Created**: 2026-01-10
+```
+
+Tasks are scoped to the package directory:
+
+```markdown
+- [ ] T001 [S0003] Create SQLAlchemy base model (`apps/api/src/models/base.py`)
+- [ ] T002 [S0003] Define User model (`apps/api/src/models/user.py`)
+- [ ] T003 [S0003] Define Organization model (`apps/api/src/models/org.py`)
+- [ ] T004 [S0003] Create Alembic migration config (`apps/api/alembic.ini`)
+```
+
+#### Implementation with package validation
+
+```
+User: /implement
+```
+
+`check-prereqs.sh` validates the package:
+
+```json
+{
+  "package": {
+    "registered": {"status": "pass", "info": "apps/api"},
+    "directory": {"status": "pass", "info": "apps/api"},
+    "manifest": {"status": "pass", "info": "pyproject.toml"},
+    "stack": {"status": "pass", "info": "Python"}
+  },
+  "workspace": {
+    "manager": {"status": "pass", "info": "pnpm"},
+    "runner": {"status": "pass", "info": "turbo"}
+  }
+}
+```
+
+During implementation, if a task tries to modify a file outside `apps/api/`, the system logs a warning (unless the session is cross-cutting).
+
+#### Completion with package metadata
+
+```
+User: /updateprd
+```
+
+State.json records the package:
+
+```json
+"completed_sessions": [
+  { "id": "phase00-session01-project-setup", "package": null },
+  { "id": "phase00-session02-shared-types", "package": "packages/shared" },
+  { "id": "phase00-session03-api-models", "package": "apps/api" }
+]
+```
+
+### Phase Transition (Monorepo)
+
+```
+User: /audit
+```
+
+The audit installs tools per-package based on stack:
+- Root: Prettier, ESLint (shared config)
+- `apps/web`: TypeScript strict mode, Jest
+- `apps/api`: Ruff (formatter + linter), pytest, mypy
+- `packages/shared`: TypeScript, Jest
+
+```
+User: /pipeline
+```
+
+Generates CI/CD with path-filtered triggers:
+- `apps/web/**` changes trigger web build + test
+- `apps/api/**` changes trigger API build + test
+- `packages/shared/**` changes trigger shared build + downstream rebuilds
+
+```
+User: /carryforward
+```
+
+Lessons are tagged with package context:
+```markdown
+- [P00-apps/api] FastAPI dependency injection works cleanly with SQLAlchemy sessions
+- [P00-packages/shared] Export TypeScript types as a separate build step for consumption
+- [P00] pnpm workspace hoisting reduces install time by 40% vs npm
+```
+
+### Key Monorepo Takeaways
+
+1. **One .spec_system/ at the root** -- not per-package
+2. **Sessions interleave** -- session 02 might be `packages/shared`, session 03 `apps/api`
+3. **Phase completion is global** -- all 6 sessions must complete, not "3 web sessions done"
+4. **Cross-cutting sessions are normal** -- use them for workspace config, CI/CD, shared infra
+5. **Package context is automatic** -- flows from stub annotations through spec.md to implementation
+
+---
+
 ## Quick Reference
 
 ```
 Stage 1: INITIALIZATION (once)
-/initspec -> /createprd -> /phasebuild
+/initspec -> /createprd -> /createuxprd (optional) -> /phasebuild
 
 Stage 2: SESSION WORKFLOW (repeat per session)
 /plansession -> /implement -> /validate -> /updateprd

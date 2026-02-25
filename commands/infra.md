@@ -54,18 +54,45 @@ Industry standard order (availability to automation):
    - Read Infrastructure table for configured components
    - Identify: CDN, hosting platform, database, cache, backup, deploy
 
-2. Detect infrastructure from existing files/configs:
+2. Read `.spec_system/state.json` for monorepo context:
+   - `monorepo` field: `true` / `false` / `null`
+   - `packages` array (when `monorepo: true`): each entry has `name`, `path`, `type`, `stack`
+
+3. Detect infrastructure from existing files/configs:
    - `wrangler.toml` = Cloudflare
    - `docker-compose.yml`, `coolify.json` = Coolify/Docker
    - `vercel.json` = Vercel
    - `fly.toml` = Fly.io
    - Terraform/Pulumi files = IaC detected
+   - **Monorepo**: Also check for per-package infra configs (e.g., `apps/web/vercel.json`, `apps/api/fly.toml`, `apps/api/Dockerfile`)
 
-3. Check for `.spec_system/audit/known-issues.md`
+4. Check for `.spec_system/audit/known-issues.md`
    - Load Skipped Infra section
    - Note: "Known issues loaded (N infra items skipped)"
 
-4. If `--dry-run`: Skip to Dry Run Output
+5. If `--dry-run`: Skip to Dry Run Output
+
+### Step 1a: Identify Deployment Topology (Monorepo Only)
+
+**Skip this step if** `monorepo` is not `true` in state.json.
+
+When `monorepo: true`, classify each package by deployment role:
+
+1. **Deployable units**: Packages with `type` of frontend, backend, or service -- these need their own health endpoints, deploy triggers, and potentially their own backup/security configs
+2. **Shared libraries**: Packages with `type` of library -- these are built and consumed by other packages, not deployed independently
+3. **Shared infrastructure**: Components used by multiple packages (e.g., a single database, shared cache) -- configured once at repo level
+
+Example deployment topology:
+```
+Deployment topology (monorepo: true):
+| Package | Path | Type | Deploys Independently | Platform |
+|---------|------|------|-----------------------|----------|
+| web | apps/web | Frontend | Yes | Vercel |
+| api | apps/api | Backend | Yes | Coolify |
+| shared | packages/shared | Library | No | (built only) |
+
+Shared infra: PostgreSQL (apps/api), Valkey cache (apps/api)
+```
 
 ### Step 2: COMPARE
 
@@ -102,6 +129,17 @@ Add configuration for the selected bundle.
 | Backup | Schedule | Cron, GitHub Actions, platform scheduler |
 | Deploy | Trigger | Webhook, Git push, platform integration |
 
+**Monorepo implementation strategy** (when `monorepo: true`):
+
+Use the deployment topology from Step 1a to scope each bundle:
+
+- **Health**: Each deployable package gets its own `/health` endpoint. Shared libraries do not need health endpoints.
+- **Security**: WAF/rate limiting applies per deployable package. Shared WAF rules go at CDN level if all packages share a domain; per-package if separate domains.
+- **Backup**: Scope to databases -- if all packages share one DB, one backup script. If packages have separate databases, per-database backups.
+- **Deploy**: Each deployable package gets its own deploy trigger. Shared libraries trigger rebuilds of dependent packages (handled by CI, not infra).
+
+**Single-repo**: All bundles apply to the single deployment target.
+
 **Implementation by detected stack:**
 
 **Health Bundle:**
@@ -120,22 +158,26 @@ async def health():
 1. Create /health endpoint in detected framework
 2. Add DB and cache connectivity checks
 3. Configure platform health probe (if platform detected)
+4. **Monorepo**: Repeat for each deployable package using its stack. Skip library packages.
 
 **Security Bundle:**
 1. If Cloudflare: Document WAF ruleset to enable (OWASP Core)
 2. Add rate limiting middleware to application
 3. Document rate limit configuration
+4. **Monorepo**: Add rate limiting per deployable package using its framework's middleware
 
 **Backup Bundle:**
 1. Create backup script for detected database
 2. Configure storage destination
 3. Create schedule (cron or GitHub Action)
 4. Document retention policy
+5. **Monorepo**: If packages use separate databases, create per-database backup scripts. Note which package owns which database.
 
 **Deploy Bundle:**
 1. Configure webhook URL (Coolify, Render, etc.)
 2. Or configure Git-based deploy (Vercel, Netlify)
 3. Add deploy step to release workflow
+4. **Monorepo**: Configure per-package deploy triggers. Ensure shared library changes trigger dependent package deploys.
 
 ### Step 5: VALIDATE
 
@@ -145,6 +187,8 @@ Verify all configured infrastructure:
 2. **Security**: Verify rate limiting works (test with rapid requests)
 3. **Backup**: Verify backup runs, check storage for recent backup
 4. **Deploy**: Trigger test deploy or verify webhook connectivity
+
+**Monorepo**: Validate each deployable package independently. A health check failing in one package does not skip validation of others. Report per-package results.
 
 **Validation commands by component:**
 
@@ -184,8 +228,26 @@ Update `.spec_system/CONVENTIONS.md` Infrastructure table:
 | Deploy | Coolify webhook | On push to main |
 ```
 
+**Monorepo only**: When packages have different deployment targets, add a Package column to distinguish per-package infra:
+
+```markdown
+| Component | Package | Provider | Details |
+|-----------|---------|----------|---------|
+| CDN/DNS | (shared) | Cloudflare | - |
+| Hosting | apps/web | Vercel | Git-based deploy |
+| Hosting | apps/api | Coolify | Docker, 8GB VPS |
+| Database | apps/api | PostgreSQL 16 | Coolify-managed |
+| Health | apps/web | Vercel | Automatic (serverless) |
+| Health | apps/api | Coolify | /health, 30s interval |
+| Deploy | apps/web | Vercel | On push to main |
+| Deploy | apps/api | Coolify webhook | On push to main |
+```
+
+Use `(shared)` for components that serve multiple packages.
+
 ### Step 8: REPORT
 
+**Single-repo:**
 ```
 REPORT
 - Added: Health bundle
@@ -196,6 +258,21 @@ REPORT
 
 Platform notes:
 - Coolify probe configured via UI (manual step documented)
+```
+
+**Monorepo:**
+```
+REPORT
+- Added: Health bundle
+
+[apps/api] Health: /health endpoint created (FastAPI)
+  - Configured: Coolify probe (HTTP, /health, 30s)
+  - Validated: 200 OK, DB pass, cache pass (45ms)
+
+[apps/web] Health: Automatic (Vercel serverless)
+  - Validated: 200 OK (120ms)
+
+[packages/shared] Skipped (library, not deployed)
 ```
 
 **If secrets/manual steps required:**

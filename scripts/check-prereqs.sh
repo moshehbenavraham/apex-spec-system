@@ -20,6 +20,7 @@ source "${SCRIPT_DIR}/common.sh"
 
 OUTPUT_MODE="human"
 JSON_RESULT=""
+PACKAGE_FILTER=""
 
 # =============================================================================
 # JSON BUILDING HELPERS
@@ -30,6 +31,8 @@ init_json() {
         "generated_at": $generated_at,
         "overall": "pass",
         "environment": {},
+        "package": {},
+        "workspace": {},
         "tools": {},
         "sessions": {},
         "files": {},
@@ -330,6 +333,188 @@ check_environment() {
 }
 
 # =============================================================================
+# MONOREPO: PACKAGE & WORKSPACE CHECKS
+# =============================================================================
+
+# Verify a specific package exists in state.json and on disk.
+# Requires: PACKAGE_FILTER set, jq available, state.json valid.
+check_package() {
+    local pkg_path="$1"
+
+    if [[ "$OUTPUT_MODE" == "human" ]]; then
+        log_info "Checking package: $pkg_path ..."
+    fi
+
+    local failed=0
+
+    # Check package exists in state.json packages array
+    local pkg_entry=""
+    pkg_entry=$(get_package_by_path "$pkg_path" 2>/dev/null) || true
+
+    if [[ -z "$pkg_entry" || "$pkg_entry" == "null" ]]; then
+        if [[ "$OUTPUT_MODE" == "human" ]]; then
+            log_error "Package not registered in state.json: $pkg_path"
+        else
+            set_check_result "package" "registered" "fail" "$pkg_path not in state.json packages"
+            add_json_issue "package" "$pkg_path" "package not registered in state.json"
+        fi
+        ((failed++)) || true
+    else
+        if [[ "$OUTPUT_MODE" == "human" ]]; then
+            log_success "Package registered: $pkg_path"
+        else
+            set_check_result "package" "registered" "pass" "$pkg_path"
+        fi
+    fi
+
+    # Check package directory exists on disk
+    if [[ -d "$pkg_path" ]]; then
+        if [[ "$OUTPUT_MODE" == "human" ]]; then
+            log_success "Package directory exists: $pkg_path"
+        else
+            set_check_result "package" "directory" "pass" "$pkg_path"
+        fi
+    else
+        if [[ "$OUTPUT_MODE" == "human" ]]; then
+            log_error "Package directory NOT found: $pkg_path"
+        else
+            set_check_result "package" "directory" "fail" "$pkg_path not found"
+            add_json_issue "package" "$pkg_path" "package directory does not exist"
+        fi
+        ((failed++)) || true
+    fi
+
+    # Check for a package manifest (package.json, Cargo.toml, etc.)
+    if [[ -d "$pkg_path" ]]; then
+        local has_manifest=false
+        for manifest in package.json Cargo.toml go.mod pyproject.toml setup.py; do
+            if [[ -f "$pkg_path/$manifest" ]]; then
+                has_manifest=true
+                if [[ "$OUTPUT_MODE" == "human" ]]; then
+                    log_success "Package manifest: $pkg_path/$manifest"
+                else
+                    set_check_result "package" "manifest" "pass" "$manifest"
+                fi
+                break
+            fi
+        done
+        if [[ "$has_manifest" == false ]]; then
+            if [[ "$OUTPUT_MODE" == "human" ]]; then
+                log_info "No package manifest found in $pkg_path (optional)"
+            else
+                set_check_result "package" "manifest" "skip" "no manifest found (optional)"
+            fi
+        fi
+    fi
+
+    # Include package stack hint from state.json if available
+    if [[ -n "$pkg_entry" && "$pkg_entry" != "null" ]]; then
+        local stack=""
+        stack=$(echo "$pkg_entry" | jq -r '.stack // empty' 2>/dev/null) || true
+        if [[ -n "$stack" ]]; then
+            if [[ "$OUTPUT_MODE" == "human" ]]; then
+                log_info "Package stack: $stack"
+            else
+                set_check_result "package" "stack" "pass" "$stack"
+            fi
+        fi
+    fi
+
+    return $failed
+}
+
+# Verify monorepo workspace tooling when monorepo: true.
+# Checks for workspace manager, config, and optional task runner.
+check_workspace_tools() {
+    if [[ "$OUTPUT_MODE" == "human" ]]; then
+        log_info "Checking workspace tools..."
+    fi
+
+    local monorepo_flag=""
+    monorepo_flag=$(get_monorepo_flag 2>/dev/null) || true
+
+    if [[ "$monorepo_flag" != "true" ]]; then
+        if [[ "$OUTPUT_MODE" == "human" ]]; then
+            log_info "Not a monorepo -- skipping workspace tool checks"
+        else
+            set_check_result "workspace" "status" "skip" "not a monorepo"
+        fi
+        return 0
+    fi
+
+    local failed=0
+
+    # Detect workspace manager
+    local manager=""
+    local manager_version=""
+    if [[ -f "pnpm-workspace.yaml" ]]; then
+        manager="pnpm"
+        manager_version=$(pnpm --version 2>/dev/null || echo "not installed")
+    elif [[ -f "package.json" ]] && jq -e '.workspaces' package.json &>/dev/null; then
+        # npm or yarn workspaces
+        if command -v yarn &>/dev/null; then
+            manager="yarn"
+            manager_version=$(yarn --version 2>/dev/null || echo "unknown")
+        else
+            manager="npm"
+            manager_version=$(npm --version 2>/dev/null || echo "unknown")
+        fi
+    elif [[ -f "Cargo.toml" ]] && grep -q '^\[workspace\]' Cargo.toml 2>/dev/null; then
+        manager="cargo"
+        manager_version=$(cargo --version 2>/dev/null | head -1 || echo "unknown")
+    elif [[ -f "go.work" ]]; then
+        manager="go"
+        manager_version=$(go version 2>/dev/null | head -1 || echo "unknown")
+    elif [[ -f "lerna.json" ]]; then
+        manager="lerna"
+        manager_version=$(npx lerna --version 2>/dev/null || echo "unknown")
+    fi
+
+    if [[ -n "$manager" ]]; then
+        if [[ "$OUTPUT_MODE" == "human" ]]; then
+            log_success "Workspace manager: $manager ($manager_version)"
+        else
+            set_check_result "workspace" "manager" "pass" "$manager $manager_version"
+        fi
+    else
+        if [[ "$OUTPUT_MODE" == "human" ]]; then
+            log_error "No workspace manager detected (monorepo: true in state.json)"
+        else
+            set_check_result "workspace" "manager" "fail" "no workspace config found"
+            add_json_issue "workspace" "manager" "monorepo is true but no workspace manager detected"
+        fi
+        ((failed++)) || true
+    fi
+
+    # Check for task runner (turbo, nx -- optional but noted)
+    local runner=""
+    local runner_version=""
+    if [[ -f "turbo.json" ]]; then
+        runner="turbo"
+        runner_version=$(npx turbo --version 2>/dev/null || echo "config found")
+    elif [[ -f "nx.json" ]]; then
+        runner="nx"
+        runner_version=$(npx nx --version 2>/dev/null || echo "config found")
+    fi
+
+    if [[ -n "$runner" ]]; then
+        if [[ "$OUTPUT_MODE" == "human" ]]; then
+            log_success "Task runner: $runner ($runner_version)"
+        else
+            set_check_result "workspace" "runner" "pass" "$runner $runner_version"
+        fi
+    else
+        if [[ "$OUTPUT_MODE" == "human" ]]; then
+            log_info "No task runner detected (turbo/nx -- optional)"
+        else
+            set_check_result "workspace" "runner" "skip" "none detected (optional)"
+        fi
+    fi
+
+    return $failed
+}
+
+# =============================================================================
 # USAGE
 # =============================================================================
 
@@ -344,12 +529,24 @@ OPTIONS:
   -f, --files LIST     Comma-separated list of required files
   -p, --prereqs LIST   Comma-separated list of prerequisite sessions
   -e, --env            Check environment only
+  --package PATH       Check package-specific prerequisites (monorepo)
   --json               Output results as JSON (for Claude integration)
   -h, --help           Show this help message
 
 OUTPUT MODES:
   Default (no --json): Human-readable output with colors
   --json: Structured JSON for programmatic use
+
+MONOREPO SUPPORT:
+  When --package is specified:
+  - Verifies the package is registered in state.json
+  - Checks the package directory exists on disk
+  - Checks for a package manifest (package.json, Cargo.toml, etc.)
+  - Reports the package stack from state.json
+
+  When monorepo: true in state.json (automatic with --env):
+  - Detects workspace manager (pnpm, npm/yarn, cargo, go, lerna)
+  - Detects task runner (turbo, nx) if present
 
 JSON OUTPUT STRUCTURE:
   {
@@ -358,6 +555,16 @@ JSON OUTPUT STRUCTURE:
     "environment": {
       "spec_system": {"status": "pass", "info": ".spec_system"},
       "jq": {"status": "pass", "info": "jq-1.7"}
+    },
+    "package": {
+      "registered": {"status": "pass", "info": "apps/web"},
+      "directory": {"status": "pass", "info": "apps/web"},
+      "manifest": {"status": "pass", "info": "package.json"},
+      "stack": {"status": "pass", "info": "TypeScript + React"}
+    },
+    "workspace": {
+      "manager": {"status": "pass", "info": "pnpm 8.15.0"},
+      "runner": {"status": "pass", "info": "turbo 1.12.0"}
     },
     "tools": {
       "node": {"status": "pass", "info": "v20.10.0"},
@@ -374,11 +581,17 @@ JSON OUTPUT STRUCTURE:
     ]
   }
 
+  Notes:
+  - "package" section only present when --package is used
+  - "workspace" section only present when monorepo: true in state.json
+  - Both sections empty ({}) when not applicable
+
 EXAMPLES:
-  ./check-prereqs.sh --env                      # Check environment
-  ./check-prereqs.sh --tools "node,npm,docker"  # Check tools
-  ./check-prereqs.sh --json --env               # JSON output
+  ./check-prereqs.sh --env                              # Check environment
+  ./check-prereqs.sh --tools "node,npm,docker"          # Check tools
+  ./check-prereqs.sh --json --env                       # JSON output
   ./check-prereqs.sh --json --env --tools "node,npm"
+  ./check-prereqs.sh --json --env --package apps/web    # Monorepo package check
 EOF
 }
 
@@ -452,6 +665,15 @@ main() {
                 run_any=true
                 shift
                 ;;
+            --package)
+                if [[ -z "${2:-}" ]]; then
+                    log_error "--package requires a PATH argument"
+                    exit 1
+                fi
+                PACKAGE_FILTER="$2"
+                run_any=true
+                shift 2
+                ;;
             -h|--help)
                 show_usage
                 exit 0
@@ -488,8 +710,23 @@ main() {
     check_environment || rc=$?
     total_failed=$((total_failed + rc))
 
-    if [[ "$env_only" == true && -z "$tools" && -z "$files" && -z "$prereqs" ]]; then
-        # Just environment check
+    # Check workspace tools when monorepo (automatic with --env)
+    if [[ "$env_only" == true || -n "$PACKAGE_FILTER" ]]; then
+        rc=0
+        check_workspace_tools || rc=$?
+        total_failed=$((total_failed + rc))
+    fi
+
+    # Check package if --package was specified
+    if [[ -n "$PACKAGE_FILTER" ]]; then
+        [[ "$OUTPUT_MODE" == "human" ]] && echo ""
+        rc=0
+        check_package "$PACKAGE_FILTER" || rc=$?
+        total_failed=$((total_failed + rc))
+    fi
+
+    if [[ "$env_only" == true && -z "$tools" && -z "$files" && -z "$prereqs" && -z "$PACKAGE_FILTER" ]]; then
+        # Just environment check (and workspace/package if applicable)
         :
     else
         if [[ "$OUTPUT_MODE" == "human" ]]; then

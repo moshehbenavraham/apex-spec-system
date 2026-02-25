@@ -47,6 +47,26 @@ mkdir -p .spec_system/archive/PRD
 mkdir -p .spec_system/archive/phases
 ```
 
+### 3a. Brownfield Monorepo Detection
+
+Detect whether the project is a monorepo. **Skip this step entirely for greenfield (empty) projects** -- leave `monorepo: null` in state.json.
+
+For brownfield projects (existing code present):
+
+1. Source common.sh and call `detect_monorepo()` to check for workspace config files (pnpm-workspace.yaml, turbo.json, nx.json, package.json workspaces, Cargo.toml workspace, go.work, lerna.json)
+
+2. If `detect_monorepo()` returns `detected: true`:
+   - Display the detected indicator and discovered packages to the user
+   - Ask the user to **confirm**, **edit** (add/remove packages), or **skip** (leave as null)
+   - **Confirmed**: Set `monorepo: true` and store the packages array in state.json (Step 4)
+   - **Edited**: Set `monorepo: true` with user-adjusted packages array
+   - **Skipped**: Leave `monorepo: null` -- can be resolved later by `/createprd`
+
+3. If `detect_monorepo()` returns `detected: false`:
+   - Leave `monorepo: null` (do NOT set to false here -- `/createprd` may detect monorepo intent from PRD content)
+
+**Important**: Never set `monorepo: false` during initspec. Only `null` (unknown) or `true` (confirmed). The `/createprd` command handles the `false` determination.
+
 ### 4. Create state.json
 
 Create `.spec_system/state.json`:
@@ -58,6 +78,7 @@ Create `.spec_system/state.json`:
   "description": "[PROJECT_DESCRIPTION]",
   "current_phase": 0,
   "current_session": null,
+  "monorepo": null,
   "phases": {
     "0": {
       "name": "[PHASE_NAME]",
@@ -69,6 +90,20 @@ Create `.spec_system/state.json`:
   "next_session_history": []
 }
 ```
+
+**If monorepo confirmed in Step 3a**, set `"monorepo": true` and add the packages array:
+
+```json
+{
+  "monorepo": true,
+  "packages": [
+    {"name": "web", "path": "apps/web", "stack_hint": "TypeScript"},
+    {"name": "api", "path": "apps/api", "stack_hint": "TypeScript"}
+  ]
+}
+```
+
+Otherwise, `"monorepo": null` and no `packages` field.
 
 ### 5. Create PRD Template
 
@@ -382,6 +417,23 @@ Create `.spec_system/CONVENTIONS.md` (coding standards and team conventions):
 - Ship, learn, iterate
 ```
 
+**If monorepo confirmed in Step 3a**, append a Workspace Structure section to CONVENTIONS.md:
+
+```markdown
+## Workspace Structure
+
+| Package | Path | Stack |
+|---------|------|-------|
+| [name] | [path] | [stack_hint] |
+
+### Cross-Package Rules
+
+- Import from sibling packages via workspace aliases, not relative paths
+- Shared types live in a dedicated shared/common package
+- Each package owns its own tests; integration tests live at repo root
+- Changes spanning multiple packages require explicit cross-package session scope
+```
+
 ### 9. Create Phase PRD
 
 Create `.spec_system/PRD/phase_00/PRD_phase_00.md`:
@@ -439,6 +491,11 @@ Created:
 - .spec_system/specs/ (session specifications directory)
 - .spec_system/audit/ (audit reports directory)
 - .spec_system/archive/ (completed work archive)
+
+[If monorepo detected and confirmed:]
+Monorepo: Detected via [indicator] with N packages
+[If monorepo not detected:]
+Monorepo: Not detected (can be set later via /createprd)
 
 Next Steps:
 1. Edit .spec_system/PRD/PRD.md with your project requirements

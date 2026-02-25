@@ -40,8 +40,22 @@ This returns structured JSON including:
 - `current_session` - The session to validate
 - `current_session_dir_exists` - Whether specs directory exists
 - `current_session_files` - Files already in the session directory
+- `monorepo` - true/false/null from state.json
+- `packages` - Array of registered packages (empty if not monorepo)
+- `active_package` - Resolved package context (null if not applicable)
 
 **IMPORTANT**: Use the `current_session` value from this output. If `current_session` is `null`, run `/plansession` yourself to set one up. Only ask the user if `/plansession` itself requires user input.
+
+### 1a. Determine Package Context (Monorepo Only)
+
+**Skip this step if** `monorepo` is not `true` in the JSON output.
+
+Resolve the active package for this session:
+
+1. **spec.md header**: Read the `Package:` field from the session's spec.md (set during `/plansession`)
+2. **active_package from script**: If spec.md has no Package field, use `active_package` from the JSON output
+
+Store the resolved package path for use in Steps 3-5. A `null` package means this is a cross-cutting session.
 
 ### 2. Read Session Files
 
@@ -67,6 +81,7 @@ From spec.md deliverables section:
 - Verify each file exists
 - Check file is non-empty
 - Note any missing files
+- **Monorepo**: File paths should be repo-root-relative (e.g., `apps/web/src/auth.ts`). Verify files are within the declared package scope (from Step 1a). Flag any deliverables outside the package boundary.
 
 #### C. ASCII Encoding Check
 For each deliverable file:
@@ -92,6 +107,7 @@ Run the project's test suite:
 - Record passed/failed
 - Calculate coverage if available
 - Note any failures
+- **Monorepo**: When a package is resolved (Step 1a), run tests scoped to that package first (e.g., `cd apps/web && npm test`, or using workspace commands like `pnpm --filter web test`). Also run repo-root tests if they exist, since cross-package regressions matter.
 
 **CRITICAL -- NO "PRE-EXISTING" EXCUSE**: If ANY test fails, you MUST:
 1. Investigate the root cause -- determine whether the session's changes caused or contributed to the failure
@@ -140,6 +156,7 @@ Review **only files created or modified in this session** (use deliverables from
 - Flag **clear violations** only -- do not speculate about edge cases
 - If the session added no user-facing data handling, mark GDPR as N/A with a brief justification
 - Hardcoded secrets and injection vulnerabilities are always FAIL regardless of scope
+- **Monorepo**: Scope the review to files within the declared package boundary (from Step 1a). Cross-cutting sessions review all modified files.
 
 ### 4. Generate Security & Compliance Report
 
@@ -149,6 +166,9 @@ Create `security-compliance.md` in the session directory (`.spec_system/specs/[c
 # Security & Compliance Report
 
 **Session ID**: `phase_NN_session_NN_name`
+[MONOREPO ONLY - include when monorepo: true]
+**Package**: [package-path]
+[END MONOREPO ONLY]
 **Reviewed**: [YYYY-MM-DD]
 **Result**: PASS / FAIL / N/A
 
@@ -246,6 +266,9 @@ Create `validation.md` in the session directory:
 # Validation Report
 
 **Session ID**: `phase_NN_session_NN_name`
+[MONOREPO ONLY - include when monorepo: true]
+**Package**: [package-path]
+[END MONOREPO ONLY]
 **Validated**: [YYYY-MM-DD]
 **Result**: PASS / FAIL
 
@@ -431,6 +454,7 @@ Update `.spec_system/state.json` based on validation result:
 ```
 
 - Update `next_session_history` entry status to `validated` or `validation_failed`
+- **Monorepo only**: Include the `package` field in the history entry when a package was resolved in Step 1a (matching the pattern from `/plansession` Step 6). Omit the `package` field for single-repo projects or cross-cutting sessions.
 
 ## Output
 

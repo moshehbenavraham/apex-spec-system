@@ -44,15 +44,33 @@ This returns structured JSON with:
 - `current_phase` - Current phase number
 - `current_session` - Active session (or null)
 - `completed_sessions` - List of completed session IDs
-- `candidate_sessions` - Sessions in current phase with completion status
+- `candidate_sessions` - Sessions in current phase with completion status; each candidate includes a `package` field (parsed from stub `Package:` annotation, or null)
 - `phases` - All phases with status and session counts
+- `monorepo` - true/false/null from state.json
+- `packages` - Array of registered packages (empty if not monorepo)
+- `active_package` - Resolved package context from `--package` flag or CWD (null if not applicable)
+- `monorepo_detection` - Auto-detection result when monorepo is null (null otherwise)
 
 **IMPORTANT**: Use this JSON output as ground truth for all state facts. Do not re-read state.json directly - the script provides authoritative state data.
+
+### 1a. Determine Package Context (Monorepo Only)
+
+**Skip this step if** `monorepo` is not `true` in the JSON output.
+
+When working in a monorepo, resolve the active package for this session. Priority order:
+
+1. **User statement**: If the user explicitly names a package (e.g., "plan a session for apps/web"), use that
+2. **Stub annotation**: If the selected candidate has a `package` field from its stub, use that
+3. **active_package from script**: If `analyze-project.sh` resolved a package via `--package` flag or CWD inference, use that
+4. **Prompt user**: If none of the above resolves a package, ask the user which package this session targets (or whether it is cross-cutting)
+
+Store the resolved package path for use in Steps 4 and 5.
 
 ### 2. Read PRD Content for Semantic Analysis
 
 With the state facts established, read these files for context:
 - `.spec_system/PRD/PRD.md` - Master project requirements
+- `.spec_system/PRD/PRD_UX.md` - UX requirements (if exists -- use for UI-focused sessions)
 - Candidate session files from the JSON output (use the `path` field)
 - `.spec_system/CONSIDERATIONS.md` - Institutional memory (if exists)
 - `.spec_system/SECURITY-COMPLIANCE.md` - Security posture and GDPR compliance (if exists)
@@ -104,6 +122,10 @@ Generate `spec.md` with all sections filled in:
 **Phase**: NN - Phase Name
 **Status**: Not Started
 **Created**: [YYYY-MM-DD]
+[MONOREPO ONLY - include these lines when monorepo: true]
+**Package**: [package-path]
+**Package Stack**: [stack]
+[END MONOREPO ONLY - omit both lines for single-repo projects]
 
 ---
 
@@ -333,6 +355,29 @@ Before marking session complete:
 Run `/implement` to begin AI-led implementation.
 ```
 
+### Path Scoping Rules (Monorepo Only)
+
+When `monorepo: true`, apply these path conventions in tasks.md:
+
+- **All file paths must be package-relative from the repo root** (e.g., `apps/web/src/auth.ts`, not `src/auth.ts`)
+- **Single-package sessions**: All paths should start with the package path prefix
+- **Cross-package sessions**: Group tasks by package using subheadings within each category:
+
+```markdown
+## Implementation (N tasks)
+
+### apps/web
+
+- [ ] T006 [SPPSS] Implement auth page (`apps/web/src/pages/auth.tsx`)
+- [ ] T007 [SPPSS] Add auth hook (`apps/web/src/hooks/useAuth.ts`)
+
+### apps/api
+
+- [ ] T008 [SPPSS] Implement auth endpoint (`apps/api/src/routes/auth.ts`)
+```
+
+For single-repo projects, paths remain unchanged (relative to project root as usual).
+
 ## Category Budgets
 
 | Category | Tasks | Purpose |
@@ -361,6 +406,16 @@ Update `.spec_system/state.json`:
 
 - Set `current_session` to the session ID
 - Add a single entry to `next_session_history` with status `planned`
+- **Monorepo only**: Include an optional `package` field in the history entry when a package was resolved in Step 1a:
+  ```json
+  {
+    "date": "YYYY-MM-DD",
+    "session": "phaseNN-sessionNN-name",
+    "package": "apps/web",
+    "status": "planned"
+  }
+  ```
+  Omit the `package` field for single-repo projects or cross-cutting sessions.
 
 ### 7. Archive Stale Specs
 

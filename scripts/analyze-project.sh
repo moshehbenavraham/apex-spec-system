@@ -19,6 +19,7 @@ source "${SCRIPT_DIR}/common.sh"
 # =============================================================================
 
 OUTPUT_MODE="human"
+PACKAGE_FILTER=""
 
 # =============================================================================
 # JSON OUTPUT FUNCTIONS
@@ -32,6 +33,19 @@ output_json() {
     current_phase=$(get_current_phase)
     current_session=$(get_current_session)
     completed_count=$(get_completed_sessions_count)
+
+    # Monorepo state
+    local monorepo_flag packages_json active_package monorepo_detection
+    monorepo_flag=$(get_monorepo_flag)
+    packages_json=$(get_packages)
+    active_package=$(resolve_package_context "$PACKAGE_FILTER")
+
+    # Auto-detect monorepo when state is unknown (null)
+    if [[ "$monorepo_flag" == "null" ]]; then
+        monorepo_detection=$(detect_monorepo)
+    else
+        monorepo_detection="null"
+    fi
 
     # Build phases array
     local phases_json="[]"
@@ -80,15 +94,27 @@ output_json() {
                     is_completed="true"
                 fi
 
+                # Parse Package: annotation from first 10 lines of stub
+                local pkg_annotation=""
+                pkg_annotation=$(head -10 "$file" | sed -n 's/^[*]*Package[*]*:[[:space:]]*\(.*\)/\1/p' | head -1)
+                pkg_annotation=$(trim "$pkg_annotation")
+
                 candidates_json=$(echo "$candidates_json" | jq \
                     --arg file "$filename" \
                     --arg path "$file" \
                     --argjson num "$session_num" \
                     --arg name "$session_name" \
                     --argjson completed "$is_completed" \
-                    '. += [{"file": $file, "path": $path, "session_number": $num, "name": $name, "completed": $completed}]')
+                    --arg pkg "$pkg_annotation" \
+                    '. += [{"file": $file, "path": $path, "session_number": $num, "name": $name, "completed": $completed, "package": (if $pkg == "" then null else $pkg end)}]')
             fi
         done < <(find "$prd_dir" -name "session_*.md" -type f 2>/dev/null | sort)
+    fi
+
+    # Filter candidates by package if --package was specified
+    if [[ -n "$PACKAGE_FILTER" ]]; then
+        candidates_json=$(echo "$candidates_json" | jq --arg pkg "$PACKAGE_FILTER" \
+            '[.[] | select(.package == $pkg or .package == null)]')
     fi
 
     # Get current session directory status
@@ -105,6 +131,14 @@ output_json() {
         fi
     fi
 
+    # Convert monorepo_flag string to proper JSON value
+    local monorepo_json
+    case "$monorepo_flag" in
+        true)  monorepo_json="true" ;;
+        false) monorepo_json="false" ;;
+        *)     monorepo_json="null" ;;
+    esac
+
     # Build final JSON output
     jq -n \
         --arg project "$project_name" \
@@ -117,6 +151,10 @@ output_json() {
         --argjson phases "$phases_json" \
         --argjson completed_sessions "$completed_json" \
         --argjson candidates "$candidates_json" \
+        --argjson monorepo "$monorepo_json" \
+        --argjson packages "$packages_json" \
+        --argjson active_package "$active_package" \
+        --argjson monorepo_detection "$monorepo_detection" \
         --arg generated_at "$(get_datetime)" \
         '{
             "project": $project,
@@ -127,6 +165,10 @@ output_json() {
             "current_session_dir_exists": $session_dir_exists,
             "current_session_files": $session_files,
             "completed_sessions_count": $completed_count,
+            "monorepo": $monorepo,
+            "packages": $packages,
+            "active_package": $active_package,
+            "monorepo_detection": $monorepo_detection,
             "phases": $phases,
             "completed_sessions": $completed_sessions,
             "candidate_sessions": $candidates
@@ -247,6 +289,21 @@ show_summary() {
 
     echo "Project: $project_name"
     echo "State File: $STATE_FILE"
+
+    # Show monorepo status if applicable
+    local monorepo_flag
+    monorepo_flag=$(get_monorepo_flag)
+    if [[ "$monorepo_flag" == "true" ]]; then
+        echo "Monorepo: Yes"
+        local packages
+        packages=$(get_packages)
+        local pkg_count
+        pkg_count=$(echo "$packages" | jq 'length')
+        echo "Packages: $pkg_count"
+        echo "$packages" | jq -r '.[] | "  - \(.name) (\(.path))"' 2>/dev/null
+    elif [[ "$monorepo_flag" == "null" ]]; then
+        echo "Monorepo: Unknown (not yet determined)"
+    fi
     echo ""
 
     analyze_phases
@@ -269,8 +326,9 @@ Usage: analyze-project.sh [OPTIONS]
 Analyze project state for session recommendations.
 
 OPTIONS:
-  --json    Output analysis as JSON (for Claude integration)
-  --help    Show this help message
+  --json              Output analysis as JSON (for Claude integration)
+  --package PATH      Filter candidates by package path (monorepo only)
+  --help              Show this help message
 
 OUTPUT MODES:
   Default (no flags): Human-readable summary with colors
@@ -286,19 +344,31 @@ JSON OUTPUT STRUCTURE:
     "current_session_dir_exists": true | false,
     "current_session_files": ["spec.md", "tasks.md"],
     "completed_sessions_count": 5,
+    "monorepo": true | false | null,
+    "packages": [{"name": "web", "path": "apps/web", "stack_hint": "TypeScript"}],
+    "active_package": {"name": "web", "path": "apps/web", ...} | null,
+    "monorepo_detection": {"detected": true, "indicator": "...", "packages": [...]} | null,
     "phases": [
       {"number": 0, "name": "Foundation", "status": "completed", "session_count": 3}
     ],
     "completed_sessions": ["phase00-session01-setup", ...],
     "candidate_sessions": [
-      {"file": "session_01_auth", "path": "...", "session_number": 1, "name": "auth", "completed": false}
+      {"file": "session_01_auth", "path": "...", "session_number": 1, "name": "auth", "completed": false, "package": "apps/web" | null}
     ]
   }
 
+MONOREPO FIELDS:
+  monorepo             true/false/null from state.json
+  packages             Array of registered packages (empty if not monorepo)
+  active_package       Resolved package context from --package flag or CWD
+  monorepo_detection   Auto-detection result (only when monorepo is null)
+  candidate.package    Package annotation parsed from session stub header
+
 EXAMPLES:
-  ./analyze-project.sh              # View human-readable summary
-  ./analyze-project.sh --json       # Get JSON for Claude
-  ./analyze-project.sh --json | jq  # Pretty-print JSON
+  ./analyze-project.sh                          # View human-readable summary
+  ./analyze-project.sh --json                   # Get JSON for Claude
+  ./analyze-project.sh --json | jq              # Pretty-print JSON
+  ./analyze-project.sh --json --package apps/web  # Filter by package
 EOF
 }
 
@@ -313,6 +383,14 @@ main() {
             --json)
                 OUTPUT_MODE="json"
                 shift
+                ;;
+            --package)
+                if [[ -z "${2:-}" ]]; then
+                    log_error "--package requires a PATH argument"
+                    exit 1
+                fi
+                PACKAGE_FILTER="$2"
+                shift 2
                 ;;
             --help|-h)
                 show_usage

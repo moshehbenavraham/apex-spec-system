@@ -53,18 +53,45 @@ Industry standard order (fast to slow, format before validate):
 
 1. Check for `.spec_system/CONVENTIONS.md`
    - If missing: Run `/initspec` yourself to create it. Only ask the user if `/initspec` requires user input you don't have.
-   - Read Repository section for monorepo detection
    - Read Stack section for languages/runtimes
    - Read Local Dev Tools table for configured tools
+   - Read Workspace Structure table (if present) for per-package tool status
 
-2. Check for `.spec_system/audit/known-issues.md`
+2. Read `.spec_system/state.json` for monorepo context:
+   - `monorepo` field: `true` / `false` / `null`
+   - `packages` array (when `monorepo: true`): each entry has `name`, `path`, `type`, `stack`
+
+3. Check for `.spec_system/audit/known-issues.md`
    - If found, load ignore patterns
    - Note: "Known issues loaded (N paths, N rules, N tests)"
 
-3. Check git status
+4. Check git status
    - If dirty: Warn "Uncommitted changes exist. Fixes will mix with existing changes."
 
-4. If `--dry-run`: Skip to Dry Run Output
+5. If `--dry-run`: Skip to Dry Run Output
+
+### Step 1a: Enumerate Packages (Monorepo Only)
+
+**Skip this step if** `monorepo` is not `true` in state.json.
+
+When `monorepo: true`, build a per-package tool matrix:
+
+1. Read the `packages` array from state.json
+2. For each package, note its `stack` field (determines which tools apply)
+3. Group packages by stack (packages sharing a stack share tool configs)
+4. Determine installation strategy per tool:
+   - **Shared at root**: When all packages use the same stack, or the tool is stack-agnostic (e.g., git hooks)
+   - **Per-package**: When packages have different stacks (e.g., Python API + TypeScript frontend)
+
+Example package matrix:
+```
+Packages detected (monorepo: true):
+| Package | Path | Stack | Formatter | Linter | Types |
+|---------|------|-------|-----------|--------|-------|
+| web | apps/web | TypeScript | Biome | Biome | tsc |
+| api | apps/api | Python | Ruff | Ruff | mypy |
+| shared | packages/shared | TypeScript | Biome | Biome | tsc |
+```
 
 ### Step 2: COMPARE
 
@@ -94,11 +121,18 @@ Install and configure the single selected bundle missing.
 | Rust | rustfmt | Clippy | (built-in) | cargo test | tracing | pre-commit |
 | Go | gofmt | golangci-lint | (built-in) | go test | log/slog | pre-commit |
 
-**For monorepos**: Install at root if shared, or per-package if stack differs.
+**Monorepo installation strategy** (when `monorepo: true`):
+- **Same stack across all packages**: Install and configure at repo root. One config file shared.
+- **Mixed stacks**: Install per-package. Each package gets its own config file in its directory.
+- **Git hooks**: Always install at repo root (hooks are repo-wide). Configure to run tools per-package via workspace commands (e.g., `pnpm -r run lint`, `turbo run lint`).
+- **Observability bundle**: Create `logs/` at repo root (shared). Logger configs go per-package in each package's source directory (e.g., `apps/api/src/logging_config.py`, `apps/web/src/logger.ts`).
+
+**Single-repo**: Install and configure at project root as usual.
 
 1. Install tool via detected package manager
 2. Generate config file with sensible defaults
-3. If install fails and not `--skip-install`: Try alternative install methods (different package manager, build from source, etc.). Only document for manual install if you have exhausted all automated options and the failure requires sudo or credentials you don't have.
+3. **Monorepo**: When installing per-package, use workspace commands where available (e.g., `pnpm --filter web add -D biome`, `cargo add -p api tracing`)
+4. If install fails and not `--skip-install`: Try alternative install methods (different package manager, build from source, etc.). Only document for manual install if you have exhausted all automated options and the failure requires sudo or credentials you don't have.
 
 #### Observability Bundle Implementation ("Logger")
 
@@ -153,7 +187,14 @@ Run ALL configured tools (not just the new one):
 - Confirm `logs/.gitignore` has correct patterns
 - Confirm `logs/last_error_<timestamp>.json` is created with valid JSON
 
-**For monorepos**: Run per package, collect results.
+**Monorepo validation** (when `monorepo: true`):
+- Run each configured tool **per package** using workspace commands or by changing into the package directory
+- Examples: `pnpm --filter web run lint`, `cd apps/api && ruff check .`, `turbo run typecheck`
+- Also run repo-root checks for root-level configs (e.g., root `tsconfig.json` references)
+- Collect results per package for the Step 8 report
+- A tool failing in one package does not skip other packages -- run all, then report all
+
+**Single-repo**: Run each tool from the project root as usual.
 
 Capture all output. Parse for errors, warnings, fixes applied.
 
@@ -180,6 +221,19 @@ Update the Local Dev Tools table:
 |----------|------|--------|
 | Formatter | Ruff | ruff.toml |  <-- was "not configured"
 ```
+
+**Monorepo only**: Also update the Workspace Structure table with per-package tool status where stacks differ:
+```markdown
+## Workspace Structure
+
+| Package | Path | Type | Stack | Formatter | Linter |
+|---------|------|------|-------|-----------|--------|
+| web | apps/web | Frontend | TypeScript | Biome | Biome |
+| api | apps/api | Backend | Python | Ruff | Ruff |
+| shared | packages/shared | Library | TypeScript | Biome | Biome |
+```
+
+If the Workspace Structure table does not yet have tool columns, add them. If the table already exists (from `/initspec` or `/createprd`), extend it with the new columns rather than replacing it.
 
 ### Step 8: REPORT
 

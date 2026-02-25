@@ -31,6 +31,8 @@ Check `.spec_system/state.json`:
 - Confirm current phase status is "complete"
 - Get phase number and name
 - If phase not complete, inform user and exit
+- Read `monorepo` field: `true` / `false` / `null`
+- If `monorepo: true`: read `packages` array and `completed_sessions` (object format with `package` field)
 
 ### 2. Gather Phase Artifacts
 
@@ -47,6 +49,8 @@ Also read:
 - Any `implementation-notes.md` files with blockers or discoveries
 - All `security-compliance.md` files from the completed phase's sessions
 - Current `.spec_system/SECURITY-COMPLIANCE.md` (if exists from prior phases)
+
+**Monorepo only**: For each session's artifacts, note the `Package:` field from its spec.md header. This associates insights with the package they originated from. Cross-cutting sessions (package: null) produce project-wide insights.
 
 ### 3. Extract Insights
 
@@ -70,6 +74,11 @@ From each session's IMPLEMENTATION_SUMMARY.md, identify:
 - Check if previous Active Concerns were addressed this phase
 - Move them to Resolved with brief resolution note
 
+**Monorepo only**: Tag each extracted insight with its source package:
+- **Package-specific**: Concerns/lessons that apply to one package (e.g., `[P05-apps/web]` for a frontend-specific issue)
+- **Cross-package**: Concerns that span multiple packages or affect package interactions (e.g., `[P05-apps/web+apps/api]` for an API contract issue)
+- **Project-wide**: Concerns that apply regardless of package (e.g., `[P05]` for a CI/CD or tooling lesson)
+
 ### 4. Read Current CONSIDERATIONS.md
 
 Read `.spec_system/CONSIDERATIONS.md`:
@@ -80,6 +89,8 @@ Read `.spec_system/CONSIDERATIONS.md`:
 ### 5. Update CONSIDERATIONS.md
 
 Update `.spec_system/CONSIDERATIONS.md` following the format below. Add new items, remove resolved ones, merge similar entries, and enforce the limits in Rules above.
+
+**Monorepo only**: When tagging items, use the package-qualified format: `[PNN-package/path]` for package-specific items, `[PNN]` for project-wide items. This helps future sessions identify which concerns apply to their target package. Do NOT create separate per-package sections -- keep the existing flat structure but use the tags to indicate scope. This avoids section bloat within the 600-line limit.
 
 ### 6. Synthesize SECURITY-COMPLIANCE.md
 
@@ -92,6 +103,12 @@ Read every `security-compliance.md` from the just-completed phase's sessions. Me
 - **Personal Data Inventory**: Accumulate across phases -- add new data elements, update existing ones if storage/purpose changed, remove if data collection was removed
 - **Dependency audit**: Keep only the current state -- drop resolved dependency issues, add new ones
 - **Phase summary**: Add a row to the Phase History table, keep last 5 phases of detail
+
+**Monorepo only**: When synthesizing findings:
+- Include the package path in finding IDs (e.g., `[P05-apps/web-S03]` for a finding from session 03 scoped to apps/web)
+- In the Personal Data Inventory, add a Package column to indicate which package collects/stores each data element
+- In the Phase History table, note per-package session counts if sessions were distributed across packages
+- Group related findings by package when it aids readability, but keep within the flat document structure
 
 ### 7. Report Summary
 
@@ -331,6 +348,7 @@ When approaching 600 lines, trim in this order:
 
 ## Output
 
+**Single-repo:**
 ```
 Phase NN Carryforward Complete
 
@@ -354,5 +372,13 @@ Key additions:
 - [Security] Brief description (if any new findings)
 
 Ready for /documents to maintain project documentation.
+```
+
+**Monorepo** (add package breakdown after Key additions):
+```
+Package breakdown:
+- apps/web: N sessions, N concerns, N findings
+- apps/api: N sessions, N concerns, N findings
+- (cross-cutting): N sessions, N concerns, N findings
 ```
 

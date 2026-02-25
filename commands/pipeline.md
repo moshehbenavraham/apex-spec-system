@@ -56,16 +56,20 @@ Industry standard order (fast feedback to comprehensive):
 
 1. Check for `.spec_system/CONVENTIONS.md`
    - If missing: Run `/initspec` yourself to create it. Only ask the user if `/initspec` requires user input you don't have.
-   - Read Repository section for monorepo detection
    - Read Stack section for languages/runtimes
    - Read CI/CD section for platform and configured workflows
+   - Read Workspace Structure table (if present) for package list and stacks
 
-2. Detect CI platform from existing files:
+2. Read `.spec_system/state.json` for monorepo context:
+   - `monorepo` field: `true` / `false` / `null`
+   - `packages` array (when `monorepo: true`): each entry has `name`, `path`, `type`, `stack`
+
+3. Detect CI platform from existing files:
    - `.github/workflows/` = GitHub Actions
    - `.gitlab-ci.yml` = GitLab CI (note: limited support)
    - If none: Default to GitHub Actions
 
-3. Check for open PRs with CI issues:
+4. Check for open PRs with CI issues:
    ```bash
    gh pr list --state open --json number,title,statusCheckRollup,reviewDecision
    ```
@@ -73,11 +77,34 @@ Industry standard order (fast feedback to comprehensive):
    - Identify PRs with requested changes
    - If `--pr <number>` specified, focus on that PR
 
-4. Check for `.spec_system/audit/known-issues.md`
+5. Check for `.spec_system/audit/known-issues.md`
    - Load Skipped Workflows section
    - Note: "Known issues loaded (N workflows skipped)"
 
-5. If `--dry-run`: Skip to Dry Run Output
+6. If `--dry-run`: Skip to Dry Run Output
+
+### Step 1a: Determine Workflow Strategy (Monorepo Only)
+
+**Skip this step if** `monorepo` is not `true` in state.json.
+
+When `monorepo: true`, determine the CI/CD strategy based on workspace structure:
+
+1. **Identify workspace manager**: Check for turbo.json, nx.json, pnpm-workspace.yaml, Cargo.toml workspace, go.work
+2. **Determine trigger strategy**:
+   - **Path filters**: Workflows trigger only when files in the relevant package change. Use when packages are independent or loosely coupled.
+   - **Matrix builds**: A single workflow runs jobs for each package. Use when packages share the same language/toolchain.
+   - **Task runner delegation**: Delegate to turbo/nx/cargo which handles caching and dependency ordering. Use when a workspace task runner is present.
+3. **Map package dependencies**: If package B depends on package A, changes to A must trigger CI for both A and B
+
+Example workflow strategy:
+```
+Monorepo CI strategy:
+- Task runner: turbo (detected)
+- Trigger: path filters per package + shared paths trigger all
+- Quality: turbo run lint typecheck (handles per-package)
+- Test: turbo run test (handles per-package with caching)
+- Shared paths: packages/shared/**, .github/**, package.json
+```
 
 ### Step 2: COMPARE
 
@@ -108,7 +135,43 @@ Generate workflow file(s) for the selected bundle.
 | Integration | `.github/workflows/integration.yml` | pull_request (to main) |
 | Operations | `.github/workflows/release.yml` + dependabot.yml | push to main, tags |
 
-**For monorepos**: Use matrix builds or path filters per package.
+**Monorepo workflow generation** (when `monorepo: true`):
+
+- **With task runner (turbo/nx)**: Use the task runner as the build orchestrator. It handles per-package execution, caching, and dependency ordering automatically.
+  ```yaml
+  # Example: turbo-based quality workflow
+  jobs:
+    quality:
+      steps:
+        - run: pnpm install
+        - run: pnpm turbo run lint typecheck
+  ```
+- **Without task runner**: Use path filters per package to trigger targeted jobs, plus a shared trigger for common files.
+  ```yaml
+  # Example: path-filtered triggers
+  on:
+    push:
+      paths:
+        - 'apps/web/**'
+        - 'packages/shared/**'    # shared dependency
+        - '.github/workflows/**'  # workflow changes
+  ```
+- **Mixed stacks**: Use matrix strategy to run language-specific jobs per package.
+  ```yaml
+  # Example: matrix for mixed stacks
+  strategy:
+    matrix:
+      include:
+        - package: apps/web
+          lang: node
+          commands: "biome ci && vitest run"
+        - package: apps/api
+          lang: python
+          commands: "ruff check . && pytest"
+  ```
+- **Cross-package dependencies**: Changes to shared packages (type: library) must trigger CI for all dependent packages. Map these via workspace config or the `packages` array in state.json.
+
+**Single-repo**: Generate standard single-target workflows.
 
 **Language-specific jobs** (from CONVENTIONS.md Stack):
 
@@ -120,8 +183,9 @@ Generate workflow file(s) for the selected bundle.
 | Go | gofmt -d, golangci-lint | go test | govulncheck |
 
 1. Generate workflow YAML with appropriate jobs
-2. Commit and push to current branch
-3. If secrets required, document in output (don't create secrets)
+2. **Monorepo**: Include path filters, matrix strategy, or task runner delegation as determined in Step 1a
+3. Commit and push to current branch
+4. If secrets required, document in output (don't create secrets)
 
 ### Step 5: VALIDATE
 
@@ -208,6 +272,15 @@ Update `.spec_system/CONVENTIONS.md` CI/CD table:
 | Code Quality | configured | .github/workflows/quality.yml |
 | Build & Test | configured | .github/workflows/test.yml |
 | Security | not configured | - |
+```
+
+**Monorepo only**: If workflows use per-package triggers or matrix builds, note the strategy in the table:
+
+```markdown
+| Bundle | Status | Workflow | Strategy |
+|--------|--------|----------|----------|
+| Code Quality | configured | quality.yml | turbo run lint typecheck |
+| Build & Test | configured | test.yml | matrix (per-package) |
 ```
 
 ### Step 8: REPORT

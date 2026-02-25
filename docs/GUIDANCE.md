@@ -16,6 +16,7 @@ Practical guidance for getting the most out of the Apex Spec System.
 | **Solo developer + AI** | The primary design target |
 | **Well-defined requirements** | Clear enough to write a PRD, although /createprd can do lifting |
 | **Learning new tech** | Structure helps when exploring unfamiliar territory |
+| **Monorepo projects** | Per-package session scoping keeps work focused |
 
 **Real example**: The NJ Title Intelligence Platform (see [WALKTHROUGH.md](WALKTHROUGH.md)) used Apex Spec to build a 4M+ parcel system across 16 phases and 79+ sessions in ~3 weeks.
 
@@ -62,7 +63,7 @@ The project is initiated, then iterates through phases. Each phase consists of s
 Ran once at the beginning of the project.
 
 ```
-/initspec -> /createprd -> /phasebuild
+/initspec -> /createprd -> /createuxprd (optional) -> /phasebuild
 ```
 
 **Artifacts created:**
@@ -173,6 +174,63 @@ Treat Apex Spec as a **personal workflow tool** that produces **shareable artifa
 
 ---
 
+## Monorepo Usage
+
+### When Monorepo Support Helps
+
+| Scenario | Why |
+|----------|-----|
+| Multiple packages with different stacks | Per-package tool validation and session scoping |
+| Large codebase with clear boundaries | Sessions stay focused on one package at a time |
+| Shared libraries consumed by multiple apps | Cross-cutting sessions handle shared code |
+| Different deploy targets per package | `/infra` and `/pipeline` adapt per deployable unit |
+
+### Session Scoping Best Practices
+
+**Prefer single-package sessions.** Most sessions should target one package. This keeps scope tight and makes validation straightforward.
+
+**Use cross-cutting sessions sparingly.** Reserve `package: null` sessions for work that genuinely spans packages:
+- Initial project scaffolding and workspace config
+- Shared type definitions consumed by multiple packages
+- CI/CD pipeline setup
+- Integration tests between services
+
+**Order sessions by dependency.** If `apps/web` needs types from `packages/shared`, plan the shared session first (lower session number within the phase).
+
+**Scope task paths to the package.** Task file paths should use full repo-root-relative paths:
+```
+- [ ] T001 [S0102] Create auth module (`apps/web/src/auth/index.ts`)
+```
+Not:
+```
+- [ ] T001 [S0102] Create auth module (`src/auth/index.ts`)
+```
+
+### Package Context Flow
+
+You do not need to remember to specify the package every time. The system resolves it automatically:
+
+1. **From session stubs**: `/phasebuild` annotates stubs with `Package: apps/web`
+2. **From spec.md**: Once planned, the spec header carries the package context
+3. **From user input**: Say "plan for apps/web" during `/plansession`
+4. **As fallback**: Claude prompts you to select from the packages list
+
+### Monorepo + Team Patterns
+
+Combine monorepo support with team patterns for larger projects:
+
+```
+Developer A                    Developer B
+-------------                  -------------
+Claims session for apps/web    Claims session for apps/api
+Runs session workflow solo     Runs session workflow solo
+Both share same state.json     Both share same .spec_system/
+```
+
+**Coordination tip**: Assign sessions by package ownership. Add `Assigned: @username` and `Package: apps/web` to session stub files. This prevents conflicts.
+
+---
+
 ## Future Enhancements
 
 The following features are under consideration but require implementation work:
@@ -225,6 +283,7 @@ Session Velocity:
 |------|---------|
 | Start new project | `/initspec` |
 | Generate PRD from requirements | `/createprd "description"` or `/createprd @file.md` |
+| Generate UX PRD from design docs | `/createuxprd "description"` or `/createuxprd @file.md` |
 | Create phase structure | `/phasebuild` |
 | Analyze, spec, and generate tasks | `/plansession` |
 | Implement tasks | `/implement` |

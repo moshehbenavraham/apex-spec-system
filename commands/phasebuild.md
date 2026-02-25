@@ -32,6 +32,15 @@ If `.spec_system/SECURITY-COMPLIANCE.md` exists, review it for:
 - **Open Findings** that should be addressed in this phase's sessions
 - **GDPR Status** that may affect data-handling session scope
 
+**Monorepo Checkpoint** (skip if `monorepo` is already `true` or `false`):
+- If the PRD references multiple packages/services but `state.json` has no `packages` array, alert the user:
+  ```
+  Warning: PRD references multiple packages but monorepo is not configured.
+  Consider running /createprd to detect and configure monorepo settings,
+  or manually update state.json with monorepo: true and a packages array.
+  ```
+- This is advisory only -- do not block phase creation
+
 ### 2. Create Phase Directory and PRD Markdown
 
 Create directory `.spec_system/PRD/phase_NN/` and markdown `.spec_system/PRD/phase_NN/PRD_phase_NN.md`:
@@ -183,6 +192,17 @@ For each session, create `session_NN_name.md` (use `snake_case` for name):
 - [ ] [Criterion 1]
 - [ ] [Criterion 2]
 ```
+
+**Monorepo package annotation** (only when `monorepo: true` in state.json):
+
+Add a `Package:` or `Packages:` line to the stub header, after the Session ID line:
+- Single-package session: `**Package**: apps/web`
+- Multi-package session: `**Packages**: apps/web, apps/api`
+- Cross-cutting or single-repo: omit the line entirely
+
+This annotation is parsed by `analyze-project.sh` to enable `--package` filtering and package-scoped workflows.
+
+**Cross-package guidance**: When a session touches multiple packages, note which package owns the primary deliverables and which are secondary dependencies. Keep cross-package sessions to 2-3 packages maximum -- split if more are needed.
 
 ### 4. Update State
 

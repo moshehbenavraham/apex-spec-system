@@ -31,6 +31,13 @@ else
 fi
 ```
 
+The JSON output includes:
+- `current_phase` - Current phase number
+- `completed_sessions` - List of completed session IDs
+- `monorepo` - true/false/null from state.json
+- `packages` - Array of registered packages (empty if not monorepo)
+- `active_package` - Resolved package context (null if not applicable)
+
 Also read:
 - `.spec_system/state.json` - Project state and phase/session progress
 - `.spec_system/PRD/PRD.md` - Product requirements for context
@@ -48,10 +55,12 @@ Check if a phase was recently completed:
 - Focus README updates on newly added packages/services
 - Update ARCHITECTURE.md with new components added in the phase
 - Still verify all standard files exist, but deep-audit only changed areas
+- **Monorepo**: Check which packages had sessions in the completed phase (use `completed_sessions` object format with `package` field). Focus per-package README updates on packages that changed.
 
 **Full Audit Mode** (initial setup, major milestones, or explicit request):
 - Audit all documentation comprehensively
 - Use when: first run, after multiple phases, or user requests full audit
+- **Monorepo**: Verify all packages have README files and that root documentation covers workspace structure
 
 Report the audit mode to the user before proceeding:
 ```
@@ -105,6 +114,8 @@ services/auth/README_auth.md     # Auth service details
 ```
 
 Pattern: `[parent]/[dirname]/README_[dirname].md`
+
+**Monorepo**: When `monorepo: true`, use the `packages` array from state.json as the authoritative list of packages needing READMEs. For each package entry, check for `README_<name>.md` in its `path` directory. This ensures documentation tracks the registered packages rather than relying on directory scanning alone.
 
 ### 4. Generate Audit Report
 
@@ -160,6 +171,16 @@ For each missing required file:
 
 - [Technology 1] - [Why]
 - [Technology 2] - [Why]
+
+[MONOREPO ONLY - include when monorepo: true]
+## Packages
+
+| Package | Path | Description | Stack |
+|---------|------|-------------|-------|
+| [name] | [path] | [Purpose] | [Stack] |
+
+> Populate from `packages` array in `.spec_system/state.json`
+[END MONOREPO ONLY]
 
 ## Project Status
 
@@ -244,6 +265,22 @@ Use conventional commits:
 ## Data Flow
 
 [Describe how data moves through the system]
+
+[MONOREPO ONLY - include when monorepo: true]
+## Package Dependencies
+
+```
+[Package A] --> [Package B (shared)]
+[Package C] --> [Package B (shared)]
+```
+
+| Package | Depends On | Depended By |
+|---------|-----------|-------------|
+| [name] | [list] | [list] |
+
+> Document cross-package import/dependency relationships.
+> Shared libraries should list their consumers.
+[END MONOREPO ONLY]
 
 ## Key Decisions
 
@@ -457,9 +494,18 @@ Push --> Build --> Test --> [Staging] --> [Production]
 
 What prompted this decision?
 
+## Options Considered
+
+1. [Option A] - [pros/cons]
+2. [Option B] - [pros/cons]
+
 ## Decision
 
 What we chose to do.
+
+## Rationale
+
+Why this option over the alternatives.
 
 ## Consequences
 
@@ -641,6 +687,15 @@ Create `.spec_system/docs-audit.md`:
 
 **Completed Phase**: Phase NN - [Phase Name]
 **Sessions Analyzed**: [list of session names]
+
+[MONOREPO ONLY]
+### Per-Package Documentation Status
+
+| Package | Path | README | Status |
+|---------|------|--------|--------|
+| [name] | [path] | README_[name].md | Found / Missing / Updated |
+
+[END MONOREPO ONLY]
 
 ### Change Manifest (from implementation-notes.md)
 

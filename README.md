@@ -49,6 +49,13 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
             /createprd @docs/requirements.md
 
    ```
+   /createuxprd OR /apex-spec:createuxprd
+   ```
+   Optional:  Turn design docs into a UX PRD companion document.
+   Example: /createuxprd "social app with feed, profiles, and messaging"
+            /createuxprd @docs/design-spec.md
+
+   ```
    /phasebuild OR /apex-spec:phasebuild
    ```
    This will set up the initial Phase and Sessions for that initial Phase
@@ -74,9 +81,42 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 
  5. **Repeat until all phases complete!**
 
+## Monorepo Quick Start
+
+The system auto-detects monorepo structures. No special configuration needed.
+
+**Brownfield** (existing monorepo with code):
+```
+/initspec
+```
+The system detects workspace configs (pnpm, npm workspaces, turbo, nx, cargo, go, lerna), shows detected packages, and asks you to confirm.
+
+**Greenfield** (new project, PRD describes multiple services):
+```
+/initspec       # Sets monorepo: null (unknown)
+/createprd      # Detects multi-package signals in PRD, prompts to confirm
+```
+
+**Per-package sessions**:
+```
+User: /plansession
+      "Plan a session for apps/web"
+
+# Claude scopes spec.md and tasks.md to apps/web
+# File paths use full repo-root-relative paths (apps/web/src/auth.ts)
+```
+
+Sessions interleave across packages within a phase. A phase completes when all its sessions are done, regardless of which packages they target.
+
+**What stays the same**:
+- Single `.spec_system/` at the repo root
+- Same session ID format (`phaseNN-sessionNN-name`)
+- Same 13-command workflow
+- Single-repo projects see zero change
+
 ## Features
 
-- **12-Command Workflow**: Structured process from initialization to completion
+- **13-Command Workflow**: Structured process from initialization to completion
 - **Session Scoping**: Keep work manageable with 12-25 tasks per session
 - **Progress Tracking**: State file and checklists track progress
 - **Validation Gates**: Verify completeness, security & GDPR compliance before marking done
@@ -85,15 +125,17 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 - **Dev Tooling**: Regular code quality audits
 - **Documentation Maintenance**: Keep project documentation up to date
 - **ASCII Enforcement**: Avoid encoding issues that break code generation
+- **Monorepo Support**: Auto-detects workspace structures, per-package session scoping
 
 ## Plugin Components
 
-### Commands (12 total)
+### Commands (13 total)
 
 | Command | Purpose |
 |---------|---------|
 | `/initspec` | Initialize spec system in current project |
 | `/createprd` | Generate master PRD from requirements document |
+| `/createuxprd` | Generate UX PRD from design documents |
 | `/plansession` | Analyze project, create spec and task checklist |
 | `/implement` | AI-led task-by-task implementation |
 | `/validate` | Verify session completeness |
@@ -141,6 +183,8 @@ your-project/
 \-- (your project source files)
 ```
 
+For monorepo projects, the same `.spec_system/` sits at the repo root. Sessions reference their target package in metadata (spec.md header), not in directory names.
+
 ## Session Scope
 
 - Maximum 25 tasks per session
@@ -158,8 +202,8 @@ All files must use ASCII-only characters (0-127). No Unicode, emoji, or smart qu
 
 ## Documentation
 
-- [Usage Guidance](docs/GUIDANCE.md) - When to use, workflow modes, team patterns
-- [Production Walkthrough](docs/WALKTHROUGH.md) - Real-world example (79+ sessions, 16 phases)
+- [Usage Guidance](docs/GUIDANCE.md) - When to use, workflow modes, team patterns, monorepo guidance
+- [Production Walkthrough](docs/WALKTHROUGH.md) - Real-world examples (single-repo and monorepo)
 
 ## License
 

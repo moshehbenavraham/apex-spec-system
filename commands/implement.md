@@ -7,15 +7,16 @@ description: AI-led task-by-task implementation of the current session
 
 Execute each task in the session's task list, updating progress as you go.
 
-## Rules
+## RULES
 
-1. **Make NO assumptions.** Do not be lazy. Pattern match precisely. Do not skim when you need detailed info. Validate systematically.
-2. **Follow CONVENTIONS.md** - all code must follow project-specific coding standards
-3. **ASCII-only characters** and Unix LF line endings in all output
-4. **Implement exactly what's in the spec** - no extra features, no refactoring unrelated code
-5. **Update tasks.md immediately** after completing each task - never batch checkbox updates
-6. **Write tests as specified** - ensure they pass before moving on
-7. **Ensure logging and error handling** - no silent failures
+1. **Make NO assumptions.** Before editing, read the relevant code and comments; pattern‑match precisely, validate systematically.
+2. **Follow `CONVENTIONS.md`.** All code must follow project‑specific coding standards.
+3. **ASCII‑only characters** and Unix LF line endings in all output.
+4. **Never lie and implement exactly what’s in the spec** – no lying, no extra features, no refactoring unrelated code.
+5. **Update `tasks.md` immediately** after completing each task – never batch checkbox updates.
+6. **Write tests as specified** – ensure they pass before moving on.
+7. **Ensure logging and error handling** – no silent failures.
+8. **Prefer cohesive, moderately sized modules** – avoid multi‑thousand‑line god files; if a file grows beyond ~400–600 LOC or multiple responsibilities, schedule a refactor.
 
 ### No Deferral Policy
 
@@ -46,8 +47,23 @@ This returns structured JSON including:
 - `current_session` - The session to implement
 - `current_session_dir_exists` - Whether specs directory exists
 - `current_session_files` - Files already in the session directory
+- `monorepo` - true/false/null from state.json
+- `packages` - Array of registered packages (empty if not monorepo)
+- `active_package` - Resolved package context (null if not applicable)
 
 **IMPORTANT**: Use the `current_session` value from this output. If `current_session` is `null`, run `/plansession` yourself to set one up. Only ask the user if that command requires user input.
+
+### 1a. Determine Package Context (Monorepo Only)
+
+**Skip this step if** `monorepo` is not `true` in the JSON output.
+
+Resolve the active package for this session:
+
+1. **spec.md header**: Read the `Package:` field from the session's spec.md (set during `/plansession`)
+2. **active_package from script**: If spec.md has no Package field, use `active_package` from the JSON output
+3. **Prompt user**: If neither resolves a package, ask the user which package this session targets (or whether it is cross-cutting)
+
+Store the resolved package path for use in Steps 2, 4, and 5. A `null` package means this is a cross-cutting session.
 
 ### 2. Verify Environment Prerequisites (REQUIRED)
 
@@ -66,6 +82,12 @@ This verifies:
 - `.spec_system/` directory and `state.json` are valid
 - `jq` is installed (required for scripts)
 - `git` availability (optional)
+
+**Monorepo**: If a package was resolved in Step 1a, add `--package <path>` to verify package-specific prerequisites and workspace tooling:
+
+```bash
+# Example: check-prereqs.sh --json --env --package apps/web
+```
 
 **If any environment check fails**: FIX the issues yourself. Install missing tools, create missing directories, start required services. The ONLY reason to stop is if you need credentials or input only the user can provide.
 
@@ -101,6 +123,9 @@ If `implementation-notes.md` doesn't exist, create it:
 # Implementation Notes
 
 **Session ID**: `phase_NN_session_NN_name`
+[MONOREPO ONLY - include when monorepo: true]
+**Package**: [package-path]
+[END MONOREPO ONLY]
 **Started**: [YYYY-MM-DD HH:MM]
 **Last Updated**: [YYYY-MM-DD HH:MM]
 
@@ -137,8 +162,11 @@ Find the first unchecked `- [ ]` task in tasks.md
 
 #### B. Implement Task
 - Read the task description carefully
+- Read surrounding code to match existing patterns before writing new code
 - Follow the spec's technical approach and CONVENTIONS.md standards
+- If `docs/adr/` exists, review relevant Architecture Decision Records and follow their decisions
 - Implement the required changes
+- **Monorepo path validation**: If a package was resolved in Step 1a, verify that files being created or modified fall within the declared package directory (e.g., `apps/web/...`). Warn if a task references files outside the package scope -- this may indicate scope creep. Exception: cross-cutting sessions (package: null) may touch any file.
 
 #### C. Update Task Status
 In `tasks.md`, change:
@@ -165,6 +193,11 @@ Add to `.spec_system/specs/[current-session]/implementation-notes.md`:
 
 **Files Changed**:
 - `path/to/file` - [changes made]
+
+[MONOREPO ONLY - include if any files fall outside the declared package scope]
+**Out-of-Scope Files** (files outside declared package):
+- `other-package/path/file` - [justification]
+[END MONOREPO ONLY]
 ```
 
 ### 6. Handle Blockers
