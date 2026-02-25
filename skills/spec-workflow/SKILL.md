@@ -32,6 +32,8 @@ The workflow has **3 distinct stages**:
       |
       v
 /createuxprd       ->  Generate UX PRD from design docs (optional)
+  OR                   OR
+[User Action]      ->  Manually populate UX PRD with requirements
       |
       v
 /phasebuild        ->  Create first phase structure (session stubs)
