@@ -7,9 +7,13 @@ description: Add and validate CI/CD workflows one bundle at a time
 
 Add and validate CI/CD workflows one bundle at a time.
 
+## Billing Failures
+
+CI failures can be caused by **billing/usage limits** (e.g., exhausted GitHub Actions minutes), not code issues. If CI fails and you suspect a billing issue, **run the equivalent steps locally** to validate. If local runs pass, treat the bundle as validated and proceed. Note in the REPORT that validation was done locally.
+
 ## Rules
 
-1. **One bundle per run** - add one workflow, validate all
+1. **One bundle per run, one run per phase** - add one workflow, validate all. Bundles accumulate across phases as the project matures.
 2. **GitHub Actions first** - GitLab CI noted but limited support
 3. **Respect known-issues.md** - skip workflows marked as flaky
 4. **Document secrets, never create them** - just document requirements
@@ -47,7 +51,7 @@ Industry standard order (fast feedback to comprehensive):
 |------|---------|-------------|
 | `--dry-run` | false | Preview what would happen without changes |
 | `--skip-install` | false | Don't create workflow files |
-| `--verbose` | false | Show full CI output |
+| `--verbose` | true | Show full CI output |
 | `--pr <number>` | none | Focus on specific PR (fix CI failures, address reviews) |
 
 ## Flow
@@ -227,9 +231,13 @@ Trigger and monitor CI:
    - Review comments requesting changes
    - Unresolved review threads
 
+**If CI fails due to billing/usage limits** (see Billing Failures above):
+- Run the workflow's steps locally (lint, test, build, etc.) to validate
+- If local runs pass, treat as validated and continue to Step 7
+
 **If still running after 3 minutes:**
 ```
-CI in progress. Rerun /pipeline to check status.
+CI still running. Validate locally and proceed.
 ```
 
 ### Step 6: FIX
@@ -331,10 +339,10 @@ REPORT
 
 ### Step 9: RECOMMEND
 
-- **CI failures remain**: List required actions, prompt rerun of `/pipeline`
+- **CI failures remain**: List required actions, validate locally and fix within this run
 - **PR has unresolved items**: Report status, note what needs manual response
 - **PR is ready**: Confirm all checks passing and reviews addressed, recommend merge
-- **Bundles remain**: Recommend rerun of `/pipeline` for next bundle
+- **Bundles remain**: Note which bundle comes next (it will be added in a future phase's `/pipeline` run)
 - **All 5 bundles configured and passing**: Recommend `/infra`
 
 ## Dry Run Output
