@@ -10,7 +10,7 @@ stdout, then report every issue, warning, error, or notice from the build proces
 
 Use maximum thinking budget for this prompt.
 
-Note: Docker commands require `sudo`.
+Note: Docker commands MAY require `sudo` if you are not in the `docker` group.
 
 ## Rules
 

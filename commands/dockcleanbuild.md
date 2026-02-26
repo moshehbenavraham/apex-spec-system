@@ -11,7 +11,7 @@ from scratch with no cache, bring containers back up, and clean up leftover arti
 
 Use maximum thinking budget for this prompt.
 
-Note: Docker commands require `sudo`.
+Note: Docker commands MAY require `sudo` if you are not in the `docker` group.
 
 ## Rules
 
