@@ -1,7 +1,6 @@
 ---
 name: pullndoc
 description: Git pull an upstream repo and document every imported change
-category: utility
 ---
 
 # /pullndoc Command

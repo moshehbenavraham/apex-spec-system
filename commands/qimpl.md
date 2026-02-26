@@ -1,7 +1,6 @@
 ---
 name: qimpl
 description: Context-aware autonomous implementation session driven by a work file
-category: utility
 ---
 
 # /qimpl Command

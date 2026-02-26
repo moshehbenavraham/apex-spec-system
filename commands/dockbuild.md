@@ -1,7 +1,6 @@
 ---
 name: dockbuild
 description: Quick Docker Compose build and start with full output
-category: utility
 ---
 
 # /dockbuild Command

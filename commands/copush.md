@@ -1,7 +1,6 @@
 ---
 name: copush
 description: Pull, version-bump, commit all changes, and push to origin
-category: utility
 ---
 
 # /copush Command

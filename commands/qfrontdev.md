@@ -1,7 +1,6 @@
 ---
 name: qfrontdev
 description: Autonomous frontend implementation session with designer-level quality standards
-category: utility
 ---
 
 # /qfrontdev Command

@@ -1,7 +1,6 @@
 ---
 name: sculpt-ui
 description: Guide AI-led creation of distinctive, production-grade frontend interfaces
-category: utility
 ---
 
 # /sculpt-ui Command

@@ -1,7 +1,6 @@
 ---
 name: up2imp
 description: Audit upstream changes and curate an optimally ordered implementation list
-category: utility
 ---
 
 # /up2imp Command

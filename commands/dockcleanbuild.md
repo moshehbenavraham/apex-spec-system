@@ -1,7 +1,6 @@
 ---
 name: dockcleanbuild
 description: Clean Docker environment and rebuild all images and containers from scratch
-category: utility
 ---
 
 # /dockcleanbuild Command

@@ -1,7 +1,6 @@
 ---
 name: qbackenddev
 description: Autonomous backend/infrastructure development session driven by a work file
-category: utility
 ---
 
 # /qbackenddev Command
