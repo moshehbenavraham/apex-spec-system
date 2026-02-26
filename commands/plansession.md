@@ -161,11 +161,11 @@ Generate `spec.md` with all sections filled in:
 ## 4. Scope
 
 ### In Scope (MVP)
-- [Feature/functionality to implement]
-- [Feature/functionality to implement]
+- [PRD requirement in actor/capability form] - [brief implementation note]
+- [PRD requirement in actor/capability form] - [brief implementation note]
 
 ### Out of Scope (Deferred)
-- [Feature] - *Reason: [why deferred]*
+- [PRD requirement] - *Reason: [why deferred]*
 
 ---
 
@@ -204,6 +204,9 @@ Generate `spec.md` with all sections filled in:
 ### Testing Requirements
 - [ ] Unit tests written and passing
 - [ ] Manual testing completed
+
+### Non-Functional Requirements
+- [ ] [Relevant NFR from PRD with measurable target]
 
 ### Quality Gates
 - [ ] All files ASCII-encoded

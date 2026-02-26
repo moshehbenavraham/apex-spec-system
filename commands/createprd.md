@@ -88,8 +88,8 @@ From the source document, extract and normalize:
 - **Goals**: 3-7 bullets that are outcome-focused
 - **Non-goals**: 3-10 bullets (explicitly out of scope)
 - **Users and use cases**: primary personas and key workflows
-- **Functional requirements**: grouped by area (MVP first)
-- **Non-functional requirements**: performance, security, privacy, reliability, accessibility
+- **Functional requirements**: grouped by area (MVP first). Write each requirement as "[Actor] can [capability] [context]" (e.g., "User can reset password via email link"). Focus on WHAT, not HOW -- keep requirements implementation-agnostic.
+- **Non-functional requirements**: performance, security, privacy, reliability, accessibility. Each NFR must include a specific, measurable target (e.g., "API response < 200ms at p95", not "should be fast")
 - **Constraints**: tech constraints, compliance, hosting, budgets, deadlines
 - **Assumptions**: what must be true for the plan to work
 - **Risks**: major risks and mitigations
@@ -138,19 +138,19 @@ Create `.spec_system/PRD/PRD.md` using this template. Use straight quotes only. 
 
 ### MVP Requirements
 
-- [Requirement]
-- [Requirement]
+- [Actor] can [capability] [context]
+- [Actor] can [capability] [context]
 
 ### Deferred Requirements
 
-- [Deferred requirement]
+- [Actor] can [capability] [context]
 
 ## Non-Functional Requirements
 
-- **Performance**: [target or statement]
-- **Security**: [target or statement]
-- **Reliability**: [target or statement]
-- **Accessibility**: [target or statement]
+- **Performance**: [specific measurable target, e.g., "API response < 200ms at p95"]
+- **Security**: [specific measurable target, e.g., "OWASP Top 10 compliance"]
+- **Reliability**: [specific measurable target, e.g., "99.9% uptime SLA"]
+- **Accessibility**: [specific measurable target, e.g., "WCAG 2.1 AA"]
 
 ## Constraints and Dependencies
 
@@ -332,11 +332,12 @@ Skip this step entirely if:
 
 ### 8. Validate Output
 
-Before reporting completion:
+Before reporting completion, run both encoding and content quality checks.
+
+#### 8.1 Encoding Validation
+
 - Confirm the file exists at `.spec_system/PRD/PRD.md`
 - Confirm it is ASCII-only and uses LF line endings
-
-Recommended checks:
 
 ```bash
 file .spec_system/PRD/PRD.md
@@ -345,6 +346,20 @@ LC_ALL=C grep -n '[^[:print:][:space:]]' .spec_system/PRD/PRD.md && echo "Non-AS
 ```
 
 If checks fail, fix the PRD content and re-check.
+
+#### 8.2 Content Quality Validation
+
+Scan the generated PRD for common quality issues. For each check, fix inline if possible or flag to the user:
+
+| Check | What to look for | Action |
+|-------|-----------------|--------|
+| Template placeholders | Bracket markers like `[Goal 1]`, `[Requirement]`, `[Actor]` remaining in output | Replace with real content or remove |
+| Vague NFRs | NFRs without specific numbers (e.g., "should be fast", "highly available") | Rewrite with measurable targets |
+| Empty sections | Sections with no content below the heading | Fill in or ask user for input |
+| Weak requirements | Requirements that describe HOW (implementation) rather than WHAT (capability) | Rewrite in actor/capability form |
+| Missing sections | Any required section from the template entirely absent | Add the section |
+
+Report any issues found and fixed in the output summary.
 
 ## Output
 
@@ -374,6 +389,14 @@ Monorepo: [true - N packages detected | false - single-repo confirmed]
 [If monorepo true:]
 - Package Map added to PRD
 - Workspace Structure added to CONVENTIONS.md
+
+[If quality issues were found and fixed:]
+Quality:
+- N issues auto-fixed (template placeholders, vague NFRs, etc.)
+
+[If quality issues remain for user:]
+Quality:
+- N issues need user input: [brief list]
 
 Next Steps:
 1. Review the generated PRD and refine as needed

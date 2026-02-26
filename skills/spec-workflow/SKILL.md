@@ -307,6 +307,10 @@ Single-repo projects see no `packages` field and keep string-form `completed_ses
 | `/carryforward` | Capture lessons & security posture | Completed phase artifacts | CONSIDERATIONS.md, SECURITY-COMPLIANCE.md |
 | `/phasebuild` | Create new phase | PRD | PRD/phase_NN/ |
 
+## Utility Commands
+
+Standalone helpers that operate outside the session workflow. They do not affect session state and can be run at any time. See [docs/UTILITIES.md](../../docs/UTILITIES.md) for the full reference and conventions for adding new utility commands.
+
 ## Additional Resources
 
 ### Scripts Directory

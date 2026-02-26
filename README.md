@@ -147,6 +147,24 @@ Sessions interleave across packages within a phase. A phase completes when all i
 | `/carryforward` | Extract lessons learned, maintain security/compliance record between phases |
 | `/phasebuild` | Create structure for new phase |
 
+### Utility Commands
+
+Standalone helpers that run outside the session workflow -- safe at any time.
+
+| Command | Purpose |
+|---------|---------|
+| `/sculpt-ui` | Guide AI-led creation of distinctive, production-grade frontend interfaces |
+| `/copush` | Pull, version-bump, commit all changes, and push to origin |
+| `/dockcleanbuild` | Clean Docker environment and rebuild all images and containers from scratch |
+| `/dockbuild` | Quick Docker Compose build and start with full output |
+| `/up2imp` | Audit upstream changes and curate an optimally ordered implementation list |
+| `/pullndoc` | Git pull an upstream repo and document every imported change |
+| `/qimpl` | Context-aware autonomous implementation session driven by a work file |
+| `/qfrontdev` | Autonomous frontend implementation session with designer-level quality standards |
+| `/qbackenddev` | Autonomous backend/infrastructure development session driven by a work file |
+
+As utility commands are added, they will be listed here. See [Utility Commands Reference](docs/UTILITIES.md) for conventions and details.
+
 ### Skill
 
 The **spec-workflow** skill auto-activates when:
