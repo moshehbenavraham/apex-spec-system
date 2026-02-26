@@ -365,6 +365,44 @@ Create `.spec_system/CONVENTIONS.md` (coding standards and team conventions):
 - Errors should be actionable--include context for debugging
 - Don't swallow errors silently
 
+## Database Layer
+
+### Connection
+- Connection string source: [env var name -- never hardcoded]
+- Pool size: [N]
+- Separate connection URLs for: app, migrations, tests
+
+### Migrations
+- Tool: [detected]
+- Location: [path]
+- Naming convention: [pattern]
+- CRITICAL: Never modify a migration already applied to shared environments
+- Every migration must have a reverse/down
+
+### Models / Schema
+- Location: [path]
+- Naming: [convention for models and tables]
+- Required columns: [timestamps, soft delete, etc.]
+
+### Queries
+- Parameterized only (no string concatenation)
+- N+1 prevention strategy: [chosen approach]
+- Transaction boundary rules: [when to wrap]
+
+### Seeding
+- Script: [path]
+- Must be idempotent (safe to re-run)
+
+### Testing
+- Strategy: [separate DB / transaction rollback / in-memory]
+- Fixture location: [path]
+
+### Vector / Embeddings (if applicable)
+- Store: [pgvector extension / standalone service]
+- Embedding model: [model name + dimensions]
+- Index type: [HNSW / IVFFlat / etc.]
+- Distance metric: [cosine / L2 / inner product]
+
 ## Testing
 
 - Test behavior, not implementation
@@ -409,6 +447,9 @@ Create `.spec_system/CONVENTIONS.md` (coding standards and team conventions):
 | Testing | not configured | - |
 | Observability | not configured | - |
 | Git Hooks | not configured | - |
+| Database | not configured | - |
+
+**Conditional**: The "Database Layer" section above is only included when DB signals are detected during brownfield `/initspec` (docker-compose with DB service, `.env` with `DATABASE_URL`, migration tool config files present). For greenfield projects, this section is deferred to `/createprd`.
 
 ## When In Doubt
 
@@ -432,6 +473,13 @@ Create `.spec_system/CONVENTIONS.md` (coding standards and team conventions):
 - Shared types live in a dedicated shared/common package
 - Each package owns its own tests; integration tests live at repo root
 - Changes spanning multiple packages require explicit cross-package session scope
+
+### Database Ownership
+| Database | Owner Package | Type | Shared By |
+| [name] | [package path] | [type] | [consumers] |
+
+- Migrations live in the owner package
+- Consuming packages use the owner's API, not direct DB access
 ```
 
 ### 9. Create Phase PRD

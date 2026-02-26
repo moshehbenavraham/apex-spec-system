@@ -62,6 +62,8 @@ From each session's IMPLEMENTATION_SUMMARY.md, identify:
 - External dependencies with risks
 - Performance thresholds to monitor
 - Security considerations
+- Database concerns (schema debt, missing indexes, query performance, migration ordering)
+- Deployment concerns (local dev startup issues, deploy failures, rollback gaps, environment drift)
 
 **Lessons Learned** (patterns to follow or avoid):
 - Technical decisions that worked well (and why)

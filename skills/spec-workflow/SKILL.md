@@ -1,7 +1,7 @@
 ---
 name: Apex Spec Workflow
 description: This skill should be used when the user asks about "spec system", "session workflow", "createprd", "plansession", "implement session", "validate session", "phase build", "session scope", "task checklist", or when working in a project containing .spec_system/ directory. Provides guidance for specification-driven AI development workflows.
-version: 1.0.2-beta
+version: 1.0.3-beta
 ---
 
 # Apex Spec Workflow
@@ -385,13 +385,19 @@ For single-repo projects: `monorepo` is `null` or `false`, `packages` is `[]`, `
     "manager": {"status": "pass", "info": "pnpm"},
     "runner": {"status": "pass", "info": "turbo"}
   },
+  "database": {
+    "type": {"status": "pass", "info": "PostgreSQL"},
+    "migration_tool": {"status": "pass", "info": "prisma"},
+    "tool_available": {"status": "pass", "info": "npx prisma"},
+    "seed_script": {"status": "warn", "info": "no seed script found"}
+  },
   "issues": [
     {"type": "tool", "name": "docker", "message": "required tool not installed"}
   ]
 }
 ```
 
-The `package` and `workspace` sections appear only when `--package` is used or monorepo is detected. For single-repo projects these sections are empty objects (`{}`).
+The `package` and `workspace` sections appear only when `--package` is used or monorepo is detected. The `database` section only appears when DB signals are detected in the project. For single-repo projects without databases, these sections are empty objects (`{}`).
 
 **Commands and their script usage:**
 | Command | analyze-project.sh | check-prereqs.sh |

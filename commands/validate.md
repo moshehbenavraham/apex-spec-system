@@ -129,6 +129,7 @@ Spot-check deliverables against project conventions:
 - **Error Handling**: Follows the project's error handling approach
 - **Comments**: Explain "why" not "what", no commented-out code
 - **Testing**: Tests follow project testing philosophy
+- **Database** (if Database Layer conventions exist): Migration naming follows convention, model/table naming matches convention, required columns present on new tables, indexes on foreign keys
 
 Note: This is a spot-check, not exhaustive. Flag obvious violations only.
 
@@ -142,6 +143,7 @@ Review **only files created or modified in this session** (use deliverables from
 - **Sensitive Data Exposure**: Unencrypted PII in logs, error messages, or responses; secrets in plaintext config
 - **Insecure Dependencies**: Known-vulnerable packages added in this session (`npm audit`, `pip audit`, `cargo audit` as applicable)
 - **Misconfiguration**: Debug modes enabled, overly permissive CORS, missing security headers
+- **Database Security** (if Database Layer conventions exist): Hardcoded connection strings (must use env vars), raw SQL with string concatenation (must use parameterized queries), missing down/rollback migrations, unencrypted sensitive columns (passwords, tokens, PII), unlimited connection pools, shared credentials between test and production
 
 **GDPR Compliance:**
 - **Data Collection**: Any new collection of personal data (names, emails, IPs, device IDs) must have a documented purpose and legal basis

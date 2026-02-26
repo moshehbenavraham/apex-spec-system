@@ -26,7 +26,7 @@ Add and validate local dev tooling one bundle at a time.
 - The ONLY valid blocker is something that requires USER input or credentials you don't have
 - If you skip a task that was executable, that is a **critical failure**
 
-## Master List (6 Bundles)
+## Master List (7 Bundles)
 
 Industry standard order (fast to slow, format before validate):
 
@@ -38,6 +38,7 @@ Industry standard order (fast to slow, format before validate):
 | 4 | **Testing** | Test runner + coverage (Jest, Vitest, pytest, pytest-cov) |
 | 5 | **Observability** | Structured logger + error capture (structlog, pino, tracing, slog) |
 | 6 | **Git Hooks** | Pre-commit hooks (husky, pre-commit, lefthook) |
+| 7 | **Database** | Migration framework + seed script + test DB config |
 
 ## Flags
 
@@ -169,6 +170,30 @@ Install and configure the single selected bundle missing.
 | Rust | Add `tracing`, `tracing-subscriber` to Cargo.toml | `src/logging.rs` | `capture_error()` function |
 | Go | (stdlib) | `internal/logging/logging.go` | `CaptureError()` function |
 
+#### Database Bundle Implementation
+
+**Activation**: Only when database signals detected (docker-compose DB service, `.env` with `DATABASE_URL`/`DB_*`, migration tool config files, ORM in dependencies, vector DB in dependencies).
+
+**Steps:**
+1. Detect DB type and existing migration tool from project signals
+2. If no migration tool found, recommend one based on detected stack (prompt user to confirm)
+3. Verify migration tool is installed and configured
+4. Create seed script if none exists (location based on stack conventions)
+5. Create test DB configuration if none exists (`.env.test` or equivalent with separate `DATABASE_URL`)
+6. Validate: run migrations (up + down + up to verify reversibility), run seed, run test suite
+
+**Monorepo**: Prompt user for DB ownership model (shared / per-package / hybrid). Install migration tool in owner package or per-package as appropriate. Update CONVENTIONS.md Database Ownership table.
+
+**Detection signals:**
+
+| Signal | Source |
+|--------|--------|
+| `docker-compose.yml` with DB service | Project root |
+| `.env` with `DATABASE_URL` or `DB_*` vars | Project/package root |
+| `prisma/schema.prisma`, `drizzle.config.*`, `alembic.ini`, `knexfile.*` | Package root |
+| ORM in dependency manifest | Package root |
+| `pgvector`, `chromadb`, `pinecone-client` in deps | Package root |
+
 ### Step 5: VALIDATE
 
 Run ALL configured tools (not just the new one):
@@ -179,6 +204,8 @@ Run ALL configured tools (not just the new one):
 4. **Tests** (if configured): Run full suite
 5. **Observability** (if configured): Verify logger and error capture
 6. **Git hooks** (if configured): Verify hooks are installed
+7. **Database** (if configured): Run migrations (up, down, up), run seed script, verify test DB connects
+8. **Local dev startup** (if applicable): Verify the app starts locally (`docker compose up -d` or framework dev command), confirm it responds (e.g., `curl http://localhost:[port]`), then shut down. If no start command is known, skip.
 
 **Observability validation:**
 - Run logger initialization (language-specific)
@@ -186,6 +213,19 @@ Run ALL configured tools (not just the new one):
 - Confirm `logs/` directory exists
 - Confirm `logs/.gitignore` has correct patterns
 - Confirm `logs/last_error_<timestamp>.json` is created with valid JSON
+
+**Database validation:**
+- Run migration tool's status/pending command to verify no drift
+- Run up migration, then down, then up again (verify reversibility)
+- Run seed script (verify idempotency -- run twice)
+- Verify test DB configuration connects successfully
+- If vector DB configured: verify extension/service is available
+
+**Local dev startup validation:**
+- If `docker-compose.yml` / `compose.yml` exists: run `docker compose config --quiet` (validate config), then `docker compose up -d`, wait for healthy, `curl` the dev URL, then `docker compose down`
+- If no compose file: use the framework's dev command (e.g., `npm run dev`, `python manage.py runserver`) in background, verify it binds to the expected port, then stop it
+- Record the working start command in CONVENTIONS.md Local Dev Tools table as `| Dev Server | [command] | [config] |`
+- **Monorepo**: Verify each deployable package starts independently
 
 **Monorepo validation** (when `monorepo: true`):
 - Run each configured tool **per package** using workspace commands or by changing into the package directory

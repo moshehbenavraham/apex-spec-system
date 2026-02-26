@@ -262,6 +262,24 @@ Use conventional commits:
 | [Tech 1] | [Purpose] | [Rationale] |
 | [Tech 2] | [Purpose] | [Rationale] |
 
+## Data Layer
+
+### Database
+- Type: [PostgreSQL / MySQL / MongoDB / etc.]
+- Hosting: [self-hosted / managed / serverless]
+- Extensions: [PostGIS, pgvector, etc. -- if applicable]
+
+### Schema Overview
+
+| Table/Collection | Purpose | Key Relationships |
+|-----------------|---------|-------------------|
+| [name] | [purpose] | [relationships] |
+
+### Migration Strategy
+- Tool: [name]
+- Location: `[path]`
+- Naming: `[convention]`
+
 ## Data Flow
 
 [Describe how data moves through the system]
@@ -377,6 +395,24 @@ cp .env.example .env
 | `[cmd]` | [Description] |
 | `[cmd]` | [Description] |
 
+## Database
+
+### Setup
+1. Start database: `[start command]`
+2. Run migrations: `[migration command]`
+3. Seed data: `[seed command]`
+4. Reset database: `[reset command]`
+
+### Useful Commands
+
+| Action | Command |
+|--------|---------|
+| Create migration | `[command]` |
+| Run migrations | `[command]` |
+| Rollback last | `[command]` |
+| Reset + seed | `[command]` |
+| DB console | `[command]` |
+
 ## Development Workflow
 
 1. Pull latest `develop`
@@ -448,6 +484,26 @@ cp .env.example .env
 ```markdown
 # Deployment
 
+## Local Dev
+
+### Start Everything
+
+```bash
+[one-command start, e.g., docker compose up -d]
+```
+
+### Verify
+
+```bash
+curl http://localhost:[port]/health
+```
+
+### Stop
+
+```bash
+[stop command, e.g., docker compose down]
+```
+
 ## CI/CD Pipeline
 
 ```
@@ -460,26 +516,46 @@ Push --> Build --> Test --> [Staging] --> [Production]
 [build command]
 ```
 
-## Release Process
+## Production Deploy
+
+### Release Process
 
 1. Merge to `main`
 2. CI runs tests
 3. Build artifacts created
 4. Deploy to staging
-5. Smoke tests
+5. Smoke tests (`curl -f https://[staging-url]/health`)
 6. Deploy to production
+7. Verify production health (`curl -f https://[production-url]/health`)
 
-## Rollback
+### Deploy Command
 
 ```bash
-[rollback command]
+[deploy command or "automatic via CI on push to main"]
 ```
+
+### Rollback
+
+```bash
+[rollback command, e.g., platform revert, git revert + redeploy, previous image tag]
+```
+
+**When to rollback**: Health check fails post-deploy, error rate spikes, or critical bug reported.
+
+## Environments
+
+| Environment | URL | Deploy Trigger |
+|-------------|-----|----------------|
+| Local | http://localhost:[port] | Manual |
+| Staging | [url] | Push to develop (or manual) |
+| Production | [url] | Push to main (after CI passes) |
 
 ## Monitoring
 
 - Logs: [Location]
 - Metrics: [Location]
 - Alerts: [Location]
+- Health: [health endpoint URL]
 ```
 
 #### docs/adr/0000-template.md (ADR Template)

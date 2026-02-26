@@ -172,12 +172,20 @@ async def health():
 3. Create schedule (cron or GitHub Action)
 4. Document retention policy
 5. **Monorepo**: If packages use separate databases, create per-database backup scripts. Note which package owns which database.
+6. Verify backup: restore to ephemeral DB and run a sanity query to confirm data integrity
 
 **Deploy Bundle:**
 1. Configure webhook URL (Coolify, Render, etc.)
 2. Or configure Git-based deploy (Vercel, Netlify)
 3. Add deploy step to release workflow
-4. **Monorepo**: Configure per-package deploy triggers. Ensure shared library changes trigger dependent package deploys.
+4. Document rollback procedure (platform revert, previous image tag, or git revert + redeploy)
+5. **Monorepo**: Configure per-package deploy triggers. Ensure shared library changes trigger dependent package deploys.
+
+**Local Dev Environment** (verified alongside Deploy bundle):
+1. If `docker-compose.yml` or `compose.yml` exists, verify `docker compose up -d` brings all services to healthy state
+2. If no compose file but the project has services (DB, cache, queue), document the local start procedure in CONVENTIONS.md
+3. Verify the app responds locally (e.g., `curl http://localhost:[port]/health`)
+4. Record the local start command in CONVENTIONS.md Infrastructure table: `| Local Dev | [command] | [details] |`
 
 ### Step 5: VALIDATE
 
@@ -196,8 +204,10 @@ Verify all configured infrastructure:
 |-----------|------------|
 | Health endpoint | `curl -f https://domain.com/health` |
 | Rate limiting | Rapid requests should get 429 |
-| Backup | Check storage for file < 24h old |
+| Backup | Check storage for file < 24h old; optionally restore to ephemeral DB and run sanity query |
 | Deploy webhook | `curl -X POST webhook_url` (dry-run if possible) |
+| Local dev | `docker compose up -d` + `curl http://localhost:[port]/health` |
+| Rollback | Verify documented rollback procedure is executable |
 
 ### Step 6: FIX
 

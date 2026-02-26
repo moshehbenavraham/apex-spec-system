@@ -36,6 +36,7 @@ init_json() {
         "tools": {},
         "sessions": {},
         "files": {},
+        "database": {},
         "issues": []
     }')
 }
@@ -243,6 +244,90 @@ check_required_files() {
     done < <(split_csv "$files")
 
     return $failed
+}
+
+check_database() {
+    # Only runs when database signals are detected
+    local has_db=false
+
+    # Check for common DB signals
+    local db_signals=(
+        "docker-compose.yml" "docker-compose.yaml" "compose.yml" "compose.yaml"
+        "prisma/schema.prisma" "drizzle.config.ts" "drizzle.config.js"
+        "alembic.ini" "knexfile.js" "knexfile.ts"
+        "diesel.toml" "sqlc.yaml" "sqlc.yml"
+    )
+
+    for signal in "${db_signals[@]}"; do
+        if [[ -f "$signal" ]]; then
+            has_db=true
+            break
+        fi
+    done
+
+    # Check .env for DATABASE_URL
+    if [[ -f ".env" ]] && grep -q "DATABASE_URL\|DB_HOST\|DB_PORT" .env 2>/dev/null; then
+        has_db=true
+    fi
+
+    [[ "$has_db" == false ]] && return 0
+
+    # Detect DB type
+    local db_type="unknown"
+    if [[ -f ".env" ]]; then
+        if grep -q "postgresql://" .env 2>/dev/null; then db_type="PostgreSQL"
+        elif grep -q "mysql://" .env 2>/dev/null; then db_type="MySQL"
+        elif grep -q "mongodb://" .env 2>/dev/null; then db_type="MongoDB"
+        fi
+    fi
+    set_check_result "database" "type" "pass" "$db_type"
+
+    # Detect migration tool
+    local migration_tool="none"
+    if [[ -f "prisma/schema.prisma" ]]; then migration_tool="prisma"
+    elif [[ -f "drizzle.config.ts" || -f "drizzle.config.js" ]]; then migration_tool="drizzle"
+    elif [[ -f "alembic.ini" ]]; then migration_tool="alembic"
+    elif [[ -f "knexfile.js" || -f "knexfile.ts" ]]; then migration_tool="knex"
+    elif [[ -f "diesel.toml" ]]; then migration_tool="diesel"
+    elif [[ -f "sqlc.yaml" || -f "sqlc.yml" ]]; then migration_tool="sqlc"
+    fi
+
+    if [[ "$migration_tool" != "none" ]]; then
+        set_check_result "database" "migration_tool" "pass" "$migration_tool"
+    else
+        set_check_result "database" "migration_tool" "warn" "no migration tool detected"
+    fi
+
+    # Check if migration tool CLI is available
+    if [[ "$migration_tool" != "none" && "$migration_tool" != "sqlc" ]]; then
+        local tool_cmd=""
+        case "$migration_tool" in
+            prisma) tool_cmd="npx prisma" ;;
+            drizzle) tool_cmd="npx drizzle-kit" ;;
+            alembic) tool_cmd="alembic" ;;
+            knex) tool_cmd="npx knex" ;;
+            diesel) tool_cmd="diesel" ;;
+        esac
+        if [[ -n "$tool_cmd" ]] && command -v "$(echo "$tool_cmd" | awk '{print $1}')" &>/dev/null; then
+            set_check_result "database" "tool_available" "pass" "$tool_cmd"
+        else
+            set_check_result "database" "tool_available" "warn" "$tool_cmd not in PATH"
+        fi
+    fi
+
+    # Check for seed script
+    local seed_found=false
+    local seed_files=("scripts/seed.ts" "scripts/seed.js" "scripts/seed.py" "prisma/seed.ts" "prisma/seed.js" "cmd/seed/main.go")
+    for sf in "${seed_files[@]}"; do
+        if [[ -f "$sf" ]]; then
+            set_check_result "database" "seed_script" "pass" "$sf"
+            seed_found=true
+            break
+        fi
+    done
+    if [[ "$seed_found" == false ]]; then
+        set_check_result "database" "seed_script" "warn" "no seed script found"
+    fi
 }
 
 check_environment() {
@@ -581,10 +666,18 @@ JSON OUTPUT STRUCTURE:
     ]
   }
 
+    "database": {
+      "type": {"status": "pass", "info": "PostgreSQL"},
+      "migration_tool": {"status": "pass", "info": "prisma"},
+      "tool_available": {"status": "pass", "info": "npx prisma"},
+      "seed_script": {"status": "warn", "info": "no seed script found"}
+    },
+
   Notes:
   - "package" section only present when --package is used
   - "workspace" section only present when monorepo: true in state.json
-  - Both sections empty ({}) when not applicable
+  - "database" section only present when DB signals detected in project
+  - Both "package" and "workspace" sections empty ({}) when not applicable
 
 EXAMPLES:
   ./check-prereqs.sh --env                              # Check environment
@@ -715,6 +808,11 @@ main() {
         rc=0
         check_workspace_tools || rc=$?
         total_failed=$((total_failed + rc))
+    fi
+
+    # Check database (automatic with --env, only when DB signals detected)
+    if [[ "$env_only" == true && "$OUTPUT_MODE" == "json" ]]; then
+        check_database
     fi
 
     # Check package if --package was specified

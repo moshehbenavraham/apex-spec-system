@@ -39,7 +39,7 @@ Industry standard order (fast feedback to comprehensive):
 | 2 | **Build & Test** | Build + unit tests + coverage reporting |
 | 3 | **Security** | Secrets scanning (gitleaks) + SAST/CodeQL + dependency review |
 | 4 | **Integration** | E2E tests + integration tests + DB migration dry-run |
-| 5 | **Operations** | Failure notifications + Dependabot/Renovate + release tagging |
+| 5 | **Operations** | Failure notifications + Dependabot/Renovate + release tagging + deploy trigger + post-deploy smoke test |
 
 ## Flags
 
@@ -133,7 +133,7 @@ Generate workflow file(s) for the selected bundle.
 | Build & Test | `.github/workflows/test.yml` | push, pull_request |
 | Security | `.github/workflows/security.yml` | push, pull_request, schedule |
 | Integration | `.github/workflows/integration.yml` | pull_request (to main) |
-| Operations | `.github/workflows/release.yml` + dependabot.yml | push to main, tags |
+| Operations | `.github/workflows/release.yml` + `deploy.yml` + dependabot.yml | push to main, tags |
 
 **Monorepo workflow generation** (when `monorepo: true`):
 
@@ -181,6 +181,20 @@ Generate workflow file(s) for the selected bundle.
 | TypeScript | biome ci | vitest run --coverage | CodeQL, gitleaks, npm audit |
 | Rust | cargo fmt --check, cargo clippy | cargo test | cargo audit |
 | Go | gofmt -d, golangci-lint | go test | govulncheck |
+
+**Database migration testing** (when migration tool detected in CONVENTIONS.md):
+- Add DB service to integration workflow (PostgreSQL, MySQL, etc. matching project's DB type)
+- Migration validation steps: run all migrations from scratch, run down migrations (verify rollback), run up again (verify idempotency)
+- Optionally run seed script to verify seed data loads against fresh schema
+- Scope: Add to Integration bundle workflow (`.github/workflows/integration.yml`)
+
+**Deployment workflow** (when Operations bundle is selected):
+- Create `.github/workflows/deploy.yml` triggered on push to main (after tests pass)
+- If `/infra` has configured a deploy target (webhook, Git-based, or platform integration), wire it into the workflow
+- Add a post-deploy smoke test step: `curl -f https://[production-url]/health` (or equivalent health endpoint)
+- If smoke test fails, the workflow should report failure (rollback is manual unless platform supports automatic rollback)
+- If no deploy target is configured yet, generate a placeholder workflow with a `TODO` comment and document in REPORT
+- **Monorepo**: Create per-package deploy jobs (triggered by path filters) or a single orchestrated deploy using the task runner
 
 1. Generate workflow YAML with appropriate jobs
 2. **Monorepo**: Include path filters, matrix strategy, or task runner delegation as determined in Step 1a

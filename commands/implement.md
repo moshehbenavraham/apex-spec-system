@@ -104,6 +104,11 @@ fi
 
 This catches missing tools BEFORE implementation starts, preventing mid-session failures.
 
+**Optional - Database Prerequisites**: If `.spec_system/CONVENTIONS.md` has a "Database Layer" section, verify:
+1. Database service is running (`docker compose ps` or connection test)
+2. Migrations are current (no pending migrations)
+If checks fail, resolve them (start services, run migrations) before proceeding.
+
 ### 3. Read Session Context
 
 Using the `current_session` value from the script output, read:
@@ -149,6 +154,10 @@ If `implementation-notes.md` doesn't exist, create it:
 - [x] Prerequisites confirmed
 - [x] Tools available
 - [x] Directory structure ready
+[IF DATABASE SESSION]
+- [x] Database running
+- [x] Migrations current
+[END IF]
 
 ---
 ```
@@ -208,6 +217,9 @@ If you encounter an obstacle, RESOLVE IT YOURSELF before documenting:
 - **Dependency missing?** Install it
 - **Directory missing?** Create it
 - **Config file missing?** Generate it from the spec
+- **Database not running?** Start it (`docker compose up -d [service]`)
+- **Migrations pending?** Run migration tool to apply them
+- **Connection refused?** Check `DATABASE_URL` in `.env`, verify port
 - **"The environment isn't set up"** is NOT a blocker -- setting it up IS the task
 
 The ONLY valid reason to pause and ask the user is when you need credentials, API keys, or decisions only a human can make. If you skip a task that was executable, that is a **critical failure**.

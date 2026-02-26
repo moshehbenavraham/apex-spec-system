@@ -274,6 +274,7 @@ Read `.spec_system/CONVENTIONS.md` (the generic template from /initspec). Replac
 | API | Add REST conventions; status code usage; error response format; versioning approach |
 | Library | Add semantic versioning rules; public API stability; backwards compatibility; documentation requirements |
 | Monorepo | Add Workspace Structure section (package table + cross-package rules); shared dependency rules; cross-package imports; workspace alias conventions |
+| Database | Add Database Layer section: connection source, migration tool + rules, model/table naming, query safety, seed script, test DB strategy, vector/embeddings conventions (if applicable) |
 
 **Section-specific transformations:**
 
@@ -290,7 +291,7 @@ Read `.spec_system/CONVENTIONS.md` (the generic template from /initspec). Replac
 - **TypeScript**: Add "Types" section for type conventions
 - **React**: Add "Components" section for component patterns
 - **API**: Add "Endpoints" section for API design conventions
-- **Database**: Add "Data" section for schema/query conventions
+- **Database**: Add "Database Layer" section with subsections for connection, migrations, models, queries, seeding, testing. If PRD references vector search, embeddings, or RAG, include "Vector / Embeddings" subsection. Detection: PRD mentions database, schema, any DB technology, migrations, ORM, data modeling, vector/embeddings, or RAG.
 - **Monorepo** (if confirmed in Step 6a): Add "Workspace Structure" section with package table and cross-package rules (import aliases, shared types location, test boundaries, cross-package session scope)
 
 #### 7.3 Enforce 300-Line Limit (STRICT)

@@ -84,6 +84,7 @@ Focus on understanding:
 - **Lessons Learned** relevant to candidate sessions
 - **Open security findings** that may affect session scope or approach
 - Naming, file placement, and testing approach from CONVENTIONS.md
+- If CONVENTIONS.md has a "Database Layer" section and the session involves data layer work (new tables, schema changes, migrations), ensure task planning includes migration, seed update, and DB integration test tasks
 
 ### 3. Analyze and Recommend
 
