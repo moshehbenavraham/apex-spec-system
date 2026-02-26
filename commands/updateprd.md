@@ -193,7 +193,7 @@ Increment the project's patch version in standard version files. Check for these
 
 ### 7. Commit and Push to Repo
 
-Commit and push all non-gitignored repo changes (implementation work, state/PRD updates, version increment).
+Commit and push ALL non-gitignored repo changes.  DO NOT add ANY attributions or co-authors!
 
 Commit message format:
 ```
