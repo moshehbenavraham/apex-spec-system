@@ -24,7 +24,7 @@ Analyze project state, recommend the next session, create its specification, and
 13. **Every task must have**: task ID (`TNNN`), session ref (`[SPPSS]`), action verb, target file path
 14. **Mark `[P]`** when tasks create independent files with no interdependency
 15. **Sequence by**: dependencies first, then setup -> foundation -> implementation -> testing
-16. **Behavioral quality by design** - When a Behavioral Quality Checklist (BQC) applies to the session's stack, embed edge-case handling into task descriptions. "Create delete dialog" becomes "Create delete dialog (with typed confirmation, disable-while-pending, state reset on close)". Explicit requirements get implemented; implicit ones get skipped.
+16. **Behavioral quality by design** - When a Behavioral Quality Checklist (BQC) applies (session produces application code), embed edge-case handling into task descriptions. "Create delete dialog" becomes "Create delete dialog (with typed confirmation, disable-while-pending, state reset on close)". Explicit requirements get implemented; implicit ones get skipped.
 
 ## Steps
 
@@ -230,8 +230,8 @@ Generate `spec.md` with all sections filled in:
 - [P##] **[Lesson Learned]**: How we're applying it in this implementation
 
 ### Behavioral Quality Focus
-<!-- Include when the session's stack matches a BQC (see /implement Step 3a). Omit if no BQC applies. -->
-Checklist active: [Frontend / Backend / Mobile]
+<!-- Include when session produces application code. Omit if no BQC applies. -->
+Checklist active: Yes
 Top behavioral risks for this session:
 - [Risk 1 relevant to this session's deliverables]
 - [Risk 2 relevant to this session's deliverables]
@@ -271,25 +271,27 @@ Top behavioral risks for this session:
 Run `/implement` to begin AI-led implementation.
 ```
 
-### 4a. Enrich Task Descriptions with BQC (Stack-Conditional)
+### 4a. Enrich Task Descriptions with BQC
 
-**Skip if** the session's stack does not match any defined BQC (see `/implement` Step 3a for stack detection).
+**Skip if** the session produces no application code.
 
-When a BQC applies, enrich task descriptions in Step 5 using this table:
+When BQC applies, enrich task descriptions in Step 5 using this table:
 
 | If task involves... | Append to description... |
 |---------------------|--------------------------|
-| useEffect / side effects | "with cleanup return for [timers/listeners/controllers]" |
-| Dialog, modal, drawer, sheet | "with state reset on close" |
-| Form submission | "with disable-while-pending and reset on success" |
-| Data fetching view | "with loading, empty, and error states" |
-| Delete/remove/revoke action | "with confirmation and disable-while-pending" |
-| Paginated list | "with bounds-clamped pagination" |
-| Optimistic update | "with scoped rollback on error" |
-| Custom interactive control | "with keyboard accessibility (Tab/Enter/Space/Escape)" |
-| Animation or transition | "with prefers-reduced-motion alternative" |
-| API response consumption | "with types matching generated API contract" |
-| Mobile/responsive layout | "using dvh/dvw viewport units" |
+| Scoped lifecycle with async work or subscriptions | "with cleanup on scope exit for all acquired resources" |
+| State-mutating action (submit, delete, send, write) | "with duplicate-trigger prevention while in-flight" |
+| View or screen that fetches or displays remote data | "with explicit loading, empty, error, and offline states" |
+| Handler for external input (endpoint, consumer, deep link, event) | "with schema-validated input and explicit error mapping" |
+| Write path (create/update/delete, single or multi-step) | "with idempotency protection, transaction boundaries, and compensation on failure" |
+| Call to external system (API, database, third-party service) | "with timeout, retry/backoff, and failure-path handling" |
+| Access-controlled resource or action | "with authorization enforced at the boundary closest to the resource" |
+| Query or list returning unbounded results | "with bounded pagination, validated filters, and deterministic ordering" |
+| Reopenable or revisitable context (dialog, form, screen, connection) | "with state reset or revalidation on re-entry" |
+| Permission-gated feature | "with denied/restricted/revoked handling and fallback behavior" |
+| Interactive control or element | "with platform-appropriate accessibility labels, focus management, and input support" |
+| Optimistic state update | "with scoped rollback on error" |
+| Component consuming external contract (API response, event payload) | "with types matching declared contract; exhaustive enum handling" |
 
 These add 5-15 words per task but prevent the 10x-cost bugs found in later audits.
 

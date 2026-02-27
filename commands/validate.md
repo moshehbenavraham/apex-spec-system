@@ -160,26 +160,26 @@ Review **only files created or modified in this session** (use deliverables from
 - Hardcoded secrets and injection vulnerabilities are always FAIL regardless of scope
 - **Monorepo**: Scope the review to files within the declared package boundary (from Step 1a). Cross-cutting sessions review all modified files.
 
-#### H. Behavioral Quality Spot-Check (Stack-Conditional)
+#### H. Behavioral Quality Spot-Check
 
-Determine whether a BQC applies using the same stack detection as `/implement` Step 3a.
+Determine whether a BQC applies: does this session produce application code?
 
-**If no BQC applies**: Mark as N/A and skip to Step 4.
+**If no application code**: Mark as N/A and skip to Step 4.
 
-**If a BQC applies**: Select up to 5 deliverable files most likely to contain behavioral issues (components with effects, forms, modals, data-fetching views). Spot-check against these priorities:
+**If application code**: Select up to 5 deliverable files most likely to contain behavioral issues (files with side effects, mutations, external calls, user interaction, or data fetching). Spot-check against these priorities:
 
 | Priority | What to check | FAIL if... |
 |----------|---------------|------------|
-| 1 | Effect/async cleanup | useEffect with timers/listeners/fetch has no cleanup return |
-| 2 | Mutation safety | Submit/delete triggers not disabled while pending |
-| 3 | State lifecycle | Dialog/form state not reset on close |
-| 4 | Accessibility | Custom interactive element missing keyboard handler or ARIA |
-| 5 | Error states | Data-fetching view has no error/empty state handling |
+| 1 | Trust boundary enforcement | External input processed without validation, or access granted without authorization check |
+| 2 | Resource cleanup | Scoped lifecycle acquires resources (timers, subscriptions, connections) without releasing on exit |
+| 3 | Mutation safety | State-mutating actions triggerable multiple times while in-flight, or write path lacks idempotency protection |
+| 4 | Failure path completeness | Operation can fail but has no explicit error/failure handling visible to caller |
+| 5 | Contract alignment | Interface between components has shape mismatch, missing enum case, or schema drift |
 
 **Scoring**:
 - 0 violations: PASS
-- 1-2 low-severity (e.g., missing reduced-motion on subtle animation): WARN -- log but do not block
-- Any high-severity (missing cleanup, no mutation disable, state not reset): FAIL -- fix before passing
+- 1-2 low-severity (e.g., missing retry backoff on non-critical read path): WARN -- log but do not block
+- Any high-severity in top priorities: FAIL -- fix before passing
 
 ### 4. Generate Security & Compliance Report
 
@@ -188,7 +188,7 @@ Create `security-compliance.md` in the session directory (`.spec_system/specs/[c
 ```markdown
 # Security & Compliance Report
 
-**Session ID**: `phase_NN_session_NN_name`
+**Session ID**: `phaseNN-sessionNN-name`
 [MONOREPO ONLY - include when monorepo: true]
 **Package**: [package-path]
 [END MONOREPO ONLY]
@@ -288,7 +288,7 @@ Create `validation.md` in the session directory:
 ```markdown
 # Validation Report
 
-**Session ID**: `phase_NN_session_NN_name`
+**Session ID**: `phaseNN-sessionNN-name`
 [MONOREPO ONLY - include when monorepo: true]
 **Package**: [package-path]
 [END MONOREPO ONLY]
@@ -308,7 +308,7 @@ Create `validation.md` in the session directory:
 | Quality Gates | PASS/FAIL | [issues] |
 | Conventions | PASS/SKIP | [issues or "No CONVENTIONS.md"] |
 | Security & GDPR | PASS/FAIL/N/A | [issues] |
-| Behavioral Quality | PASS/WARN/FAIL/N/A | [issues or "No BQC for stack"] |
+| Behavioral Quality | PASS/WARN/FAIL/N/A | [issues or "N/A -- no application code"] |
 
 **Overall**: PASS / FAIL
 
@@ -433,19 +433,18 @@ From spec.md:
 
 ### Status: PASS/WARN/FAIL/N/A
 
-*N/A if session's stack has no defined BQC.*
+*N/A if session produced no application code.*
 
-**Stack detected**: [stack name]
-**Checklist applied**: [Frontend / Backend / Mobile / None]
+**Checklist applied**: [Yes / N/A]
 **Files spot-checked**: [list of up to 5 files]
 
 | Category | Status | File | Details |
 |----------|--------|------|---------|
-| Effect cleanup | PASS/FAIL | `path` | [details or "--"] |
+| Trust boundaries | PASS/FAIL | `path` | [details or "--"] |
+| Resource cleanup | PASS/FAIL | `path` | [details or "--"] |
 | Mutation safety | PASS/FAIL | `path` | [details or "--"] |
-| State lifecycle | PASS/FAIL | `path` | [details or "--"] |
-| Accessibility | PASS/FAIL | `path` | [details or "--"] |
-| Error states | PASS/FAIL | `path` | [details or "--"] |
+| Failure paths | PASS/FAIL | `path` | [details or "--"] |
+| Contract alignment | PASS/FAIL | `path` | [details or "--"] |
 
 ### Violations Found
 [List with file:line, category, severity, or "None"]
@@ -479,11 +478,11 @@ Update `.spec_system/state.json` based on validation result:
 **If PASS:**
 ```json
 {
-  "current_session": "phase_NN_session_NN_name",
+  "current_session": "phaseNN-sessionNN-name",
   "next_session_history": [
     {
       "date": "YYYY-MM-DD",
-      "session": "phase_NN_session_NN_name",
+      "session": "phaseNN-sessionNN-name",
       "status": "validated"
     }
   ]
@@ -496,7 +495,7 @@ Update `.spec_system/state.json` based on validation result:
   "next_session_history": [
     {
       "date": "YYYY-MM-DD",
-      "session": "phase_NN_session_NN_name",
+      "session": "phaseNN-sessionNN-name",
       "status": "validation_failed"
     }
   ]

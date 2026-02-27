@@ -123,50 +123,26 @@ Using the `current_session` value from the script output, read:
 
 ### 3a. Load Behavioral Quality Checklist (BQC)
 
-Determine this session's stack to select the applicable behavioral checklist:
-
-1. **spec.md `Package Stack:` field** (monorepo sessions)
-2. **CONVENTIONS.md** stack-specific sections (e.g., "Components" implies React)
-3. **state.json `packages[].stack`** for the active package
-4. **PRD Technical Stack section** (fallback)
-
-Apply the matching checklist below. If no stack matches, skip -- behavioral verification defaults to general code review.
+BQC applies when the session produces application code (not pure configuration, documentation, or infrastructure-as-code). If the session is entirely non-code work, skip to Step 4.
 
 ---
 
-#### Frontend BQC
-
-**Applies when**: Stack includes React, Next.js, Vue, Angular, Svelte, Solid, or package type is `frontend`.
+#### Behavioral Quality Checklist
 
 **Mandatory edge-case checklist** -- verify applicable items before marking EACH task complete:
 
-- [ ] **Pending/loading state** prevents duplicate submits (buttons disabled while mutation in-flight)
-- [ ] **Cancel/abort/unmount cleanup** for async work (timers, listeners, streams, AbortControllers, animation controls)
-- [ ] **Optimistic updates** rollback correctly under error/race (scoped to the specific entry, not the whole list)
-- [ ] **Reopen flows** reset form/dialog/mutation state correctly (close then reopen must not show stale data)
-- [ ] **Keyboard/focus/a11y** behavior works (Tab/Enter/Space/Escape, focus trap in modals, focus return on close, ARIA attributes on custom controls)
-- [ ] **Mobile viewport and overflow** behavior works (use dvh/dvw not vh/vw, sheets handle navigation-triggered close, touch targets >= 44x44px)
-- [ ] **Reduced-motion** behavior is preserved (prefers-reduced-motion respected with non-animated alternative, not just animation:none)
-- [ ] **API/schema contracts** remain aligned (component props match generated client types, enum switches are exhaustive)
-- [ ] **Error/empty/loading states** are handled explicitly (no blank screens on fetch failure or empty data)
+- [ ] **Resource cleanup**: Every resource acquired in a scoped lifecycle is released when that scope ends. No leaked timers, dangling subscriptions, unclosed connections, or orphaned async tasks.
+- [ ] **Duplicate action prevention**: Every state-mutating operation is protected against duplicate triggers while in-flight. No double-submits, no unguarded retries, no concurrent write races.
+- [ ] **State freshness on re-entry**: When a context is re-entered (reopened, revisited, reconnected, retried), state is explicitly reset or revalidated. No stale data from a prior lifecycle.
+- [ ] **Trust boundary enforcement**: All inputs crossing a trust boundary are validated with explicit schema or type checks, and all access is authorized at the enforcement point closest to the protected resource. Never trust upstream callers.
+- [ ] **Failure path completeness**: Every operation that can fail has an explicit, caller-visible failure path. No silent swallows, no blank screens, no infinite spinners, no generic 500s.
+- [ ] **Concurrency safety**: Shared mutable state accessed from multiple execution contexts is protected against races. No unguarded read-modify-write sequences.
+- [ ] **External dependency resilience**: Every call to an external system has a timeout, a retry/backoff strategy, and a defined failure path. No unbounded waits.
+- [ ] **Contract alignment**: Interfaces between components match their declared contracts. Response shapes match client types. Event payloads match schemas. Enum handling is exhaustive.
+- [ ] **Error information boundaries**: Errors exposed to external callers reveal only stable, intentional information. No stack traces, internal paths, or secrets in responses or logs.
+- [ ] **Accessibility and platform compliance**: Interactive elements participate in the platform's accessibility model with appropriate labels, focus management, and input method support.
 
-**How to apply**: After implementing each task, check ONLY the items relevant to the code you touched. A task adding a useEffect with setInterval must have cleanup. A task adding a delete button must have confirmation + disable-while-pending. Not every item applies to every task.
-
----
-
-#### Backend BQC
-
-**Applies when**: Stack includes FastAPI, Express, Django, Rails, Flask, Gin, Actix, Spring, or package type is `backend`.
-
-*(Future: backend checklist will be defined here.)*
-
----
-
-#### Mobile BQC
-
-**Applies when**: Stack includes React Native, Flutter, Swift/SwiftUI, Kotlin/Jetpack Compose.
-
-*(Future: mobile checklist will be defined here.)*
+**How to apply**: After each task, check ONLY the items relevant to the code you touched. A task adding a timed background operation must satisfy resource cleanup + failure path. A task adding a write endpoint must satisfy duplicate prevention + trust boundaries + error information boundaries. A task adding an interactive dialog must satisfy state freshness + accessibility. Not every item applies to every task -- but every item applies somewhere.
 
 ### 4. Initialize Implementation Notes
 
@@ -175,7 +151,7 @@ If `implementation-notes.md` doesn't exist, create it:
 ```markdown
 # Implementation Notes
 
-**Session ID**: `phase_NN_session_NN_name`
+**Session ID**: `phaseNN-sessionNN-name`
 [MONOREPO ONLY - include when monorepo: true]
 **Package**: [package-path]
 [END MONOREPO ONLY]
@@ -321,7 +297,7 @@ When all tasks complete:
 ```
 Session implementation complete!
 Tasks: N/N (100%)
-BQC: [X] fixes applied across [Y] tasks [or "N/A - no BQC for this stack"]
+BQC: [X] fixes applied across [Y] tasks [or "N/A - no application code in session"]
 
 Run `/validate` to verify session completeness.
 ```
