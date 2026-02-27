@@ -9,7 +9,7 @@ Verify that all session requirements are met before marking the session complete
 
 ## Rules
 
-1. **PASS requires ALL of**: 100% tasks complete, all deliverables exist, all files ASCII-encoded with LF endings, all tests passing, all success criteria met, no security or GDPR violations
+1. **PASS requires ALL of**: 100% tasks complete, all deliverables exist, all files ASCII-encoded with LF endings, all tests passing, all success criteria met, no security or GDPR violations, no critical behavioral quality violations (when BQC applies)
 2. **Any single failure = overall FAIL** - no partial passes
 3. **Script first** - run `analyze-project.sh --json` before any analysis
 4. Conventions compliance is a spot-check, not exhaustive - flag obvious violations only
@@ -160,6 +160,27 @@ Review **only files created or modified in this session** (use deliverables from
 - Hardcoded secrets and injection vulnerabilities are always FAIL regardless of scope
 - **Monorepo**: Scope the review to files within the declared package boundary (from Step 1a). Cross-cutting sessions review all modified files.
 
+#### H. Behavioral Quality Spot-Check (Stack-Conditional)
+
+Determine whether a BQC applies using the same stack detection as `/implement` Step 3a.
+
+**If no BQC applies**: Mark as N/A and skip to Step 4.
+
+**If a BQC applies**: Select up to 5 deliverable files most likely to contain behavioral issues (components with effects, forms, modals, data-fetching views). Spot-check against these priorities:
+
+| Priority | What to check | FAIL if... |
+|----------|---------------|------------|
+| 1 | Effect/async cleanup | useEffect with timers/listeners/fetch has no cleanup return |
+| 2 | Mutation safety | Submit/delete triggers not disabled while pending |
+| 3 | State lifecycle | Dialog/form state not reset on close |
+| 4 | Accessibility | Custom interactive element missing keyboard handler or ARIA |
+| 5 | Error states | Data-fetching view has no error/empty state handling |
+
+**Scoring**:
+- 0 violations: PASS
+- 1-2 low-severity (e.g., missing reduced-motion on subtle animation): WARN -- log but do not block
+- Any high-severity (missing cleanup, no mutation disable, state not reset): FAIL -- fix before passing
+
 ### 4. Generate Security & Compliance Report
 
 Create `security-compliance.md` in the session directory (`.spec_system/specs/[current-session]/security-compliance.md`):
@@ -287,6 +308,7 @@ Create `validation.md` in the session directory:
 | Quality Gates | PASS/FAIL | [issues] |
 | Conventions | PASS/SKIP | [issues or "No CONVENTIONS.md"] |
 | Security & GDPR | PASS/FAIL/N/A | [issues] |
+| Behavioral Quality | PASS/WARN/FAIL/N/A | [issues or "No BQC for stack"] |
 
 **Overall**: PASS / FAIL
 
@@ -404,6 +426,32 @@ From spec.md:
 
 ### Critical Violations (if any)
 [List critical/high severity items or "None"]
+
+---
+
+## 8. Behavioral Quality Spot-Check
+
+### Status: PASS/WARN/FAIL/N/A
+
+*N/A if session's stack has no defined BQC.*
+
+**Stack detected**: [stack name]
+**Checklist applied**: [Frontend / Backend / Mobile / None]
+**Files spot-checked**: [list of up to 5 files]
+
+| Category | Status | File | Details |
+|----------|--------|------|---------|
+| Effect cleanup | PASS/FAIL | `path` | [details or "--"] |
+| Mutation safety | PASS/FAIL | `path` | [details or "--"] |
+| State lifecycle | PASS/FAIL | `path` | [details or "--"] |
+| Accessibility | PASS/FAIL | `path` | [details or "--"] |
+| Error states | PASS/FAIL | `path` | [details or "--"] |
+
+### Violations Found
+[List with file:line, category, severity, or "None"]
+
+### Fixes Applied During Validation
+[List fixes, or "None"]
 
 ---
 

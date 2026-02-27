@@ -24,6 +24,7 @@ Analyze project state, recommend the next session, create its specification, and
 13. **Every task must have**: task ID (`TNNN`), session ref (`[SPPSS]`), action verb, target file path
 14. **Mark `[P]`** when tasks create independent files with no interdependency
 15. **Sequence by**: dependencies first, then setup -> foundation -> implementation -> testing
+16. **Behavioral quality by design** - When a Behavioral Quality Checklist (BQC) applies to the session's stack, embed edge-case handling into task descriptions. "Create delete dialog" becomes "Create delete dialog (with typed confirmation, disable-while-pending, state reset on close)". Explicit requirements get implemented; implicit ones get skipped.
 
 ## Steps
 
@@ -228,6 +229,14 @@ Generate `spec.md` with all sections filled in:
 - [P##] **[Active Concern]**: How it affects this session and mitigation
 - [P##] **[Lesson Learned]**: How we're applying it in this implementation
 
+### Behavioral Quality Focus
+<!-- Include when the session's stack matches a BQC (see /implement Step 3a). Omit if no BQC applies. -->
+Checklist active: [Frontend / Backend / Mobile]
+Top behavioral risks for this session:
+- [Risk 1 relevant to this session's deliverables]
+- [Risk 2 relevant to this session's deliverables]
+- [Risk 3 relevant to this session's deliverables]
+
 ---
 
 ## 9. Testing Strategy
@@ -261,6 +270,28 @@ Generate `spec.md` with all sections filled in:
 
 Run `/implement` to begin AI-led implementation.
 ```
+
+### 4a. Enrich Task Descriptions with BQC (Stack-Conditional)
+
+**Skip if** the session's stack does not match any defined BQC (see `/implement` Step 3a for stack detection).
+
+When a BQC applies, enrich task descriptions in Step 5 using this table:
+
+| If task involves... | Append to description... |
+|---------------------|--------------------------|
+| useEffect / side effects | "with cleanup return for [timers/listeners/controllers]" |
+| Dialog, modal, drawer, sheet | "with state reset on close" |
+| Form submission | "with disable-while-pending and reset on success" |
+| Data fetching view | "with loading, empty, and error states" |
+| Delete/remove/revoke action | "with confirmation and disable-while-pending" |
+| Paginated list | "with bounds-clamped pagination" |
+| Optimistic update | "with scoped rollback on error" |
+| Custom interactive control | "with keyboard accessibility (Tab/Enter/Space/Escape)" |
+| Animation or transition | "with prefers-reduced-motion alternative" |
+| API response consumption | "with types matching generated API contract" |
+| Mobile/responsive layout | "using dvh/dvw viewport units" |
+
+These add 5-15 words per task but prevent the 10x-cost bugs found in later audits.
 
 ### 5. Generate Task Checklist
 

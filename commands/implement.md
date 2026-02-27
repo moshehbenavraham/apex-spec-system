@@ -17,6 +17,7 @@ Execute each task in the session's task list, updating progress as you go.
 6. **Write tests as specified** – ensure they pass before moving on.
 7. **Ensure logging and error handling** – no silent failures.
 8. **Prefer cohesive, moderately sized modules** – avoid multi‑thousand‑line god files; if a file grows beyond ~400–600 LOC or multiple responsibilities, schedule a refactor.
+9. **Behavioral correctness over speed** - Code must handle edge cases, cleanup, and failure paths before a task is marked done. A checked task with a behavioral bug costs 10x more to find in a later audit.
 
 ### No Deferral Policy
 
@@ -120,6 +121,53 @@ Using the `current_session` value from the script output, read:
 
 **Resuming?** If `implementation-notes.md` and completed tasks already exist, read them to understand current state and resume from the next incomplete task.
 
+### 3a. Load Behavioral Quality Checklist (BQC)
+
+Determine this session's stack to select the applicable behavioral checklist:
+
+1. **spec.md `Package Stack:` field** (monorepo sessions)
+2. **CONVENTIONS.md** stack-specific sections (e.g., "Components" implies React)
+3. **state.json `packages[].stack`** for the active package
+4. **PRD Technical Stack section** (fallback)
+
+Apply the matching checklist below. If no stack matches, skip -- behavioral verification defaults to general code review.
+
+---
+
+#### Frontend BQC
+
+**Applies when**: Stack includes React, Next.js, Vue, Angular, Svelte, Solid, or package type is `frontend`.
+
+**Mandatory edge-case checklist** -- verify applicable items before marking EACH task complete:
+
+- [ ] **Pending/loading state** prevents duplicate submits (buttons disabled while mutation in-flight)
+- [ ] **Cancel/abort/unmount cleanup** for async work (timers, listeners, streams, AbortControllers, animation controls)
+- [ ] **Optimistic updates** rollback correctly under error/race (scoped to the specific entry, not the whole list)
+- [ ] **Reopen flows** reset form/dialog/mutation state correctly (close then reopen must not show stale data)
+- [ ] **Keyboard/focus/a11y** behavior works (Tab/Enter/Space/Escape, focus trap in modals, focus return on close, ARIA attributes on custom controls)
+- [ ] **Mobile viewport and overflow** behavior works (use dvh/dvw not vh/vw, sheets handle navigation-triggered close, touch targets >= 44x44px)
+- [ ] **Reduced-motion** behavior is preserved (prefers-reduced-motion respected with non-animated alternative, not just animation:none)
+- [ ] **API/schema contracts** remain aligned (component props match generated client types, enum switches are exhaustive)
+- [ ] **Error/empty/loading states** are handled explicitly (no blank screens on fetch failure or empty data)
+
+**How to apply**: After implementing each task, check ONLY the items relevant to the code you touched. A task adding a useEffect with setInterval must have cleanup. A task adding a delete button must have confirmation + disable-while-pending. Not every item applies to every task.
+
+---
+
+#### Backend BQC
+
+**Applies when**: Stack includes FastAPI, Express, Django, Rails, Flask, Gin, Actix, Spring, or package type is `backend`.
+
+*(Future: backend checklist will be defined here.)*
+
+---
+
+#### Mobile BQC
+
+**Applies when**: Stack includes React Native, Flutter, Swift/SwiftUI, Kotlin/Jetpack Compose.
+
+*(Future: mobile checklist will be defined here.)*
+
 ### 4. Initialize Implementation Notes
 
 If `implementation-notes.md` doesn't exist, create it:
@@ -176,6 +224,7 @@ Find the first unchecked `- [ ]` task in tasks.md
 - If `docs/adr/` exists, review relevant Architecture Decision Records and follow their decisions
 - Implement the required changes
 - **Monorepo path validation**: If a package was resolved in Step 1a, verify that files being created or modified fall within the declared package directory (e.g., `apps/web/...`). Warn if a task references files outside the package scope -- this may indicate scope creep. Exception: cross-cutting sessions (package: null) may touch any file.
+- **Behavioral quality verification** (if BQC loaded in Step 3a): Before marking this task complete, scan your code against the applicable checklist items. Fix violations now -- do not defer. Note any BQC fixes in the task log entry (Step 5D).
 
 #### C. Update Task Status
 In `tasks.md`, change:
@@ -202,6 +251,9 @@ Add to `.spec_system/specs/[current-session]/implementation-notes.md`:
 
 **Files Changed**:
 - `path/to/file` - [changes made]
+
+**BQC Fixes** (if any):
+- [Category]: [What was caught and fixed] (`path/to/file`)
 
 [MONOREPO ONLY - include if any files fall outside the declared package scope]
 **Out-of-Scope Files** (files outside declared package):
@@ -269,6 +321,7 @@ When all tasks complete:
 ```
 Session implementation complete!
 Tasks: N/N (100%)
+BQC: [X] fixes applied across [Y] tasks [or "N/A - no BQC for this stack"]
 
 Run `/validate` to verify session completeness.
 ```
