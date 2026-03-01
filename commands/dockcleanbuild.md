@@ -72,6 +72,11 @@ Run `sudo docker compose up -d` to start the containers in detached mode.
 
 Verify containers are running with `sudo docker compose ps`.
 
+**If any container fails to start, investigate the root cause (port conflicts,
+missing dependencies, config errors, etc.), resolve it, and retry
+`sudo docker compose up -d` until ALL containers are running or healthy.
+Do not proceed until every service is up.**
+
 Report the status of each container.
 
 ### 7. Final cleanup
