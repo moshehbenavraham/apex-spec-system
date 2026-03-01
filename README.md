@@ -1,6 +1,6 @@
 # Apex Spec System
 
-**Version: 1.6.10-beta**
+**Version: 1.6.11-beta**
 
 A Claude Code plugin providing a specification-driven workflow system for AI-assisted development. Think Github Spec Kit (our source inspiration) simplified.
 
@@ -75,7 +75,7 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
    /infra OR /apex-spec:infra                # Production infrastructure (health, security, backup, deploy)
    /carryforward OR /apex-spec:carryforward  # Lessons learned, security/compliance records
    /documents OR /apex-spec:documents        # Create, maintain project documentation
-   -- Optional but recommended, do manual testing HERE --
+   -- Optional but HIGHLY recommended, do manual testing and separate LLM Audit HERE --
    /phasebuild OR /apex-spec:phasebuild      # Set up next Phase and Phase's sessions
    ```
 
