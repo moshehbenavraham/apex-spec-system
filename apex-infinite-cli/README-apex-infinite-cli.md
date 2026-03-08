@@ -36,6 +36,19 @@ Originally powered by an n8n workflow with Airtable, Slack, and SSH nodes, this 
 
 The manager LLM can also output `help` to pause for CEO (human) input, or give custom instructions to Claude Code for edge cases.
 
+## Supported Commands
+
+All 13 Apex Spec commands are recognized and routed through the plugin activation prompt:
+
+| Stage | Commands |
+|-------|----------|
+| Initialization | `initspec`, `createprd`, `createuxprd` |
+| Session workflow | `plansession`, `implement`, `validate`, `updateprd` |
+| Phase transition | `audit`, `pipeline`, `infra`, `carryforward`, `documents`, `phasebuild` |
+| Terminal | `help` (pauses for CEO input), `alldonebaby` (stops loop) |
+
+Any output not matching a known command is sent as custom instructions via the `ULTRATHINK - {raw output}` fallback, allowing the manager LLM to give ad-hoc instructions to Claude Code (e.g., "Fix the two failing tests then rerun /validate").
+
 ## Install
 
 ```bash
@@ -129,6 +142,14 @@ Two ways to inject human guidance:
 ## Data
 
 Interaction history is stored at `~/.apex-infinite/history.db` (SQLite with WAL mode).
+
+## Notes
+
+- **Nesting**: The CLI clears the `CLAUDECODE` environment variable so it can launch `claude -p` subprocesses even when run from within a Claude Code session.
+- **Slash tolerance**: The manager LLM sometimes outputs `/plansession` instead of `plansession`. The CLI strips leading slashes before routing.
+- **implement -> /implementation**: The n8n workflow routes "implement" but the actual SSH command runs `/implementation`. The CLI preserves this alias.
+- **LLM retries**: Both LLM calls (summarizer and manager) retry 3 times with a 5-second wait between attempts, matching the original n8n workflow's `retryOnFail` + `waitBetweenTries: 5000`.
+- **Reference workflow**: The original n8n workflow JSON is preserved in `n8n-workflow/` for reference.
 
 ## Requirements
 

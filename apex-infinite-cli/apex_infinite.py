@@ -32,6 +32,7 @@ DB_DIR = Path.home() / ".apex-infinite"
 DB_PATH = DB_DIR / "history.db"
 
 KNOWN_COMMANDS = {
+    "initspec", "createprd", "createuxprd",
     "plansession", "implement", "validate", "updateprd",
     "audit", "pipeline", "infra", "carryforward", "documents", "phasebuild",
 }
@@ -657,7 +658,7 @@ def build_claude_prompt(output_cmd, raw_output):
     Known commands: ULTRATHINK - activate plugin skill apex-spec -- .../cmd
     Custom: ULTRATHINK - {raw output}
     """
-    cmd_lower = output_cmd.strip().lower()
+    cmd_lower = output_cmd.strip().lower().lstrip("/")
 
     if cmd_lower in KNOWN_COMMANDS:
         actual_cmd = COMMAND_ALIASES.get(cmd_lower, cmd_lower)
@@ -682,15 +683,24 @@ def execute_claude(path, prompt, dry_run=False, verbose=False):
     console.print(f"  [dim]Executing claude in {expanded_path}...[/dim]")
 
     try:
+        # Clear CLAUDECODE env var to allow nested sessions
+        env = os.environ.copy()
+        env.pop("CLAUDECODE", None)
+
         result = subprocess.run(
             ["claude", "-p", prompt, "--dangerously-skip-permissions"],
             cwd=expanded_path,
             capture_output=True,
             text=True,
             timeout=COMMAND_TIMEOUT,
+            env=env,
         )
 
         output = result.stdout
+        # If stdout is empty, use stderr (claude -p sometimes outputs there)
+        if not output.strip() and result.stderr.strip():
+            output = result.stderr
+
         if result.returncode != 0:
             error_msg = result.stderr or "Unknown error"
             output = f"[ERROR exit code {result.returncode}]\nstdout: {result.stdout}\nstderr: {error_msg}"
@@ -800,7 +810,8 @@ def infinite_loop(
         console.print(f"  [dim]Reason: {reason_val}[/dim]")
 
         # 3. Route on decision
-        output_lower = output_val.lower()
+        # Strip leading slash - LLM sometimes outputs "/plansession" instead of "plansession"
+        output_lower = output_val.lower().lstrip("/")
 
         if output_lower == "help":
             console.print("\n[bold yellow]*** MANAGER NEEDS CEO HELP ***[/bold yellow]")
