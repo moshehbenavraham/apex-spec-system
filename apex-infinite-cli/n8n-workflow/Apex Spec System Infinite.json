@@ -1,0 +1,1391 @@
+{
+  "name": "Apex Spec System Infinite",
+  "nodes": [
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"output\": \"<output>\",\n  \"reason\": \"<reason for output>\"\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1680,
+        384
+      ],
+      "id": "ba251463-333f-44ea-9085-604d4282c65f",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "claude -p \"Use maximum thinking budget for this prompt:     activate plugin skill apex-spec -- after activating the plugin skill run command /validate\" --dangerously-skip-permissions",
+        "cwd": "={{ $('Variables').first().json.path_to_project }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        -416
+      ],
+      "id": "ffa19c59-f0b2-4f2a-a0b4-968ee56dd01b",
+      "name": "Execute VALIDATE",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "ieiyPBgH4ujHWgKv",
+          "name": "SSH Private Key LOCAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n.aiwithapex.ngrok.dev/webhook/9bfe4916-2c35-4393-96d4-8f8513994255",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "response",
+              "value": "={{ $json.stdout }}"
+            },
+            {
+              "name": "path",
+              "value": "={{ $('Variables').first().json.path_to_project }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2496,
+        160
+      ],
+      "id": "2d3b217b-c274-4cc6-8817-c8aa0405332e",
+      "name": "Claude Code Response"
+    },
+    {
+      "parameters": {
+        "model": "grok-4-1-fast-reasoning",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatXAiGrok",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        384
+      ],
+      "id": "4b71455b-e1dc-4187-b925-c3d651d67439",
+      "name": "xAI Grok Chat 4.1 Fast Reasoning",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "xAiApi": {
+          "id": "QvDv8UUslyTceRaU",
+          "name": "xAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=IF EXISTS, CLAUDE CODE SENIOR DEVELOPER LATEST MESSAGE:\n{{ $('Variables').first().json.cc_response }}\n\nIF EXISTS, CEO'S INSTRUCTIONS:\n{{ $('Variables').first().json.ceo_response }}\n\nHISTORICAL INTERACTIONS SUMMARY:\n{{ $json.text }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "# Role\n\nYou are a **managing software engineer** — the kind that obsesses over perfect project structure.  You approach implementation like a craftsperson: methodical, patient, and uncompromising on quality.  You specifically are managing an AI Coding Agent called 'Claude Code' which is acting as your Senior Developer.\n\n# Input\n\nBoth:\n- A summary of previous historical messages from CC and your responses.\nOR\n  -- The last message from Claude Code, your Senior Developer.\n  -- Instructions from the CEO\n\n# Your Senior Developer Claude Code\n\n## Claude Code Commands\n\nClaude Code is pre-armed with some powerful pre-built 'commands' which will make your managing responsibilities MUCH easier.  The details are below in section \"Senior Developer's Commands\".  Claude Code will give you suggestions on which command to run next to make your job even easier!  The one exception you wouldn't follow Claude Code's advice is if it mentions a problem that it didn't create or a \"pre-existing issue\".  A problem it didn't create and pre-existing issues are still problems, and in that case please see \"## Issues\" section.\n\n## Issues\n\nIf Claude Code reports any issues, you should give high-level instructions to address the issue.  (Claude Code is -extremely- intelligent and doesn't need code snippets or examples, so you can instruct Claude Code concisely and high level.)  Example, Claude Code may respond in conclusion to a /validate session report there are two bugs.  You can simply instruct Claude Code to both fix the bugs, and then either rerun the command or run the next command.  Ex. \"You may have not created the code that resulted in the warning / the issue may be pre-existing it, but we are responsible for fixing it.  Please fix the issue then rerun /X\".  Claude Code has shell access and can handle most anything outside of SUDO commands... such as running snapshot updates, unit tests, installing/running pnpm, Github (Claude Code has gh ssh access), etc. in which case, it should just be given instructions to do that thing that blocked it; you will see in history whether its failing to do something more than once in which you would ask the CEO for help.\n\n### Issues - Special Cases\n\nIf Claude Code reports the /pipeline command ran into billing issues, just move on to /infra instead of bugging the CEO\n\n## CEO\n\nIf the CEO sends instructions, your job is simply to relay the instructions to Claude Code.\n\n### Try Not to Bug CEO\n\nThis is supposed to be an autonomous system. You do not want to bug the User, who effectively you can consider the CEO.  Only bug the CEO if its necessary.  An example of a good reason to bug the CEO is if Claude Code tells you something needs to be installed with SUDO access.  In the case you need the CEO, your output should simply be \"help\". Do NOT bug the CEO for stuff like running python3, installing venv related packages, installing/running nppm, Github (Claude Code has gh ssh access), running unit tests, etc.  Only tasks that Claude Code TRULY cannot do, SUDO is the clearest example.\n\n## All Done Baby!\n\nFinally, it may be the case that Claude Code has completed everything and indicates there are no more sessions or phases remaining and the very last /audit, /pipeline, /infra, /documents and /carryover have been ran.  In that case, HUGE congratulations, you completed the project!  You can simply output \"alldonebaby\".\n\n# Output\n\nYour output MUST be in clean valid JSON format. Your output MUST be a single word command from the list below (without the /, example for /implement you'd simple output implement) OR the CEO's instructions as simple text OR the high-level instructions to Claude Code as simple text OR just \"help\" to get CEO intervention OR just \"alldonebaby\" if everything has been fully completed.  In addition, you should explain the reason for your output.  Examples of valid outputs:\n\n{ \"output\": \"tasks\", \"reason\": \"<explanation for output choice>\" }\nOR\n{ \"output\": \"run phasebuild\", \"reason\": \"The CEO sent me instructions and my job is to relay them straight to Claude Code our Senior Engineer.\"  }\nOR\n{ \"output\": \"Fix the two bugs.\", \"reason\": \"<explanation for output choice>\"  }\nOR\n{ \"output\": \"carryforward\", \"reason\": \"<explanation for output choice>\"  }\nOR\n{ \"output\": \"help\", \"reason\": \"<explanation for output choice>\"  }\n\n# Senior Developer's Commands\n\n---\n---\n\n  Claude Code Senior Developer - Command Reference\n\n  Important rules:  When all sessions of a phase are completed, start phase transition with /audit\n\n  The Senior Developer's workflow has 2 stages that loop: Sessions (a collection of Sessions are a Phase, loop to complete a Phase) → [If any Phases remain] Phase Transition (prepare for a new set of Sessions)\n\n```\nStage 1: SESSIONS WORKFLOW (Repeat until phase complete)\n\n---\n\n/plansession\n\nPurpose: Plan, spec, and task-generate for the next session in one shot\n\nSteps:\n1. Run analyze-project.sh --json for state (phase, completed sessions, candidates)\n2. Read PRD.md, candidate sessions, CONSIDERATIONS.md (Active Concerns, Lessons Learned), CONVENTIONS.md\n3. Evaluate candidates by: prerequisites, dependencies, logical flow, MVP focus\n4. Create NEXT_SESSION.md: recommendation, rationale, deliverables, alternatives\n5. Create .spec_system/specs/phaseNN-sessionNN-name/\n6. Generate spec.md (10 sections): Overview, Objectives, Prerequisites, Scope, Technical Approach, Deliverables, Success Criteria, Implementation Notes, Testing Strategy, Dependencies\n7. Archive NEXT_SESSION.md to session directory\n8. Generate tasks.md:\n   - Progress table (Setup/Foundation/Implementation/Testing)\n   - Tasks: - [ ] TNNN [SPPSS] [P] Action + what + where (path)\n   - [P] marks parallelizable tasks\n   - Completion checklist\n9. Update state.json: set current_session, append next_session_history, status → tasks_created\nRules:\n- If phase complete, use /audit instead. Trust script JSON as ground truth.\n- Max 25 tasks, max 4 hours, single objective (reject if exceeded)\n- Task sweet spot: 20 tasks, ~20-25 min each\n\nCategories: Setup (2-4), Foundation (4-8), Implementation (8-15), Testing (3-5)\n\nNext: /implement\n\n---\n\n/implement\n\nPurpose: AI-led task-by-task implementation\n\nSteps:\n1. Run analyze-project.sh --json for current session\n2. Run check-prereqs.sh --json --env (STOP if fails); optionally --tools \"tool1,tool2\"\n3. Read spec.md, tasks.md, CONVENTIONS.md\n4. Create/update implementation-notes.md\n5. Per task:\n   - Implement per CLAUDE.md + CONVENTIONS.md\n   - Mark - [ ] → - [x] in tasks.md\n   - Log: timestamps, notes, files changed\n6. Document blockers and decisions\n7. Checkpoint every 3-5 tasks\n\nRules: ASCII-only, LF endings, follow conventions, implement spec exactly (no extras)\n\nNext: /validate\n\n---\n/validate\n\nPurpose: Verify session completeness and quality gates\n\nSteps:\n1. Run analyze-project.sh --json for current session\n2. Read spec.md, tasks.md, implementation-notes.md, CONVENTIONS.md\n3. Run 6 checks:\n   - A. Task completion (100% [x])\n   - B. Deliverables exist (non-empty)\n   - C. ASCII encoding (no non-ASCII, no CRLF)\n   - D. Tests passing\n   - E. Success criteria met\n   - F. Conventions compliance\n4. Generate validation.md: PASS/FAIL per check\n5. Update state.json status → validated or validation_failed\n\nPASS: All checks pass. FAIL: Any issue → resolve → re-run /validate\n\nNext: /updateprd (if PASS)\n\n---\n/updateprd\n\nPurpose: Mark session complete, update docs, commit\n\nSteps:\n1. Verify validation.md shows PASS\n2. Update state.json: add to completed_sessions[], clear current_session, mark history completed\n3. Update phase PRD: mark session Complete\n4. Create IMPLEMENTATION_SUMMARY.md: overview, deliverables, decisions, tests, lessons, future, stats\n5. If last session: archive phase to archive/phases/, update master PRD\n6. Increment version (patch) in package.json/pyproject.toml/Cargo.toml/etc.\n7. Commit and push (no co-authors)\n\nCommit format: Complete phaseNN-sessionNN-name: [description] + deliverables\n\nNext: /plansession (if phase incomplete) or /audit (if phase complete)\n\n---\nStage 2: PHASE TRANSITION\n\n---\n/audit\n\nPurpose: Add/validate local dev tooling, one bundle at a time\n\nSteps:\n1. DETECT: Read CONVENTIONS.md, known-issues.md, check git status\n2. COMPARE: Check 5 bundles against master list\n3. SELECT: Pick highest-priority missing bundle\n4. IMPLEMENT: Install tool + generate config\n5. VALIDATE: Run ALL tools (formatter → linter → types → tests → hooks)\n6. FIX: Auto-fix; revert if syntax breaks after 2 retries\n7. RECORD: Update CONVENTIONS.md Local Dev Tools table\n8. REPORT: Summary of additions, fixes, remaining issues\n9. RECOMMEND: Rerun /audit or proceed to /pipeline\n\nBundles (priority): Formatting → Linting → Type Safety → Testing → Git Hooks\n\nFlags: --dry-run, --skip-install, --verbose\n\nRules: One bundle per run. Never break syntax (revert after 2 failures).\n\nWhen: After phase complete, before /pipeline\n\n---\n/pipeline\n\nPurpose: Add/validate CI/CD workflows, one bundle at a time\n\nSteps:\n1. DETECT: Read CONVENTIONS.md, detect CI platform, check PRs with issues\n2. COMPARE: Check 5 bundles against master list\n3. SELECT: Pick highest-priority missing bundle\n4. IMPLEMENT: Generate workflow YAML, commit, push\n5. VALIDATE: Poll CI (3 min timeout), check PR status\n6. FIX: Parse CI logs, fix errors, address PR review comments\n7. RECORD: Update CONVENTIONS.md CI/CD table\n8. REPORT: Summary of workflows, fixes, CI/PR status\n9. RECOMMEND: Fix issues, merge PR, or proceed to /infra\n\nBundles (priority): Code Quality → Build & Test → Security → Integration → Operations\n\nFlags: --dry-run, --skip-install, --verbose, --pr <number>\n\nRules: One bundle per run. PR-aware: fixes CI failures AND review comments. Documents secrets (never creates them).\n\nWhen: After /audit, before /infra\n\n---\n/infra\n\nPurpose: Add/validate production infrastructure, one bundle at a time\n\nSteps:\n1. DETECT: Read CONVENTIONS.md Infrastructure table, detect platform (Cloudflare/Coolify/Vercel/Fly.io/etc.)\n2. COMPARE: Check 4 bundles against master list\n3. SELECT: Pick highest-priority missing bundle\n4. IMPLEMENT: Add platform-specific config/code\n5. VALIDATE: Verify (curl /health, test rate limiting, check backups, trigger deploy)\n6. FIX: Address validation failures\n7. RECORD: Update CONVENTIONS.md Infrastructure table\n8. REPORT: Summary of infra, validation results, manual steps\n9. RECOMMEND: Fix issues or proceed to /documents\n\nBundles (priority): Health → Security → Backup → Deploy\n\nFlags: --dry-run, --skip-install, --verbose\n\nRules: One bundle per run. Stack-agnostic. Documents manual steps/env vars (never creates secrets).\n\nWhen: After /pipeline, before /documents\n\n---\n/carryforward\n\nPurpose: Extract lessons learned, update CONSIDERATIONS.md between phases\n\nSteps:\n1. Verify phase complete in state.json\n2. Read all IMPLEMENTATION_SUMMARY.md from completed phase\n3. Extract:\n   - Active Concerns: Tech debt, external deps, performance/security, architecture\n   - Lessons Learned: What worked, what to avoid, tool notes\n   - Resolved: Previous concerns addressed\n4. Update .spec_system/CONSIDERATIONS.md: add new, remove resolved, merge similar\n   - Limits: 20 Active Concerns, 30 Lessons Learned, 15 Resolved\n5. Enforce 600-line limit (trim oldest/least relevant)\n\nFormat: Tag items with [P##] for traceability\n\nWhen: After phase complete, after /audit, before /documents. Recommended for all phases.\n\n---\n/documents\n\nPurpose: Create/maintain project documentation\n\nSteps:\n1. Run analyze-project.sh --json\n2. Determine scope:\n   - Phase-Focused: Prioritize changes from just-completed phase\n   - Full Audit: Initial setup, milestones, or explicit request\n3. Audit standard files:\n   - Root: README.md, CONTRIBUTING.md, LICENSE\n   - docs/: ARCHITECTURE.md, CODEOWNERS, onboarding.md, development.md, environments.md, deployment.md, adr/, runbooks/, api/\n   - Per-package: README_<dirname>.md (not README.md)\n4. Create missing files from templates (.spec_system/doc-templates/ first)\n5. Update existing docs to current state\n6. Generate docs-audit.md report\n\nNaming: Only root gets README.md; subdirs use README_<dirname>.md\n\nPrinciple: Current over complete—small accurate doc beats comprehensive stale one\n\nWhen: After /carryforward, before /phasebuild. Recommended for all phases.\n\n---\n/phasebuild\n\nPurpose: Create structure for new phase with session stubs (last transition step)\n\nSteps:\n1. Read state.json and PRD for next phase number\n2. Read CONSIDERATIONS.md for lessons to apply\n3. Create PRD/phase_NN/ directory\n4. Create PRD_phase_NN.md (phase tracker with progress table)\n5. Create session stubs (session_NN_name.md): objectives, scope, deliverables\n6. Update state.json with new phase\n7. Update master PRD.md phases table\n\nStub format: Objective, scope (in/out), prerequisites, deliverables, success criteria\n\nGuidelines: 4-8 sessions typical, 12-25 tasks each, 2-4 hours each\n\nNext: /plansession\n\n---\nQuick Reference\n\n| Command       | Stage      | Input                  | Output                              |\n|---------------|------------|------------------------|-------------------------------------|\n| /plansession  | Sessions   | State, PRD, candidates | NEXT_SESSION.md spec.md tasks.md |\n| /implement    | Sessions   | spec.md, tasks.md      | Code + implementation-notes.md      |\n| /validate     | Sessions   | All session files      | validation.md                       |\n| /updateprd    | Sessions   | validation.md          | Summary, commit, push, version bump |\n| /audit        | Transition | Codebase               | Local dev tooling, report           |\n| /pipeline     | Transition | Codebase               | CI/CD workflows, report             |\n| /infra        | Transition | Codebase               | Infrastructure, report              |\n| /carryforward | Transition | Phase artifacts        | Updated CONSIDERATIONS.md           |\n| /documents    | Transition | State, PRD, codebase   | Updated docs                        |\n| /phasebuild   | Transition | PRD, state             | Phase dir + session stubs           |\n```\n\n---\n---\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.8,
+      "position": [
+        1696,
+        160
+      ],
+      "id": "6d64efaa-93fe-4606-8710-2a7aefaaab35",
+      "name": "LLM Generate Response",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "9bfe4916-2c35-4393-96d4-8f8513994255",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        432,
+        160
+      ],
+      "id": "be27af12-fc6e-4f4a-aa89-4f7f37b47c03",
+      "name": "Webhook from Claude Code",
+      "webhookId": "9bfe4916-2c35-4393-96d4-8f8513994255"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.output }}",
+                    "rightValue": "plansession",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "857ac7d5-ecef-4dc4-9461-9362e6f0bc66"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "/plansession"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ef76627f-c6c3-4a86-be95-19fcf6b249bd",
+                    "leftValue": "={{ $json.output.output }}",
+                    "rightValue": "implement",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "/implement"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "298fc86b-4131-4d65-b971-324dd1ea4081",
+                    "leftValue": "={{ $json.output.output }}",
+                    "rightValue": "validate",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "/validate"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "48834514-25c7-415b-ad36-cb1483b8086f",
+                    "leftValue": "={{ $json.output.output }}",
+                    "rightValue": "updateprd",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "/updateprd"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "fa4c025c-3829-4056-a363-c4f36f5080b2",
+                    "leftValue": "={{ $json.output.output }}",
+                    "rightValue": "audit",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "/audit"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ed38a5ae-b2de-4175-8186-3077e03210e2",
+                    "leftValue": "={{ $json.output.output }}",
+                    "rightValue": "pipeline",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "/pipeline"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c3c996cf-2e94-4132-b8e1-030965eba691",
+                    "leftValue": "={{ $json.output.output }}",
+                    "rightValue": "infra",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "/infra"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "46f099fb-a178-430e-9b31-f49a8883211c",
+                    "leftValue": "={{ $json.output.output }}",
+                    "rightValue": "carryforward",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "/carryforward"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "951a27e3-c5ae-4791-9d20-5cf94bedf482",
+                    "leftValue": "={{ $json.output.output }}",
+                    "rightValue": "documents",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "/documents"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c059d8a0-649a-47c2-9457-56febec379e2",
+                    "leftValue": "={{ $json.output.output }}",
+                    "rightValue": "phasebuild",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "/phasebuild"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "1589a876-6cf5-4cc4-9a20-8d032c949853",
+                    "leftValue": "={{ $json.output.output }}",
+                    "rightValue": "help",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "HELP"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "1214e642-d555-480c-8243-66cfcd93ebb0",
+                    "leftValue": "={{ $json.output.output }}",
+                    "rightValue": "alldonebaby",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ALLDONEBABY"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "ignoreCase": true,
+          "renameFallbackOutput": "CUSTOM-INSTRUCTIONS"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        2048,
+        -16
+      ],
+      "id": "2df3cc3f-326f-4595-b8ac-2ad22e4a1d97",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "98ee2931-e504-4861-a537-eaa874c96ca1",
+              "name": "path_to_project",
+              "value": "={{ $json.body.path }}",
+              "type": "string"
+            },
+            {
+              "id": "083fd7b8-8c03-4f2d-a09b-3fe328563022",
+              "name": "cc_response",
+              "value": "={{ $json.body.response }}",
+              "type": "string"
+            },
+            {
+              "id": "0587c46a-aee7-44bc-ba38-2fa3f04f6dec",
+              "name": "ceo_response",
+              "value": "={{ $json.body.ceo_message }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        656,
+        160
+      ],
+      "id": "ffdda483-fb49-4067-867f-6e5948e4d13d",
+      "name": "Variables"
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "claude -p \"Use maximum thinking budget for this prompt:     activate plugin skill apex-spec -- after activating the plugin skill run command /audit\" --dangerously-skip-permissions",
+        "cwd": "={{ $('Variables').first().json.path_to_project }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        -32
+      ],
+      "id": "ae9ad8b0-d9f1-4567-bbe5-99e76d5c693e",
+      "name": "Execute AUDIT",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "ieiyPBgH4ujHWgKv",
+          "name": "SSH Private Key LOCAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://n8n.aiwithapex.ngrok.dev/webhook/9bfe4916-2c35-4393-96d4-8f8513994255",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "response",
+              "value": "={{ $json['Response from CC'] }}"
+            },
+            {
+              "name": "path",
+              "value": "={{ $json.Path }}"
+            },
+            {
+              "name": "ceo_message",
+              "value": "={{ $json['Instructions from CEO'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        656,
+        -1024
+      ],
+      "id": "842fb1dd-d315-4eac-92c5-b39176782dcd",
+      "name": "Test Response"
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "claude -p \"ULTRATHINK - activate plugin skill apex-spec -- after activating the plugin skill run command /carryforward\" --dangerously-skip-permissions",
+        "cwd": "={{ $('Variables').first().json.path_to_project }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        544
+      ],
+      "id": "55b4e694-aae4-4afd-a9ad-cfa49584c13d",
+      "name": "Execute CARRYFORWARD",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "ieiyPBgH4ujHWgKv",
+          "name": "SSH Private Key LOCAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "claude -p \"ULTRATHINK - activate plugin skill apex-spec -- after activating the plugin skill run command /documents\" --dangerously-skip-permissions",
+        "cwd": "={{ $('Variables').first().json.path_to_project }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        736
+      ],
+      "id": "5c70b751-3e50-4a57-b85e-df33bb0000f9",
+      "name": "Execute DOCUMENTS",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "ieiyPBgH4ujHWgKv",
+          "name": "SSH Private Key LOCAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "claude -p \"ULTRATHINK - activate plugin skill apex-spec -- after activating the plugin skill run command /phasebuild\" --dangerously-skip-permissions",
+        "cwd": "={{ $('Variables').first().json.path_to_project }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        1024
+      ],
+      "id": "c8906bce-e122-4e91-bc35-8c2b95199f26",
+      "name": "Execute PHASEBUILD",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "ieiyPBgH4ujHWgKv",
+          "name": "SSH Private Key LOCAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "basicAuth",
+        "formTitle": "Quick response",
+        "formDescription": "=~/projects/apex-spec-system-open/\n~/projects/wp-ai-chatbot/\n~/projects/diamond_mine/\n~/projects/n8n/\n~/projects/1-PORT-INVENTORY/\n~/projects/crocbot/\n~/projects/Voice-Agent-PuPuPlatter/\n~/projects/Intermud3/\n~/projects/Luminari-Source/\n~/projects/LuminariGUI/\n~/projects/Napkin-AI-API/\n~/projects/Portfolio-Frontend/\n~/projects/Project-Webpage-for-IBM/\n~/projects/Ultimate-Agent-Directory/\n~/projects/airtable-frontend/\n~/projects/apex-spec-system/\n~/projects/automation-booking-hub/\n~/projects/base_agent/\n~/projects/chat_with_google_maps/\n~/projects/claude-n8n-workflow/\n~/projects/closing-assistant/\n~/projects/community-api/\n~/projects/comp-sci-books/\n~/projects/content-gen/\n~/projects/discord-mud-chat/\n~/projects/ffmpeg-web-suite/\n~/projects/google-maps-styling/\n~/projects/graphmind/\n~/projects/lockin/\n~/projects/lore/\n~/projects/lore-sage/\n~/projects/luminaris-quest/\n~/projects/modern-resume-site/\n~/projects/moshehbenavraham/\n~/projects/moshehbenavraham.github.io/\n~/projects/obsidian-ai-agent/\n~/projects/openai-codex-assistant/\n~/projects/rto/\n~/projects/tavily-app/\n~/projects/title_clerk/\n~/projects/torah/\n~/projects/Voice-AI-Guessing-Game",
+        "formFields": {
+          "values": [
+            {
+              "fieldName": "Response from CC",
+              "fieldLabel": "Response from CC",
+              "fieldType": "textarea",
+              "placeholder": "Instructions for Claude Code to get it back on the tracks!"
+            },
+            {
+              "fieldName": "Path",
+              "fieldLabel": "Path",
+              "placeholder": "~/projects/<project-name>/",
+              "defaultValue": "~/projects/<project-name>/",
+              "requiredField": true
+            },
+            {
+              "fieldName": "Instructions from CEO",
+              "fieldLabel": "Instructions from CEO",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.4,
+      "position": [
+        432,
+        -1024
+      ],
+      "id": "fbc1e707-d4e3-4bdf-9cea-a30ccd2de21e",
+      "name": "On form submission",
+      "webhookId": "b4439fbd-4e6b-4679-b826-20be7f26e50d",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "BsCxDDfbd2o0pHzm",
+          "name": "Form Auth n8n Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "claude -p \"Use maximum thinking budget for this prompt:     activate plugin skill apex-spec -- after activating the plugin skill run command /implementation\" --dangerously-skip-permissions",
+        "cwd": "={{ $('Variables').first().json.path_to_project }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        -608
+      ],
+      "id": "e54a14f6-2cc3-49fb-ae72-5063e828a1b8",
+      "name": "Execute IMPLEMENTATION",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "ieiyPBgH4ujHWgKv",
+          "name": "SSH Private Key LOCAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "claude -p \"Use maximum thinking budget for this prompt:     activate plugin skill apex-spec -- after activating the plugin skill run command /updateprd\" --dangerously-skip-permissions",
+        "cwd": "={{ $('Variables').first().json.path_to_project }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        -224
+      ],
+      "id": "e7976812-20ac-4237-b453-c022f2f529bd",
+      "name": "Execute UPDATEPRD",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "ieiyPBgH4ujHWgKv",
+          "name": "SSH Private Key LOCAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "=claude -p \"ULTRATHINK - {{ $('LLM Generate Response').item.json.output.output }}\" --dangerously-skip-permissions",
+        "cwd": "={{ $('Variables').first().json.path_to_project }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        1216
+      ],
+      "id": "5c93d9f8-c4d6-42d4-ab50-ee9da2087260",
+      "name": "Execute CUSTOM-INSTRUCTIONS",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "ieiyPBgH4ujHWgKv",
+          "name": "SSH Private Key LOCAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "U07LM0LQZ53",
+          "mode": "list",
+          "cachedResultName": "max"
+        },
+        "text": "=Project:\n{{ $('Variables').first().json.path_to_project }}\n\nOutput:\n{{ $('LLM Generate Response').first().json.output.output }}\n\nReason:\n{{ $('LLM Generate Response').first().json.output.reason }}\n\n---\n---\n\nOriginal Message from CC:\n{{ $('Webhook from Claude Code').first().json.body.response }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        2496,
+        880
+      ],
+      "id": "ef763a0f-c21a-4d0d-a0f4-1d4d883a2a14",
+      "name": "HELP & DONE Slack Message",
+      "webhookId": "17c07cd5-f09c-4c56-ba22-a8f8a6e4c7d3",
+      "alwaysOutputData": true,
+      "credentials": {
+        "slackApi": {
+          "id": "6eYFK99H07sZqrXk",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "apppl9h1H5dcZUATA",
+          "mode": "list",
+          "cachedResultName": "Oasis - Omnipresent AI System for Instant Support",
+          "cachedResultUrl": "https://airtable.com/apppl9h1H5dcZUATA"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl8p6luMf0SE0CmB",
+          "mode": "list",
+          "cachedResultName": "CC Infinite",
+          "cachedResultUrl": "https://airtable.com/apppl9h1H5dcZUATA/tbl8p6luMf0SE0CmB"
+        },
+        "filterByFormula": "={Path} = \"{{ $json.path_to_project }}\"",
+        "returnAll": false,
+        "limit": 15,
+        "options": {},
+        "sort": {
+          "property": [
+            {
+              "field": "Created Time",
+              "direction": "desc"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        160
+      ],
+      "id": "a55bcbe3-b4eb-4b44-9038-ca47202f85b3",
+      "name": "Grab 15 Records",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "PJ19416TS8seorAO",
+          "name": "Airtable PAT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=INPUT:\n{{ $json.summary_input }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "# Role\n\nYou are a **master tech agent/managing coding agent response/decision summarizer** — the kind that obsesses over perfection.  You approach summarizing like a craftsperson: methodical, patient, and uncompromising on quality.\n\n# Input\n\nBetween 0 to 15 aggregated records in newest to oldest of responses between a Senior Developer and their Manager.\n\n# Output\n\nA concise summary that does not leave out important details in plain text.  Maximum 2000 characters.  No preamble. No conclusion. No meta-commentary. Output only the summary.\n"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.8,
+      "position": [
+        1328,
+        160
+      ],
+      "id": "4f74d2fd-c1ad-462e-b777-91bcc03d8502",
+      "name": "Summarize History",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "jsCode": "const combined = $input.all()\n  .map((item, i) => `[Task ${i + 1}: ${item.json.Name}]\\nAgent: ${item.json['CC Response']}\\nManager: ${item.json['AI Decision']}`)\n  .join('\\n\\n');\n\nreturn [{ json: { summary_input: combined } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        160
+      ],
+      "id": "ae220de8-d2df-497f-bb06-aa56ce3aab5b",
+      "name": "Aggregate Results"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "apppl9h1H5dcZUATA",
+          "mode": "list",
+          "cachedResultName": "Oasis - Omnipresent AI System for Instant Support",
+          "cachedResultUrl": "https://airtable.com/apppl9h1H5dcZUATA"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl8p6luMf0SE0CmB",
+          "mode": "list",
+          "cachedResultName": "CC Infinite",
+          "cachedResultUrl": "https://airtable.com/apppl9h1H5dcZUATA/tbl8p6luMf0SE0CmB"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Variables').first().json.path_to_project }}_{{ $executionId }}_{{ $now.toMillis() }}",
+            "Path": "={{ $('Variables').first().json.path_to_project }}",
+            "CC Response": "={{ $('Variables').first().json.cc_response }}",
+            "AI Decision": "=Manger - Output: {{ $('LLM Generate Response').first().json.output.output }} | Reason: {{ $('LLM Generate Response').first().json.output.reason }}",
+            "HELP or DONE Msg": "={{ $json.message.text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Path",
+              "displayName": "Path",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "CC Response",
+              "displayName": "CC Response",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Decision",
+              "displayName": "AI Decision",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "HELP or DONE Msg",
+              "displayName": "HELP or DONE Msg",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created Time",
+              "displayName": "Created Time",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Record ID",
+              "displayName": "Record ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2720,
+        528
+      ],
+      "id": "fc60e91f-db07-4fe2-a74f-1cdcc218a991",
+      "name": "Create Work Log",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "PJ19416TS8seorAO",
+          "name": "Airtable PAT"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "claude -p \"Use maximum thinking budget for this prompt:     activate plugin skill apex-spec -- after activating the plugin skill run command /pipeline\" --dangerously-skip-permissions",
+        "cwd": "={{ $('Variables').first().json.path_to_project }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        160
+      ],
+      "id": "443a73f9-b4ab-4d67-b4e0-bc69eca78c6a",
+      "name": "Execute PIPELINE",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "ieiyPBgH4ujHWgKv",
+          "name": "SSH Private Key LOCAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "claude -p \"ULTRATHINK - activate plugin skill apex-spec -- after activating the plugin skill run command /infra\" --dangerously-skip-permissions",
+        "cwd": "={{ $('Variables').first().json.path_to_project }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        352
+      ],
+      "id": "25c45150-4bda-418d-90b6-740aa6d1627f",
+      "name": "Execute INFRA",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "ieiyPBgH4ujHWgKv",
+          "name": "SSH Private Key LOCAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Form\n\n## https://n8n.aiwithapex.ngrok.dev/form/b4439fbd-4e6b-4679-b826-20be7f26e50d\n\n# Headless Mode\n\n## claude -p \"Use maximum thinking budget for this prompt:   activate plugin skill apex-spec -- after activating the plugin skill run command /<slash-command>\" --dangerously-skip-permissions",
+        "height": 336,
+        "width": 1600,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        400,
+        -224
+      ],
+      "typeVersion": 1,
+      "id": "0816a7f7-b65c-42b1-9299-9465ec45d8d4",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "claude -p \"Use maximum thinking budget for this prompt:     activate plugin skill apex-spec -- after activating the plugin skill run command /plansession\" --dangerously-skip-permissions",
+        "cwd": "={{ $('Variables').first().json.path_to_project }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        -800
+      ],
+      "id": "78f117bd-8af5-4b56-b14c-424858b611ed",
+      "name": "Execute PLANSESSION",
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "ieiyPBgH4ujHWgKv",
+          "name": "SSH Private Key LOCAL"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "LLM Generate Response",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "xAI Grok Chat 4.1 Fast Reasoning": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "LLM Generate Response",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Summarize History",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook from Claude Code": {
+      "main": [
+        [
+          {
+            "node": "Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Generate Response": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Execute PLANSESSION",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute IMPLEMENTATION",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute VALIDATE",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute UPDATEPRD",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute AUDIT",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute PIPELINE",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute INFRA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute CARRYFORWARD",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute DOCUMENTS",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute PHASEBUILD",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HELP & DONE Slack Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HELP & DONE Slack Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute CUSTOM-INSTRUCTIONS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Variables": {
+      "main": [
+        [
+          {
+            "node": "Grab 15 Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute VALIDATE": {
+      "main": [
+        [
+          {
+            "node": "Claude Code Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute AUDIT": {
+      "main": [
+        [
+          {
+            "node": "Claude Code Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute CARRYFORWARD": {
+      "main": [
+        [
+          {
+            "node": "Claude Code Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute DOCUMENTS": {
+      "main": [
+        [
+          {
+            "node": "Claude Code Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute PHASEBUILD": {
+      "main": [
+        [
+          {
+            "node": "Claude Code Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Test Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute IMPLEMENTATION": {
+      "main": [
+        [
+          {
+            "node": "Claude Code Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute UPDATEPRD": {
+      "main": [
+        [
+          {
+            "node": "Claude Code Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute CUSTOM-INSTRUCTIONS": {
+      "main": [
+        [
+          {
+            "node": "Claude Code Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude Code Response": {
+      "main": [
+        [
+          {
+            "node": "Create Work Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Grab 15 Records": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize History": {
+      "main": [
+        [
+          {
+            "node": "LLM Generate Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Results": {
+      "main": [
+        [
+          {
+            "node": "Summarize History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HELP & DONE Slack Message": {
+      "main": [
+        [
+          {
+            "node": "Create Work Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute PIPELINE": {
+      "main": [
+        [
+          {
+            "node": "Claude Code Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute INFRA": {
+      "main": [
+        [
+          {
+            "node": "Claude Code Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute PLANSESSION": {
+      "main": [
+        [
+          {
+            "node": "Claude Code Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "versionId": "e1559eb4-e69d-4955-a5c7-b2df3288d493",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f2a7d1929ea55a514a417573f4b32838b3ba79327ec0539f736870fc66c603fe"
+  },
+  "id": "drADeVBS4Eu5P3nF",
+  "tags": []
+}
