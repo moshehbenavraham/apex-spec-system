@@ -1,0 +1,3 @@
+# Dev dependencies for linting and formatting
+black>=24.0
+pylint>=3.0

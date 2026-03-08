@@ -29,6 +29,7 @@ Run `git pull origin <current-branch>` to fetch and merge the latest changes.
 If the merge is clean (fast-forward or auto-merge with no conflicts), proceed.
 
 If there are merge conflicts or the merge cannot complete cleanly:
+
 - Abort the merge with `git merge --abort`
 - Report the conflict details to the user
 - HALT -- do not continue to subsequent steps
@@ -36,6 +37,7 @@ If there are merge conflicts or the merge cannot complete cleanly:
 ### 2. Increment the project version
 
 Look for version strings in the project. Common locations include:
+
 - `README.md` (e.g., `**Version: X.Y.Z**`)
 - `package.json` (`"version": "X.Y.Z"`)
 - `plugin.json` / `marketplace.json`
@@ -48,6 +50,7 @@ the tag (e.g., `1.0.4-beta`).
 
 If no version string can be found anywhere in the project, initialize versioning
 at `0.1.0` in all standard locations appropriate for the project type:
+
 - **Node/JS/TS projects**: `package.json` (`"version": "0.1.0"`)
 - **Python projects**: `pyproject.toml` or `setup.py`
 - **Rust projects**: `Cargo.toml`
@@ -81,6 +84,7 @@ situation and HALT. Do not force-push.
 ## Output
 
 Report:
+
 - Whether the pull was clean
 - Which files had the version bumped (and from/to values)
 - The commit hash and message

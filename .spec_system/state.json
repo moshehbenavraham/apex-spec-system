@@ -1,0 +1,31 @@
+{
+  "version": "2.0",
+  "project_name": "Apex Spec System",
+  "description": "A Claude Code plugin providing specification-driven AI development workflows",
+  "current_phase": 0,
+  "current_session": null,
+  "monorepo": false,
+  "phases": {
+    "0": {
+      "name": "Foundation",
+      "description": "Automated linting, testing, CI/CD pipelines, security hardening, and documentation cleanup",
+      "status": "in_progress",
+      "session_count": 4
+    }
+  },
+  "completed_sessions": [
+    "phase00-session01-linting-and-formatting"
+  ],
+  "next_session_history": [
+    {
+      "date": "2026-03-09",
+      "session": "phase00-session01-linting-and-formatting",
+      "status": "validated"
+    },
+    {
+      "date": "2026-03-09",
+      "session": "phase00-session01-linting-and-formatting",
+      "status": "completed"
+    }
+  ]
+}

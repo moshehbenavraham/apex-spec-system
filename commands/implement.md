@@ -9,14 +9,14 @@ Execute each task in the session's task list, updating progress as you go.
 
 ## RULES
 
-1. **Make NO assumptions.** Before editing, read the relevant code and comments; pattern‑match precisely, validate systematically.
-2. **Follow `CONVENTIONS.md`.** All code must follow project‑specific coding standards.
-3. **ASCII‑only characters** and Unix LF line endings in all output.
-4. **Never lie and implement exactly what’s in the spec** – no lying, no extra features, no refactoring unrelated code.
-5. **Update `tasks.md` immediately** after completing each task – never batch checkbox updates.
-6. **Write tests as specified** – ensure they pass before moving on.
-7. **Ensure logging and error handling** – no silent failures.
-8. **Prefer cohesive, moderately sized modules** – avoid multi‑thousand‑line god files; if a file grows beyond ~400–600 LOC or multiple responsibilities, schedule a refactor.
+1. **Make NO assumptions.** Before editing, read the relevant code and comments; pattern-match precisely, validate systematically.
+2. **Follow `CONVENTIONS.md`.** All code must follow project-specific coding standards.
+3. **ASCII-only characters** and Unix LF line endings in all output.
+4. **Never lie and implement exactly what's in the spec** -- no lying, no extra features, no refactoring unrelated code.
+5. **Update `tasks.md` immediately** after completing each task -- never batch checkbox updates.
+6. **Write tests as specified** -- ensure they pass before moving on.
+7. **Ensure logging and error handling** -- no silent failures.
+8. **Prefer cohesive, moderately sized modules** -- avoid multi-thousand-line god files; if a file grows beyond ~400--600 LOC or multiple responsibilities, schedule a refactor.
 9. **Behavioral correctness over speed** - Code must handle edge cases, cleanup, and failure paths before a task is marked done. A checked task with a behavioral bug costs 10x more to find in a later audit.
 
 ### No Deferral Policy
@@ -45,6 +45,7 @@ fi
 ```
 
 This returns structured JSON including:
+
 - `current_session` - The session to implement
 - `current_session_dir_exists` - Whether specs directory exists
 - `current_session_files` - Files already in the session directory
@@ -80,6 +81,7 @@ fi
 ```
 
 This verifies:
+
 - `.spec_system/` directory and `state.json` are valid
 - `jq` is installed (required for scripts)
 - `git` availability (optional)
@@ -106,6 +108,7 @@ fi
 This catches missing tools BEFORE implementation starts, preventing mid-session failures.
 
 **Optional - Database Prerequisites**: If `.spec_system/CONVENTIONS.md` has a "Database Layer" section, verify:
+
 1. Database service is running (`docker compose ps` or connection test)
 2. Migrations are current (no pending migrations)
 If checks fail, resolve them (start services, run migrations) before proceeding.
@@ -113,6 +116,7 @@ If checks fail, resolve them (start services, run migrations) before proceeding.
 ### 3. Read Session Context
 
 Using the `current_session` value from the script output, read:
+
 - `.spec_system/specs/[current-session]/spec.md` - Full specification
 - `.spec_system/specs/[current-session]/tasks.md` - Task checklist
 - `.spec_system/specs/[current-session]/implementation-notes.md` - Progress log (if exists)
@@ -191,9 +195,11 @@ If `implementation-notes.md` doesn't exist, create it:
 For each incomplete task:
 
 #### A. Identify Next Task
+
 Find the first unchecked `- [ ]` task in tasks.md
 
 #### B. Implement Task
+
 - Read the task description carefully
 - Read surrounding code to match existing patterns before writing new code
 - Follow the spec's technical approach and CONVENTIONS.md standards
@@ -203,17 +209,23 @@ Find the first unchecked `- [ ]` task in tasks.md
 - **Behavioral quality verification** (if BQC loaded in Step 3a): Before marking this task complete, scan your code against the applicable checklist items. Fix violations now -- do not defer. Note any BQC fixes in the task log entry (Step 5D).
 
 #### C. Update Task Status
+
 In `tasks.md`, change:
+
 ```markdown
 - [ ] T001 [S0101] Task description
 ```
+
 To:
+
 ```markdown
 - [x] T001 [S0101] Task description
 ```
 
 #### D. Log Progress
+
 Add to `.spec_system/specs/[current-session]/implementation-notes.md`:
+
 ```markdown
 ### Task TNNN - [Description]
 
@@ -253,6 +265,7 @@ If you encounter an obstacle, RESOLVE IT YOURSELF before documenting:
 The ONLY valid reason to pause and ask the user is when you need credentials, API keys, or decisions only a human can make. If you skip a task that was executable, that is a **critical failure**.
 
 After resolving, document in implementation-notes.md:
+
 ```markdown
 ## Blockers & Solutions
 
@@ -285,6 +298,7 @@ When making implementation choices:
 ### 8. Track Progress and Checkpoint
 
 After each task:
+
 - Update Progress Summary table in tasks.md
 - Update implementation-notes.md
 - Report status to user: tasks done (X of Y), next task
@@ -294,7 +308,8 @@ After each task:
 ## Output
 
 When all tasks complete:
-```
+
+```text
 Session implementation complete!
 Tasks: N/N (100%)
 BQC: [X] fixes applied across [Y] tasks [or "N/A - no application code in session"]

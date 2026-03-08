@@ -62,11 +62,12 @@ The project is initiated, then iterates through phases. Each phase consists of s
 
 Ran once at the beginning of the project.
 
-```
+```text
 /initspec -> /createprd -> /createuxprd (optional) -> /phasebuild
 ```
 
 **Artifacts created:**
+
 - PRD.md (master requirements document)
 - state.json
 - Folder structure and templates
@@ -76,11 +77,12 @@ Ran once at the beginning of the project.
 
 Ran repeatedly until all the sessions of the Phase are completed.
 
-```
+```text
 /plansession -> /implement -> /validate -> /updateprd
 ```
 
 **Artifacts created:**
+
 - spec.md (detailed specification)
 - tasks.md (12-25 task checklist)
 - implementation-notes.md (progress log)
@@ -92,11 +94,12 @@ Ran repeatedly until all the sessions of the Phase are completed.
 
 Ran once after all sessions of a Phase are completed, between each Phase.
 
-```
+```text
 /audit -> /pipeline -> /infra -> /carryforward -> /documents -> /phasebuild
 ```
 
 **Artifacts created:**
+
 - CONSIDERATIONS.md
 - CONVENTIONS.md
 - SECURITY-COMPLIANCE.md
@@ -111,9 +114,9 @@ Apex Spec is designed for **solo developer + AI** workflows. However, teams can 
 
 ### Pattern 1: Shared PRD, Individual Sessions
 
-```
+```text
 Team                          Individual
-─────                         ──────────
+-----                         ----------
 Collaborate on PRD     ->     Developer claims session
 Define phases          ->     Runs session workflow solo
 Review phase structure ->     Commits via standard git
@@ -126,15 +129,16 @@ Review phase structure ->     Commits via standard git
 
 ### Pattern 2: Pair Programming with AI
 
-```
+```text
 Developer A (Driver)          Developer B (Navigator)
-────────────────────          ─────────────────────────
+--------------------          -------------------------
 Runs Claude commands          Reviews output
 Executes implementation       Catches issues early
 Marks tasks complete          Suggests improvements
 ```
 
 **Benefits**:
+
 - Knowledge transfer
 - Real-time review
 - Reduced errors
@@ -142,9 +146,9 @@ Marks tasks complete          Suggests improvements
 
 ### Pattern 3: Review Checkpoints
 
-```
+```text
 Developer                     Team
-─────────                     ────
+---------                     ----
 Complete session       ->
 /validate              ->     Review validation.md
                        <-     Feedback
@@ -166,6 +170,7 @@ Incorporate feedback   ->
 ### Team Best Practice
 
 Treat Apex Spec as a **personal workflow tool** that produces **shareable artifacts**:
+
 - specs, tasks, validation reports are reviewable
 - implementation-notes.md provides context
 - CONSIDERATIONS.md captures institutional memory
@@ -190,6 +195,7 @@ Treat Apex Spec as a **personal workflow tool** that produces **shareable artifa
 **Prefer single-package sessions.** Most sessions should target one package. This keeps scope tight and makes validation straightforward.
 
 **Use cross-cutting sessions sparingly.** Reserve `package: null` sessions for work that genuinely spans packages:
+
 - Initial project scaffolding and workspace config
 - Shared type definitions consumed by multiple packages
 - CI/CD pipeline setup
@@ -198,11 +204,14 @@ Treat Apex Spec as a **personal workflow tool** that produces **shareable artifa
 **Order sessions by dependency.** If `apps/web` needs types from `packages/shared`, plan the shared session first (lower session number within the phase).
 
 **Scope task paths to the package.** Task file paths should use full repo-root-relative paths:
-```
+
+```markdown
 - [ ] T001 [S0102] Create auth module (`apps/web/src/auth/index.ts`)
 ```
+
 Not:
-```
+
+```markdown
 - [ ] T001 [S0102] Create auth module (`src/auth/index.ts`)
 ```
 
@@ -219,7 +228,7 @@ You do not need to remember to specify the package every time. The system resolv
 
 Combine monorepo support with team patterns for larger projects:
 
-```
+```text
 Developer A                    Developer B
 -------------                  -------------
 Claims session for apps/web    Claims session for apps/api
@@ -239,7 +248,7 @@ The following features are under consideration but require implementation work:
 
 **Concept**: Track session duration, task counts, and estimation accuracy over time.
 
-```
+```text
 /metrics
 
 Session Velocity:
@@ -254,7 +263,7 @@ Session Velocity:
 
 **Concept**: Pre-configured PRD structures for common project types.
 
-```
+```text
 /initspec --template cli
 /initspec --template web-app
 /initspec --template api-server
@@ -266,7 +275,7 @@ Session Velocity:
 
 **Concept**: Generate shareable status reports.
 
-```
+```text
 /export --format markdown
 /export --format html
 ```
@@ -308,5 +317,6 @@ Session Velocity:
 ### Recovery
 
 Every `/updateprd` commits and pushes. Git is your safety net:
+
 - Undo completed session: `git revert <commit>`
 - Mid-session issues: Resume `/implement` or delete session directory

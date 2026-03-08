@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable=too-many-lines
 """Apex Spec System Infinite CLI - Autonomous Claude Code session manager.
 
 Replaces the n8n "Apex Spec System Infinite" workflow with a standalone
@@ -13,7 +14,6 @@ import sqlite3
 import subprocess
 import sys
 import time
-from datetime import datetime
 from pathlib import Path
 
 import click
@@ -22,7 +22,6 @@ from openai import OpenAI
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
-from rich.text import Text
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -32,9 +31,19 @@ DB_DIR = Path.home() / ".apex-infinite"
 DB_PATH = DB_DIR / "history.db"
 
 KNOWN_COMMANDS = {
-    "initspec", "createprd", "createuxprd",
-    "plansession", "implement", "validate", "updateprd",
-    "audit", "pipeline", "infra", "carryforward", "documents", "phasebuild",
+    "initspec",
+    "createprd",
+    "createuxprd",
+    "plansession",
+    "implement",
+    "validate",
+    "updateprd",
+    "audit",
+    "pipeline",
+    "infra",
+    "carryforward",
+    "documents",
+    "phasebuild",
 }
 
 # n8n routes "implement" but the SSH node runs "/implementation"
@@ -387,15 +396,15 @@ A concise summary that does not leave out important details in plain text.  Maxi
 # Signal handling
 # ---------------------------------------------------------------------------
 
-_interrupted = False
+_INTERRUPTED = False
 
 
-def _handle_sigint(sig, frame):
-    global _interrupted
-    if _interrupted:
+def _handle_sigint(_sig, _frame):
+    global _INTERRUPTED  # pylint: disable=global-statement
+    if _INTERRUPTED:
         console.print("\n[bold red]Force quit.[/bold red]")
         sys.exit(1)
-    _interrupted = True
+    _INTERRUPTED = True
     console.print(
         "\n[bold yellow][CEO INTERRUPT] Will pause after current step...[/bold yellow]"
     )
@@ -415,7 +424,7 @@ def load_config(config_path, provider_override=None, model_override=None):
         console.print(f"[red]Config file not found: {config_path}[/red]")
         sys.exit(1)
 
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
     if provider_override:
@@ -579,7 +588,7 @@ def _llm_call_with_retry(client, model, messages, json_mode=False):
         try:
             response = client.chat.completions.create(**kwargs)
             return response.choices[0].message.content
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             last_error = e
             if attempt < LLM_RETRY_COUNT:
                 console.print(
@@ -588,8 +597,11 @@ def _llm_call_with_retry(client, model, messages, json_mode=False):
                 console.print(f"  [dim]Retrying in {LLM_RETRY_WAIT}s...[/dim]")
                 time.sleep(LLM_RETRY_WAIT)
             else:
-                console.print(f"  [red]LLM call failed after {LLM_RETRY_COUNT} attempts: {e}[/red]")
-                raise last_error
+                console.print(
+                    f"  [red]LLM call failed after {LLM_RETRY_COUNT} attempts: {e}[/red]"
+                )
+                raise last_error from e
+    return None
 
 
 def llm_summarize(client, model, records):
@@ -629,21 +641,25 @@ def llm_manager_decide(client, model, cc_response, ceo_msg, summary):
         result = json.loads(raw)
         if "output" in result and "reason" in result:
             return result
-    except (json.JSONDecodeError, Exception):
+    except (json.JSONDecodeError, Exception):  # pylint: disable=broad-exception-caught
         pass
 
     # Fallback: try without json_mode and parse with regex
     try:
         raw = _llm_call_with_retry(client, model, messages, json_mode=False)
         # Try to extract JSON from the response
-        json_match = re.search(r'\{[^{}]*"output"\s*:\s*"[^"]*"[^{}]*"reason"\s*:\s*"[^"]*"[^{}]*\}', raw)
+        json_match = re.search(
+            r'\{[^{}]*"output"\s*:\s*"[^"]*"[^{}]*"reason"\s*:\s*"[^"]*"[^{}]*\}', raw
+        )
         if json_match:
             return json.loads(json_match.group())
         # Last resort: try to parse the whole response as JSON
         return json.loads(raw)
-    except (json.JSONDecodeError, Exception):
+    except (json.JSONDecodeError, Exception):  # pylint: disable=broad-exception-caught
         # Absolute fallback
-        console.print(f"  [yellow]Could not parse LLM response as JSON, using raw output[/yellow]")
+        console.print(
+            "  [yellow]Could not parse LLM response as JSON, using raw output[/yellow]"
+        )
         return {"output": raw.strip(), "reason": "Raw LLM output (JSON parse failed)"}
 
 
@@ -666,9 +682,8 @@ def build_claude_prompt(output_cmd, raw_output):
             f"ULTRATHINK - activate plugin skill apex-spec -- "
             f"after activating the plugin skill run command /{actual_cmd}"
         )
-    else:
-        # CUSTOM-INSTRUCTIONS fallback (exact n8n pattern)
-        return f"ULTRATHINK - {raw_output}"
+    # CUSTOM-INSTRUCTIONS fallback (exact n8n pattern)
+    return f"ULTRATHINK - {raw_output}"
 
 
 def execute_claude(path, prompt, dry_run=False, verbose=False):
@@ -677,7 +692,9 @@ def execute_claude(path, prompt, dry_run=False, verbose=False):
 
     if dry_run:
         console.print(f"  [dim][DRY RUN] Would execute in {expanded_path}:[/dim]")
-        console.print(f'  [dim]claude -p "{prompt}" --dangerously-skip-permissions[/dim]')
+        console.print(
+            f'  [dim]claude -p "{prompt}" --dangerously-skip-permissions[/dim]'
+        )
         return f"[DRY RUN] Command: {prompt}"
 
     console.print(f"  [dim]Executing claude in {expanded_path}...[/dim]")
@@ -694,6 +711,7 @@ def execute_claude(path, prompt, dry_run=False, verbose=False):
             text=True,
             timeout=COMMAND_TIMEOUT,
             env=env,
+            check=False,
         )
 
         output = result.stdout
@@ -707,11 +725,15 @@ def execute_claude(path, prompt, dry_run=False, verbose=False):
             console.print(f"  [red]Claude exited with code {result.returncode}[/red]")
 
         if verbose:
-            console.print(Panel(output[:2000], title="CC Response (full)", border_style="blue"))
+            console.print(
+                Panel(output[:2000], title="CC Response (full)", border_style="blue")
+            )
         else:
             truncated = output[:500]
             if len(output) > 500:
-                truncated += f"\n... ({len(output)} chars total, use --verbose for full)"
+                truncated += (
+                    f"\n... ({len(output)} chars total, use --verbose for full)"
+                )
             console.print(Panel(truncated, title="CC Response", border_style="blue"))
 
         return output
@@ -724,7 +746,7 @@ def execute_claude(path, prompt, dry_run=False, verbose=False):
         msg = "[ERROR] 'claude' command not found. Is Claude Code CLI installed?"
         console.print(f"  [red]{msg}[/red]")
         return msg
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
         msg = f"[ERROR] Failed to execute claude: {e}"
         console.print(f"  [red]{msg}[/red]")
         return msg
@@ -747,6 +769,7 @@ def notify(title, message):
             ["notify-send", title, message],
             capture_output=True,
             timeout=5,
+            check=False,
         )
     except (FileNotFoundError, subprocess.TimeoutExpired):
         pass
@@ -757,12 +780,17 @@ def notify(title, message):
 # ---------------------------------------------------------------------------
 
 
-def infinite_loop(
-    path, config, start_command=None, ceo_message="",
-    max_iterations=DEFAULT_MAX_ITERATIONS, dry_run=False, verbose=False,
+def infinite_loop(  # pylint: disable=too-many-positional-arguments,too-many-statements
+    path,
+    config,
+    start_command=None,
+    ceo_message="",
+    max_iterations=DEFAULT_MAX_ITERATIONS,
+    dry_run=False,
+    verbose=False,
 ):
     """The main autonomous loop replacing n8n webhook->LLM->SSH->webhook cycle."""
-    global _interrupted
+    global _INTERRUPTED  # pylint: disable=global-statement
 
     client, model = get_llm_client(config)
     cc_response = ""
@@ -773,8 +801,8 @@ def infinite_loop(
         iteration += 1
 
         # Check interrupt flag
-        if _interrupted:
-            _interrupted = False
+        if _INTERRUPTED:
+            _INTERRUPTED = False
             console.print("\n[bold yellow]--- CEO INTERRUPT ---[/bold yellow]")
             notify("Apex Infinite", "CEO interrupt - input requested")
             ceo_input = console.input("[bold]CEO instructions (or 'quit'): [/bold]")
@@ -817,7 +845,9 @@ def infinite_loop(
             console.print("\n[bold yellow]*** MANAGER NEEDS CEO HELP ***[/bold yellow]")
             console.print(f"[yellow]Reason: {reason_val}[/yellow]")
             notify("Apex Infinite - HELP", reason_val)
-            db_log(path, cc_response, output_val, reason_val, help_or_done_msg=reason_val)
+            db_log(
+                path, cc_response, output_val, reason_val, help_or_done_msg=reason_val
+            )
             ceo_input = console.input("[bold]CEO response (or 'quit'): [/bold]")
             if ceo_input.strip().lower() == "quit":
                 break
@@ -828,7 +858,13 @@ def infinite_loop(
             console.print("\n[bold green]*** PROJECT COMPLETE! ***[/bold green]")
             console.print(f"[green]Reason: {reason_val}[/green]")
             notify("Apex Infinite - ALL DONE!", "Project complete!")
-            db_log(path, cc_response, output_val, reason_val, help_or_done_msg="ALL DONE BABY!")
+            db_log(
+                path,
+                cc_response,
+                output_val,
+                reason_val,
+                help_or_done_msg="ALL DONE BABY!",
+            )
             console.print(f"\n[bold]Total iterations: {iteration}[/bold]")
             break
 
@@ -857,26 +893,45 @@ def infinite_loop(
 
 
 @click.command()
-@click.option("--path", "project_path", default=None, help="Project path (prompted if not given)")
+@click.option(
+    "--path", "project_path", default=None, help="Project path (prompted if not given)"
+)
 @click.option("--start", default=None, help='Starting command (e.g. "plansession")')
 @click.option("--ceo", default=None, help="Initial CEO instructions")
-@click.option("--provider", default=None, help="LLM provider override: ollama|grok|openai")
+@click.option(
+    "--provider", default=None, help="LLM provider override: ollama|grok|openai"
+)
 @click.option("--model", default=None, help="Model override")
 @click.option(
-    "--config", "config_path",
+    "--config",
+    "config_path",
     default=None,
     help="Config file path (default: ./config.yaml)",
 )
 @click.option("--history", is_flag=True, help="Show interaction history")
 @click.option(
-    "--max-iterations", default=DEFAULT_MAX_ITERATIONS, type=int,
+    "--max-iterations",
+    default=DEFAULT_MAX_ITERATIONS,
+    type=int,
     help=f"Safety limit (default: {DEFAULT_MAX_ITERATIONS})",
 )
-@click.option("--dry-run", is_flag=True, help="Show what would execute without running claude")
+@click.option(
+    "--dry-run", is_flag=True, help="Show what would execute without running claude"
+)
 @click.option("--verbose", is_flag=True, help="Show full CC output")
 @click.version_option(version="1.0.0", prog_name="apex-infinite")
-def main(project_path, start, ceo, provider, model, config_path, history,
-         max_iterations, dry_run, verbose):
+def main(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals,too-many-branches,too-many-statements
+    project_path,
+    start,
+    ceo,
+    provider,
+    model,
+    config_path,
+    history,
+    max_iterations,
+    dry_run,
+    verbose,
+):
     """Apex Spec System Infinite CLI - Autonomous Claude Code session manager."""
 
     # Init database
@@ -891,7 +946,9 @@ def main(project_path, start, ceo, provider, model, config_path, history,
         elif Path("config.yaml").exists():
             config_path = "config.yaml"
         else:
-            console.print("[red]No config.yaml found. Use --config to specify path.[/red]")
+            console.print(
+                "[red]No config.yaml found. Use --config to specify path.[/red]"
+            )
             sys.exit(1)
 
     config = load_config(config_path, provider_override=provider, model_override=model)
@@ -903,24 +960,31 @@ def main(project_path, start, ceo, provider, model, config_path, history,
 
     # Interactive mode if no path given
     if not project_path:
-        console.print(Panel(
-            "[bold]Apex Spec System Infinite CLI[/bold]",
-            border_style="cyan",
-        ))
+        console.print(
+            Panel(
+                "[bold]Apex Spec System Infinite CLI[/bold]",
+                border_style="cyan",
+            )
+        )
 
         # List ~/projects/ directories
         projects_dir = Path.home() / "projects"
         if projects_dir.exists():
-            dirs = sorted([
-                d for d in projects_dir.iterdir()
-                if d.is_dir() and not d.name.startswith(".")
-            ])
+            dirs = sorted(
+                [
+                    d
+                    for d in projects_dir.iterdir()
+                    if d.is_dir() and not d.name.startswith(".")
+                ]
+            )
             console.print("\n[bold]Available projects:[/bold]")
             for i, d in enumerate(dirs, 1):
                 console.print(f"  {i}. ~/{d.relative_to(Path.home())}/")
             console.print()
 
-            selection = console.input("[bold]Select project [number or path]: [/bold]").strip()
+            selection = console.input(
+                "[bold]Select project [number or path]: [/bold]"
+            ).strip()
             if selection.isdigit():
                 idx = int(selection) - 1
                 if 0 <= idx < len(dirs):
@@ -972,11 +1036,13 @@ def main(project_path, start, ceo, provider, model, config_path, history,
     if dry_run:
         banner_text += "\n[bold yellow]DRY RUN MODE[/bold yellow]"
 
-    console.print(Panel(
-        banner_text,
-        title="[bold cyan]Apex Spec System Infinite CLI[/bold cyan]",
-        border_style="cyan",
-    ))
+    console.print(
+        Panel(
+            banner_text,
+            title="[bold cyan]Apex Spec System Infinite CLI[/bold cyan]",
+            border_style="cyan",
+        )
+    )
 
     # Run the loop
     infinite_loop(
@@ -991,4 +1057,4 @@ def main(project_path, start, ceo, provider, model, config_path, history,
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pylint: disable=no-value-for-parameter

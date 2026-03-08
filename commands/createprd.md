@@ -43,6 +43,7 @@ fi
 ```
 
 Use the JSON output as ground truth for:
+
 - Project name (if available)
 - Current phase number
 - Existing phases list (if present)
@@ -52,6 +53,7 @@ Do not parse `state.json` directly.
 ### 3. Collect the Source Requirements Document
 
 Ask the user for the source document in one of these forms:
+
 - Paste the text directly into the chat
 - Provide a file path in the repo to read
 - Provide multiple snippets (if the content is long)
@@ -72,18 +74,22 @@ The `/initspec` command creates a placeholder PRD with bracket markers like `[Go
 If the PRD has real content (fewer than 2 template markers), ask for explicit user confirmation before overwriting.
 
 **If overwriting real content (confirmation given)**:
+
 1. Create a timestamped backup in `.spec_system/archive/PRD/` before writing
 2. Then replace `.spec_system/PRD/PRD.md`
 
 Backup naming (ASCII only):
+
 - `.spec_system/archive/PRD/PRD-backup-YYYYMMDD-HHMMSS.md`
 
 If overwrite is not confirmed:
+
 - Offer to create a new file next to it for review and stop
 
 ### 5. Extract and Normalize Requirements
 
 From the source document, extract and normalize:
+
 - **Product overview**: 1-3 paragraphs
 - **Goals**: 3-7 bullets that are outcome-focused
 - **Non-goals**: 3-10 bullets (explicitly out of scope)
@@ -97,6 +103,7 @@ From the source document, extract and normalize:
 - **Open questions**: items requiring human confirmation
 
 Important:
+
 - Do not invent details. If the source doc is missing critical info, ask 3-8 targeted questions
 - Keep content high-level and stable. Session-level details belong in `/plansession`
 - Keep phases as planning scaffolding, not implementation plans
@@ -201,6 +208,7 @@ Sessions are defined via `/phasebuild` as `session_NN_name.md` stubs under `.spe
 ```
 
 Notes:
+
 - If the project already has phases beyond Phase 00 (from state analysis), update the phases table accordingly
 - Do not create phase directories here - that is `/phasebuild`'s job
 - Use `[PHASE_NAME]` placeholder - default to "Foundation" if not specified
@@ -221,7 +229,8 @@ When `monorepo` is `null` (unknown), scan for multi-package signals:
    - If `monorepo_detection.detected` is `true`, use it as supporting evidence
 
 3. **If signals found**: Present the user with a proposed package map:
-   ```
+
+   ```text
    Monorepo signals detected in PRD:
    - [signal 1]
    - [signal 2]
@@ -236,6 +245,7 @@ When `monorepo` is `null` (unknown), scan for multi-package signals:
    ```
 
    - **Confirmed**: Set `monorepo: true` in state.json, add `packages` array, add Package Map section to PRD after Technical Stack:
+
      ```markdown
      ## Package Map
 
@@ -244,6 +254,7 @@ When `monorepo` is `null` (unknown), scan for multi-package signals:
      | web | apps/web | TypeScript | Frontend application |
      | api | apps/api | TypeScript | Backend API server |
      ```
+
    - **Rejected**: Set `monorepo: false` in state.json
 
 4. **If no signals found**: Set `monorepo: false` in state.json
@@ -288,6 +299,7 @@ Read `.spec_system/CONVENTIONS.md` (the generic template from /initspec). Replac
 | **Dependencies** | Generic -> Package manager commands, lockfile rules, version pinning strategy |
 
 **Add new sections if warranted:**
+
 - **TypeScript**: Add "Types" section for type conventions
 - **React**: Add "Components" section for component patterns
 - **API**: Add "Endpoints" section for API design conventions
@@ -303,6 +315,7 @@ wc -l .spec_system/CONVENTIONS.md
 ```
 
 If over 300 lines:
+
 1. **Merge** similar conventions into single entries
 2. **Prioritize** stack-specific over generic (remove generic if redundant)
 3. **Condense** verbose explanations to single lines
@@ -313,6 +326,7 @@ If over 300 lines:
 #### 7.4 Validate Changes
 
 After edits:
+
 1. Verify file is valid markdown
 2. Confirm line count <= 300
 3. Ensure no duplicate sections created
@@ -326,6 +340,7 @@ LC_ALL=C grep -n '[^[:print:][:space:]]' .spec_system/CONVENTIONS.md && echo "No
 #### 7.5 Skip Conditions
 
 Skip this step entirely if:
+
 - `.spec_system/CONVENTIONS.md` does not exist
 - No tech stack was identified from the requirements
 - User explicitly requests `--skip-conventions`
@@ -365,7 +380,7 @@ Report any issues found and fixed in the output summary.
 
 Report to user:
 
-```
+```text
 /createprd Complete!
 
 Created:

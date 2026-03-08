@@ -19,6 +19,7 @@ Set up the complete `.spec_system/` directory structure and initial files for a 
 ### 1. Check Current State
 
 First, check if the spec system is already initialized:
+
 - Look for `.spec_system/state.json`
 - Check for `.spec_system/PRD/` directory
 - Check for `.spec_system/specs/` directory
@@ -28,6 +29,7 @@ If already initialized, ask the user if they want to reinitialize (this will res
 ### 2. Gather Project Information
 
 Ask the user for:
+
 - **Project name**: Name of the project
 - **Project description**: Brief description of what the project does
 - **First phase name**: Name for Phase 00 (default: "Foundation")
@@ -526,7 +528,7 @@ chmod +x .spec_system/scripts/*.sh
 
 Tell the user:
 
-```
+```text
 Apex Spec System initialized!
 
 Created:
@@ -554,4 +556,3 @@ Next Steps:
 5. Repeat step 4 until all sessions in the phase are complete
 6. Run /carryforward (optional) to capture lessons learned, then /phasebuild for next phase
 ```
-

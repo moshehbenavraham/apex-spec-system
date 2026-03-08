@@ -15,7 +15,7 @@ Use maximum thinking budget for this prompt.
 
 ## Usage
 
-```
+```text
 /qbackenddev <work-file>
 ```
 
@@ -24,6 +24,7 @@ Use maximum thinking budget for this prompt.
   `tmp/final-plan.md`, `docs/ongoing_projects/MY_TECH_PRD.md`)
 
 The work file determines the mode of work. It might contain:
+
 - Implementation tasks to execute (session-by-session or phase-by-phase)
 - An audit scope to analyze (backend files, infrastructure, CLI commands)
 - A plan to create, refine, or merge from multiple draft plans
@@ -63,6 +64,7 @@ The work file determines the mode of work. It might contain:
 ### 1. Orient
 
 Read the work file provided by the user. Identify:
+
 - The goal(s) of the session (implement, audit, plan, refactor, document, review)
 - Any prior progress or context from previous sessions
 - The current phase/session/task to work on
@@ -74,6 +76,7 @@ partner work, design docs, blueprint files), read those too for full context.
 ### 2. Analyze existing patterns
 
 Before making any changes, study the codebase to understand:
+
 - File/folder structure and naming conventions
 - How components are registered, invoked, and connected
 - Common patterns (argument parsing, error handling, output formatting, logging)
@@ -85,6 +88,7 @@ This prevents introducing inconsistencies or reinventing existing solutions.
 ### 3. Verify
 
 Before writing any code, verify the work file's claims against the actual codebase:
+
 - Do referenced files, modules, and endpoints exist?
 - Do described patterns and architectures match reality?
 - Are documented APIs, schemas, and configs accurate?
@@ -99,6 +103,7 @@ Work through the tasks defined in the work file. Follow the mode-specific guidan
 below.
 
 **For implementation work:**
+
 - Work through sessions/tasks methodically, one at a time
 - Make small, deliberate, atomic changes
 - Validate each change before moving to the next
@@ -106,6 +111,7 @@ below.
 - Follow existing patterns for argument parsing, output formatting, and error handling
 
 **For audit work:**
+
 - Analyze every relevant file thoroughly -- do not skip or skim
 - Document file paths, line counts, and specific findings
 - Identify concrete refactoring opportunities with rationale: architecture,
@@ -113,6 +119,7 @@ below.
 - Prioritize findings by impact and effort
 
 **For planning work:**
+
 - Analyze existing implementations to understand conventions before planning
 - If merging multiple draft plans, include only clear, objective improvements
   from secondary sources
@@ -121,12 +128,14 @@ below.
 - No wordiness, no redundancy
 
 **For review/validation work (partner engineer's output):**
+
 - Verify every claim in the partner's document against the actual codebase
 - Check for accuracy, completeness, and whether findings are up to date
 - Add missing findings, correct inaccuracies, remove stale entries
 - Preserve the partner's good work -- only modify what needs correction
 
 **For documentation/conversion work:**
+
 - Verify every detail against the actual codebase or source material
 - Do not trust existing docs -- they may be outdated or contain mistakes
 - Fact-check every word; no shortcuts, no assumptions, no fabrication
@@ -136,6 +145,7 @@ below.
 ### 5. Monitor context consumption
 
 Keep a running awareness of resource usage:
+
 - **File reads**: Begin wrapping up when approaching 12
 - **Total tool calls**: Begin wrapping up when approaching 30
 - Whichever limit approaches first triggers the session wrap-up
@@ -145,6 +155,7 @@ When nearing the limit, proceed to Step 6 rather than pushing further.
 ### 6. Update the work file and wrap up
 
 Before ending the session, update the work file with:
+
 - What was completed this session
 - What remains to be done
 - Current state of the implementation (what works, what is partial)
@@ -158,6 +169,7 @@ those too.
 ## Output
 
 Report to the user:
+
 - What was accomplished in this session
 - How much of the work file's goals were completed
 - Any issues, warnings, or quality concerns discovered

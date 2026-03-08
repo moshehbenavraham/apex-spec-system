@@ -1,11 +1,11 @@
 # Choose active provider: ollama | grok | openai
-provider: grok
+provider: ollama
 
 providers:
   ollama:
     base_url: "http://localhost:11434/v1"
     api_key: "ollama"
-    model: "llama3.1:70b"
+    model: "qwen2.5:7b"
 
   grok:
     base_url: "https://api.x.ai/v1"

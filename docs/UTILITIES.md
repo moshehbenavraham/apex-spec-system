@@ -76,8 +76,10 @@ Add a row to the Command Reference table above, then add a section below with:
 
 **Usage**:
 ```
+
 /<name> [arguments if any]
-```
+
+```text
 
 **Behavior**: What happens when you run it.
 ```
@@ -103,7 +105,8 @@ Add the command to the Utility Commands table in README.md.
 **Purpose**: Pull latest from origin, increment the project version, commit all non-gitignored changes, and push.
 
 **Usage**:
-```
+
+```text
 /copush
 ```
 
@@ -120,7 +123,8 @@ and halts if rejected. Reports every step's outcome.
 **Purpose**: Full Docker cleanup and from-scratch rebuild cycle, preserving volumes/data.
 
 **Usage**:
-```
+
+```text
 /dockcleanbuild
 ```
 
@@ -138,7 +142,8 @@ including warnings, errors, deprecation notices, and update notices regardless o
 **Purpose**: Quick Docker Compose build-and-start with full output reporting.
 
 **Usage**:
-```
+
+```text
 /dockbuild
 ```
 
@@ -154,7 +159,8 @@ message found in the output, no matter how minor.
 **Purpose**: Audit a raw upstream changes list and rewrite it as a curated, optimally ordered implementation list for a hardened fork.
 
 **Usage**:
-```
+
+```text
 /up2imp <changes-file> [upstream-dir]
 ```
 
@@ -173,7 +179,8 @@ order, preserving enough detail for efficient engineering.
 **Purpose**: Run an autonomous, context-window-disciplined implementation session guided by a work file.
 
 **Usage**:
-```
+
+```text
 /qimpl <work-file>
 ```
 
@@ -191,7 +198,8 @@ assumes or guesses -- uses web tools to verify uncertain details.
 **Purpose**: Run an autonomous backend, infrastructure, or general engineering session guided by a work file.
 
 **Usage**:
-```
+
+```text
 /qbackenddev <work-file>
 ```
 
@@ -210,7 +218,8 @@ consumption (12 reads or 30 tool calls) and updates the work file for session co
 **Purpose**: Run an autonomous frontend development session with senior-engineer rigor and designer-level quality standards, guided by a work file.
 
 **Usage**:
-```
+
+```text
 /qfrontdev <work-file>
 ```
 
@@ -229,7 +238,8 @@ polish as the minimum standard. Stops at 50% context window consumption (12 read
 **Purpose**: Pull an upstream/original repo and generate a comprehensive changelog documenting every imported change.
 
 **Usage**:
-```
+
+```text
 /pullndoc <upstream-dir>
 ```
 
@@ -246,7 +256,8 @@ section. Never omits any changed file. Stops early if already up to date.
 **Purpose**: Guide AI-led creation of distinctive, production-grade frontend interfaces with high design quality.
 
 **Usage**:
-```
+
+```text
 /sculpt-ui
 ```
 

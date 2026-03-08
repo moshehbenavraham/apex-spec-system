@@ -1,6 +1,6 @@
 # Apex Spec System
 
-**Version: 2.0.2-beta**
+**Version: 2.0.3-beta**
 
 A Claude Code plugin providing a specification-driven workflow system for AI-assisted development. Think Github Spec Kit (our source inspiration) simplified.
 
@@ -34,42 +34,49 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
 1. **Install the plugin** (see above)
 
 2. **Initialize in your project**:
-   ```
+
+   ```text
    /initspec OR /apex-spec:initspec
    ```
+
    This creates the spec system structure in your project.
 
    **Optional but recommended**: Customize `.spec_system/CONVENTIONS.md` with your project's coding standards (naming, structure, error handling, testing philosophy, etc.)
 
-   ```
+   ```text
    /createprd OR /apex-spec:createprd OR Manually fill out .spec_system/PRD/PRD.md
    ```
+
    Optional:  Turn argument or file path into a technical PRD for development.
    Example: /createprd "a habit trackker app"
             /createprd @docs/requirements.md
 
-   ```
+   ```text
    /createuxprd OR /apex-spec:createuxprd
    ```
+
    Optional:  Turn design docs into a UX PRD companion document.
    Example: /createuxprd "social app with feed, profiles, and messaging"
             /createuxprd @docs/design-spec.md
 
-   ```
+   ```text
    /phasebuild OR /apex-spec:phasebuild
    ```
+
    This will set up the initial Phase and Sessions for that initial Phase
 
 3. **Run the session workflow and repeat until all sessions inside the Phase are completed, thus completing the Phase**:
-   ```
+
+   ```text
    /plansession OR /apex-spec:plansession    # Analyze, spec, and generate task checklist
    /implement OR /apex-spec:implement        # Start implementation
    /validate OR /apex-spec:validate          # Verify completeness, security & compliance
    /updateprd OR /apex-spec:updateprd        # Mark complete, update system
    ```
 
- 4. **Between Phases**
-   ```
+4. **Between Phases**
+
+   ```text
    /audit OR /apex-spec:audit                # Local dev tooling (formatter, linter, types, tests, observability, hooks)
    /pipeline OR /apex-spec:pipeline          # CI/CD workflows (quality, build, security, integration, ops)
    /infra OR /apex-spec:infra                # Production infrastructure (health, security, backup, deploy)
@@ -79,26 +86,30 @@ The scripts use `jq` for JSON parsing. Verify with: `bash scripts/check-prereqs.
    /phasebuild OR /apex-spec:phasebuild      # Set up next Phase and Phase's sessions
    ```
 
- 5. **Repeat until all phases complete!**
+5. **Repeat until all phases complete!**
 
 ## Monorepo Quick Start
 
 The system auto-detects monorepo structures. No special configuration needed.
 
 **Brownfield** (existing monorepo with code):
-```
+
+```text
 /initspec
 ```
+
 The system detects workspace configs (pnpm, npm workspaces, turbo, nx, cargo, go, lerna), shows detected packages, and asks you to confirm.
 
 **Greenfield** (new project, PRD describes multiple services):
-```
+
+```text
 /initspec       # Sets monorepo: null (unknown)
 /createprd      # Detects multi-package signals in PRD, prompts to confirm
 ```
 
 **Per-package sessions**:
-```
+
+```text
 User: /plansession
       "Plan a session for apps/web"
 
@@ -109,6 +120,7 @@ User: /plansession
 Sessions interleave across packages within a phase. A phase completes when all its sessions are done, regardless of which packages they target.
 
 **What stays the same**:
+
 - Single `.spec_system/` at the repo root
 - Same session ID format (`phaseNN-sessionNN-name`)
 - Same 13-command workflow
@@ -168,6 +180,7 @@ As utility commands are added, they will be listed here. See [Utility Commands R
 ### Skill
 
 The **spec-workflow** skill auto-activates when:
+
 - Working in projects with `.spec_system/` directory
 - User mentions spec system concepts
 - User asks about session workflow
@@ -180,7 +193,7 @@ The **spec-workflow** skill auto-activates when:
 
 After running `/initspec`, your project will have:
 
-```
+```text
 your-project/
 |-- .spec_system/               # All spec system files
 |   |-- state.json              # Project state tracking

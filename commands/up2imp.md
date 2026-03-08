@@ -14,7 +14,7 @@ Use maximum thinking budget for this prompt.
 
 ## Usage
 
-```
+```text
 /up2imp <changes-file> [upstream-dir]
 ```
 
@@ -60,6 +60,7 @@ modifications, and which components exist or have been replaced.
 For every item in the changes file, classify it into one of these categories:
 
 **INCLUDE -- objectively improves the fork:**
+
 - Bug fixes -- correctness issues, edge cases, error handling
 - Performance improvements -- measurable efficiency gains
 - Security patches -- vulnerability fixes, hardening measures
@@ -68,6 +69,7 @@ For every item in the changes file, classify it into one of these categories:
   or reduces technical debt
 
 **EXCLUDE -- does not belong in the fork:**
+
 - Feature additions the fork has intentionally stripped out
 - Changes to components/modules the fork does not use or has replaced
 - Cosmetic/stylistic changes (formatting, comment rewording, variable renames
@@ -79,6 +81,7 @@ For every item in the changes file, classify it into one of these categories:
 ### 3. Determine implementation order
 
 Sort the included items by optimal implementation sequence:
+
 - Dependencies first (if change B relies on change A, A comes first)
 - Security patches and bug fixes before refactors
 - Lower-risk changes before higher-risk ones
@@ -91,6 +94,7 @@ ONLY the actionable improvements -- no excluded items, no commentary about what
 was removed.
 
 For each retained item, ensure it includes:
+
 - Clear description of what the change does and why it matters
 - Which files in the fork are affected
 - References to upstream (commit hashes, file paths, PR numbers if available)
@@ -100,6 +104,7 @@ For each retained item, ensure it includes:
 
 The changes file is rewritten in place as the filtered, optimally ordered
 implementation list. Report:
+
 - Total items reviewed
 - Items retained (with breakdown by category: bug fix, performance, security,
   stability, refactor)

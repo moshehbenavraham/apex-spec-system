@@ -83,7 +83,8 @@ When `monorepo: true`, classify each package by deployment role:
 3. **Shared infrastructure**: Components used by multiple packages (e.g., a single database, shared cache) -- configured once at repo level
 
 Example deployment topology:
-```
+
+```text
 Deployment topology (monorepo: true):
 | Package | Path | Type | Deploys Independently | Platform |
 |---------|------|------|-----------------------|----------|
@@ -97,6 +98,7 @@ Shared infra: PostgreSQL (apps/api), Valkey cache (apps/api)
 ### Step 2: COMPARE
 
 Compare Infrastructure table against 4-bundle master list:
+
 - Health: Is there a /health endpoint? Platform probe configured?
 - Security: WAF rules present? Rate limiting configured?
 - Backup: Backup script/job exists? Storage configured?
@@ -143,6 +145,7 @@ Use the deployment topology from Step 1a to scope each bundle:
 **Implementation by detected stack:**
 
 **Health Bundle:**
+
 ```python
 # FastAPI example
 @app.get("/health")
@@ -161,12 +164,14 @@ async def health():
 4. **Monorepo**: Repeat for each deployable package using its stack. Skip library packages.
 
 **Security Bundle:**
+
 1. If Cloudflare: Document WAF ruleset to enable (OWASP Core)
 2. Add rate limiting middleware to application
 3. Document rate limit configuration
 4. **Monorepo**: Add rate limiting per deployable package using its framework's middleware
 
 **Backup Bundle:**
+
 1. Create backup script for detected database
 2. Configure storage destination
 3. Create schedule (cron or GitHub Action)
@@ -175,6 +180,7 @@ async def health():
 6. Verify backup: restore to ephemeral DB and run a sanity query to confirm data integrity
 
 **Deploy Bundle:**
+
 1. Configure webhook URL (Coolify, Render, etc.)
 2. Or configure Git-based deploy (Vercel, Netlify)
 3. Add deploy step to release workflow
@@ -182,6 +188,7 @@ async def health():
 5. **Monorepo**: Configure per-package deploy triggers. Ensure shared library changes trigger dependent package deploys.
 
 **Local Dev Environment** (verified alongside Deploy bundle):
+
 1. If `docker-compose.yml` or `compose.yml` exists, verify `docker compose up -d` brings all services to healthy state
 2. If no compose file but the project has services (DB, cache, queue), document the local start procedure in CONVENTIONS.md
 3. Verify the app responds locally (e.g., `curl http://localhost:[port]/health`)
@@ -258,7 +265,8 @@ Use `(shared)` for components that serve multiple packages.
 ### Step 8: REPORT
 
 **Single-repo:**
-```
+
+```text
 REPORT
 - Added: Health bundle
 - Created: src/api/health.py
@@ -271,7 +279,8 @@ Platform notes:
 ```
 
 **Monorepo:**
-```
+
+```text
 REPORT
 - Added: Health bundle
 
@@ -286,7 +295,8 @@ REPORT
 ```
 
 **If secrets/manual steps required:**
-```
+
+```text
 Required setup:
 1. In Coolify dashboard, set health check path to /health
 2. Set health check interval to 30 seconds
@@ -301,7 +311,7 @@ Required setup:
 
 ## Dry Run Output
 
-```
+```text
 INFRA PREVIEW (DRY RUN)
 
 Stack detected:
@@ -328,22 +338,25 @@ Run without --dry-run to apply.
 ## Platform-Specific Notes
 
 **Cloudflare:**
+
 - WAF rules configured via dashboard or Terraform
 - Document which rulesets to enable
 - R2 for backup storage
 
 **Coolify:**
+
 - Health probes configured via UI
 - Webhook URL available in deployment settings
 - Supports Docker and static deploys
 
 **Vercel:**
+
 - Health checks automatic for serverless
 - Rate limiting via Edge Config or middleware
 - Git-based deploys, no webhook needed
 
 **AWS/ECS:**
+
 - Health checks via target group
 - WAF via AWS WAF
 - Backups via RDS snapshots or custom scripts
-

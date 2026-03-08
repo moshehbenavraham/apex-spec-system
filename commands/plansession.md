@@ -42,6 +42,7 @@ fi
 ```
 
 This returns structured JSON with:
+
 - `current_phase` - Current phase number
 - `current_session` - Active session (or null)
 - `completed_sessions` - List of completed session IDs
@@ -70,6 +71,7 @@ Store the resolved package path for use in Steps 4 and 5.
 ### 2. Read PRD Content for Semantic Analysis
 
 With the state facts established, read these files for context:
+
 - `.spec_system/PRD/PRD.md` - Master project requirements
 - `.spec_system/PRD/PRD_UX.md` - UX requirements (if exists -- use for UI-focused sessions)
 - Candidate session files from the JSON output (use the `path` field)
@@ -78,6 +80,7 @@ With the state facts established, read these files for context:
 - `.spec_system/CONVENTIONS.md` - Project coding conventions (if exists)
 
 Focus on understanding:
+
 - Session objectives and scope
 - Prerequisites and dependencies
 - Logical ordering
@@ -92,11 +95,13 @@ Focus on understanding:
 Using the deterministic state + semantic understanding:
 
 **Determine:**
+
 - Which candidates have unmet prerequisites (based on `completed_sessions`)
 - Natural next session based on dependencies
 - Complexity and scope assessment
 
 **Evaluate each candidate by:**
+
 - Prerequisites met (check against `completed_sessions` array)
 - Dependencies completed
 - Logical flow in project progression
@@ -109,7 +114,7 @@ If phase complete: Suggest `/phasebuild` for next phase.
 
 Create the session directory and generate `spec.md`:
 
-```
+```text
 .spec_system/specs/phaseNN-sessionNN-name/
 |-- spec.md
 \-- (tasks.md created in next step)
@@ -444,6 +449,7 @@ Update `.spec_system/state.json`:
 - Set `current_session` to the session ID
 - Add a single entry to `next_session_history` with status `planned`
 - **Monorepo only**: Include an optional `package` field in the history entry when a package was resolved in Step 1a:
+
   ```json
   {
     "date": "YYYY-MM-DD",
@@ -452,6 +458,7 @@ Update `.spec_system/state.json`:
     "status": "planned"
   }
   ```
+
   Omit the `package` field for single-repo projects or cross-cutting sessions.
 
 ### 7. Archive Stale Specs
@@ -465,6 +472,7 @@ Example: If currently on Phase 3, keep Phase 2 and Phase 3 specs. Archive Phase 
 ## Output
 
 After creating spec.md and tasks.md, summarize to the user:
+
 - Recommended session name and why it's next
 - Key deliverables
 - Total task count and category breakdown

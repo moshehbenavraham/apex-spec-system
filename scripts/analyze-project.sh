@@ -74,7 +74,8 @@ output_json() {
 
     # Build candidate sessions array
     local candidates_json="[]"
-    local prd_dir="${SPEC_SYSTEM_DIR}/PRD/phase_$(printf '%02d' "$current_phase")"
+    local prd_dir
+    prd_dir="${SPEC_SYSTEM_DIR}/PRD/phase_$(printf '%02d' "$current_phase")"
 
     if [[ -d "$prd_dir" ]]; then
         while IFS= read -r file; do
@@ -248,7 +249,8 @@ analyze_next_candidates() {
     local current_phase
     current_phase=$(get_current_phase)
 
-    local prd_dir="${SPEC_SYSTEM_DIR}/PRD/phase_$(printf '%02d' "$current_phase")"
+    local prd_dir
+    prd_dir="${SPEC_SYSTEM_DIR}/PRD/phase_$(printf '%02d' "$current_phase")"
 
     echo ""
     echo "Next Session Candidates (Phase $current_phase):"

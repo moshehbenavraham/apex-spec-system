@@ -24,7 +24,8 @@ Note: Docker commands MAY require `sudo` if you are not in the `docker` group.
 ### 1. Run Docker Compose build
 
 Execute:
-```
+
+```bash
 sudo docker compose up -d --build 2>&1 | tee /dev/stderr
 ```
 
@@ -37,6 +38,7 @@ Run `sudo docker compose ps` to confirm all containers are running.
 ### 3. Report results
 
 Present:
+
 - The full build output
 - Final container status (name, state, ports)
 - Every warning, error, deprecation notice, update notice, or informational message found in the output -- no matter the severity level

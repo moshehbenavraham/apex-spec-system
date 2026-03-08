@@ -6,6 +6,7 @@ description: Extract lessons learned, update CONSIDERATIONS.md, and maintain SEC
 # /carryforward Command
 
 Extract key insights from the just-completed phase and update two living documents:
+
 - `.spec_system/CONSIDERATIONS.md` - institutional memory for AI assistants working on future phases
 - `.spec_system/SECURITY-COMPLIANCE.md` - cumulative security posture and GDPR compliance record
 
@@ -28,6 +29,7 @@ Run after completing a phase, before `/phasebuild`. Optional but recommended for
 ### 1. Verify Phase Completion
 
 Check `.spec_system/state.json`:
+
 - Confirm current phase status is "complete"
 - Get phase number and name
 - If phase not complete, inform user and exit
@@ -44,6 +46,7 @@ ls .spec_system/archive/phases/phase_NN_*/IMPLEMENTATION_SUMMARY.md
 ```
 
 Also read:
+
 - `.spec_system/audit/` - recent audit reports
 - `.spec_system/PRD/phase_NN/` - phase requirements (before archive)
 - Any `implementation-notes.md` files with blockers or discoveries
@@ -57,6 +60,7 @@ Also read:
 From each session's IMPLEMENTATION_SUMMARY.md, identify:
 
 **Active Concerns** (things that affect upcoming work):
+
 - Unresolved technical debt
 - Known limitations or constraints
 - External dependencies with risks
@@ -66,6 +70,7 @@ From each session's IMPLEMENTATION_SUMMARY.md, identify:
 - Deployment concerns (local dev startup issues, deploy failures, rollback gaps, environment drift)
 
 **Lessons Learned** (patterns to follow or avoid):
+
 - Technical decisions that worked well (and why)
 - Approaches that failed (and why)
 - Useful patterns discovered
@@ -73,10 +78,12 @@ From each session's IMPLEMENTATION_SUMMARY.md, identify:
 - Architecture insights
 
 **Items to Resolve** (move from Active Concerns if addressed):
+
 - Check if previous Active Concerns were addressed this phase
 - Move them to Resolved with brief resolution note
 
 **Monorepo only**: Tag each extracted insight with its source package:
+
 - **Package-specific**: Concerns/lessons that apply to one package (e.g., `[P05-apps/web]` for a frontend-specific issue)
 - **Cross-package**: Concerns that span multiple packages or affect package interactions (e.g., `[P05-apps/web+apps/api]` for an API contract issue)
 - **Project-wide**: Concerns that apply regardless of package (e.g., `[P05]` for a CI/CD or tooling lesson)
@@ -84,6 +91,7 @@ From each session's IMPLEMENTATION_SUMMARY.md, identify:
 ### 4. Read Current CONSIDERATIONS.md
 
 Read `.spec_system/CONSIDERATIONS.md`:
+
 - Parse existing sections
 - Note current line count
 - Identify stale items in each section
@@ -99,6 +107,7 @@ Update `.spec_system/CONSIDERATIONS.md` following the format below. Add new item
 Read every `security-compliance.md` from the just-completed phase's sessions. Merge them into `.spec_system/SECURITY-COMPLIANCE.md` following the format below.
 
 **Synthesis rules:**
+
 - **Don't append** -- re-synthesize the entire document each time by merging new phase findings with the existing file
 - **Remediated findings**: Move to the Resolved Findings section with resolution date and phase. Compress after 2 phases (keep one-line summary only)
 - **Open findings**: Keep full detail (severity, file, description, remediation steps)
@@ -107,6 +116,7 @@ Read every `security-compliance.md` from the just-completed phase's sessions. Me
 - **Phase summary**: Add a row to the Phase History table, keep last 5 phases of detail
 
 **Monorepo only**: When synthesizing findings:
+
 - Include the package path in finding IDs (e.g., `[P05-apps/web-S03]` for a finding from session 03 scoped to apps/web)
 - In the Personal Data Inventory, add a Package column to indicate which package collects/stores each data element
 - In the Phase History table, note per-package session counts if sessions were distributed across packages
@@ -311,6 +321,7 @@ Actionable items for upcoming phases based on cumulative findings.
 ## SECURITY-COMPLIANCE.md Line Budget Guidance
 
 Target allocation within 1000 lines:
+
 - Header/metadata: ~20 lines
 - Open Findings: ~300 lines (detailed entries with remediation steps)
 - GDPR Compliance: ~200 lines (inventory + checklist)
@@ -322,6 +333,7 @@ Target allocation within 1000 lines:
 ### Trimming Strategy
 
 When approaching 1000 lines, trim in this order:
+
 1. Resolved findings older than 2 phases (compress to one-line table row)
 2. Phase History detail older than 5 phases (keep only the summary row)
 3. Dependency issues that have been resolved
@@ -333,6 +345,7 @@ When approaching 1000 lines, trim in this order:
 ## CONSIDERATIONS.md Line Budget Guidance
 
 Target allocation within 600 lines (CONSIDERATIONS.md):
+
 - Header/metadata: ~15 lines
 - Active Concerns: ~150 lines (20 items x ~7 lines avg)
 - Lessons Learned: ~250 lines (30 items x ~8 lines avg)
@@ -342,6 +355,7 @@ Target allocation within 600 lines (CONSIDERATIONS.md):
 ### Trimming Strategy
 
 When approaching 600 lines, trim in this order:
+
 1. Resolved items older than 2 phases
 2. Lessons Learned items older than 5 phases (unless still highly relevant)
 3. Active Concerns that have become irrelevant
@@ -351,7 +365,8 @@ When approaching 600 lines, trim in this order:
 ## Output
 
 **Single-repo:**
-```
+
+```text
 Phase NN Carryforward Complete
 
 Updated .spec_system/CONSIDERATIONS.md:
@@ -377,10 +392,10 @@ Ready for /documents to maintain project documentation.
 ```
 
 **Monorepo** (add package breakdown after Key additions):
-```
+
+```text
 Package breakdown:
 - apps/web: N sessions, N concerns, N findings
 - apps/api: N sessions, N concerns, N findings
 - (cross-cutting): N sessions, N concerns, N findings
 ```
-

@@ -24,13 +24,13 @@ A real-world walkthrough based on an actual project: **NJ Title Intelligence Pla
 
 ### Step 1: /initspec
 
-```
+```text
 User: /initspec
 ```
 
 Claude creates the spec system structure:
 
-```
+```text
 title_clerk/
 |-- .spec_system/
 |   |-- state.json              # Tracks progress
@@ -43,7 +43,7 @@ title_clerk/
 
 ### Step 2: /createprd
 
-```
+```text
 User: /createprd "A property intelligence platform for NJ title insurance
       that maximizes FREE public data, covering 21 NJ counties, 564
       municipalities, and ~4M parcels with $0 data acquisition cost."
@@ -69,22 +69,22 @@ Claude generates a comprehensive PRD with phase breakdown:
 
 ### Step 3: /phasebuild
 
-```
+```text
 User: /phasebuild
 ```
 
 Creates Phase 01 structure with session stubs:
 
-```
+```text
 .spec_system/PRD/phase_01/
-├── README.md
-├── session_01_project_structure_python_setup.md
-├── session_02_docker_compose_postgresql.md
-├── session_03_database_extensions_init.md
-├── session_04_litestar_application_skeleton.md
-├── session_05_alembic_migrations_framework.md
-├── session_06_redis_celery_configuration.md
-└── session_07_development_tooling_documentation.md
+|-- README.md
+|-- session_01_project_structure_python_setup.md
+|-- session_02_docker_compose_postgresql.md
+|-- session_03_database_extensions_init.md
+|-- session_04_litestar_application_skeleton.md
+|-- session_05_alembic_migrations_framework.md
+|-- session_06_redis_celery_configuration.md
+\-- session_07_development_tooling_documentation.md
 ```
 
 ---
@@ -95,7 +95,7 @@ This is where the real work happens. Repeat for each session until the phase is 
 
 ### Step 4: /plansession
 
-```
+```text
 User: /plansession
 ```
 
@@ -114,7 +114,7 @@ Claude analyzes project state, recommends the next session, creates the specific
 
 Creates the spec and tasks in the session directory:
 
-```
+```text
 .spec_system/specs/phase09-session01-rutgers-modiv-analysis/
 |-- spec.md
 |-- tasks.md
@@ -170,7 +170,7 @@ parcel records from Rutgers University's MOD-IV data archive (1989-present).
 
 ### Step 5: /implement
 
-```
+```text
 User: /implement
 ```
 
@@ -203,7 +203,7 @@ Reference: 44 fields in current schema
 
 ### Step 6: /validate
 
-```
+```text
 User: /validate
 ```
 
@@ -254,7 +254,7 @@ Claude verifies session completeness:
 
 ### Step 7: /updateprd
 
-```
+```text
 User: /updateprd
 ```
 
@@ -266,7 +266,7 @@ Claude marks session complete and commits:
 - Clears `current_session`
 - Reports next steps
 
-```
+```text
 Session phase09-session01-rutgers-modiv-analysis marked COMPLETE.
 
 Phase 09 Progress: 1/8 sessions complete (12.5%)
@@ -277,7 +277,8 @@ Next: Run /plansession for session 02 recommendation.
 ### Repeat Until Phase Complete
 
 Continue the cycle:
-```
+
+```text
 /plansession -> /implement -> /validate -> /updateprd
 ```
 
@@ -291,11 +292,12 @@ After completing all sessions in a phase, run the phase transition commands.
 
 ### /audit
 
-```
+```text
 User: /audit
 ```
 
 Adds local dev tooling one bundle at a time:
+
 1. Formatting (Prettier, Ruff)
 2. Linting (ESLint, Ruff)
 3. Type Safety (TypeScript, mypy)
@@ -307,11 +309,12 @@ Run multiple times until all bundles are configured.
 
 ### /pipeline
 
-```
+```text
 User: /pipeline
 ```
 
 Adds CI/CD workflows one bundle at a time:
+
 1. Code Quality (lint + format + type check)
 2. Build & Test (build + unit tests + coverage)
 3. Security (secrets scanning + CodeQL)
@@ -320,11 +323,12 @@ Adds CI/CD workflows one bundle at a time:
 
 ### /infra
 
-```
+```text
 User: /infra
 ```
 
 Adds production infrastructure one bundle at a time:
+
 1. Health (/health endpoint + probes)
 2. Security (WAF rules + rate limiting)
 3. Backup (DB backup + retention)
@@ -332,7 +336,7 @@ Adds production infrastructure one bundle at a time:
 
 ### /carryforward
 
-```
+```text
 User: /carryforward
 ```
 
@@ -368,11 +372,12 @@ Captures lessons learned in CONSIDERATIONS.md and updates SECURITY-COMPLIANCE.md
 
 ### /documents
 
-```
+```text
 User: /documents
 ```
 
 Audits and updates documentation:
+
 - README.md
 - CONTRIBUTING.md
 - docs/ARCHITECTURE.md
@@ -385,7 +390,7 @@ Audits and updates documentation:
 
 ### /phasebuild (Next Phase)
 
-```
+```text
 User: /phasebuild
 ```
 
@@ -444,13 +449,13 @@ A walkthrough showing how Apex Spec handles a monorepo project: **Acme SaaS Plat
 
 ### Initialization (Brownfield)
 
-```
+```text
 User: /initspec
 ```
 
 The system detects the existing monorepo structure:
 
-```
+```text
 Detected monorepo structure:
   Workspace manager: pnpm (pnpm-workspace.yaml)
   Task runner: Turborepo (turbo.json)
@@ -490,19 +495,19 @@ CONVENTIONS.md gains a Workspace Structure table:
 
 ### PRD and Phase Build
 
-```
+```text
 User: /createprd @docs/requirements.md
 ```
 
 The PRD includes a Package Map section showing which packages are involved in each phase. Then:
 
-```
+```text
 User: /phasebuild
 ```
 
 Creates phase stubs with package annotations:
 
-```
+```text
 .spec_system/PRD/phase_00/
   session_01_project_setup.md              # No Package: annotation (cross-cutting)
   session_02_shared_types.md               # Package: packages/shared
@@ -516,7 +521,7 @@ Creates phase stubs with package annotations:
 
 #### Planning a cross-cutting session
 
-```
+```text
 User: /plansession
 ```
 
@@ -547,7 +552,7 @@ Tasks reference files across the entire repo:
 
 #### Planning a package-scoped session
 
-```
+```text
 User: /plansession
       "Plan session for apps/api"
 ```
@@ -575,7 +580,7 @@ Tasks are scoped to the package directory:
 
 #### Implementation with package validation
 
-```
+```text
 User: /implement
 ```
 
@@ -600,7 +605,7 @@ During implementation, if a task tries to modify a file outside `apps/api/`, the
 
 #### Completion with package metadata
 
-```
+```text
 User: /updateprd
 ```
 
@@ -616,30 +621,33 @@ State.json records the package:
 
 ### Phase Transition (Monorepo)
 
-```
+```text
 User: /audit
 ```
 
 The audit installs tools per-package based on stack:
+
 - Root: Prettier, ESLint (shared config)
 - `apps/web`: TypeScript strict mode, Jest
 - `apps/api`: Ruff (formatter + linter), pytest, mypy
 - `packages/shared`: TypeScript, Jest
 
-```
+```text
 User: /pipeline
 ```
 
 Generates CI/CD with path-filtered triggers:
+
 - `apps/web/**` changes trigger web build + test
 - `apps/api/**` changes trigger API build + test
 - `packages/shared/**` changes trigger shared build + downstream rebuilds
 
-```
+```text
 User: /carryforward
 ```
 
 Lessons are tagged with package context:
+
 ```markdown
 - [P00-apps/api] FastAPI dependency injection works cleanly with SQLAlchemy sessions
 - [P00-packages/shared] Export TypeScript types as a separate build step for consumption
@@ -658,7 +666,7 @@ Lessons are tagged with package context:
 
 ## Quick Reference
 
-```
+```text
 Stage 1: INITIALIZATION (once)
 /initspec -> /createprd -> /createuxprd (optional) -> /phasebuild
 

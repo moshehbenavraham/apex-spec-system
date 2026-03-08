@@ -74,9 +74,11 @@ Industry standard order (fast feedback to comprehensive):
    - If none: Default to GitHub Actions
 
 4. Check for open PRs with CI issues:
+
    ```bash
    gh pr list --state open --json number,title,statusCheckRollup,reviewDecision
    ```
+
    - Identify PRs with failing checks
    - Identify PRs with requested changes
    - If `--pr <number>` specified, focus on that PR
@@ -101,7 +103,8 @@ When `monorepo: true`, determine the CI/CD strategy based on workspace structure
 3. **Map package dependencies**: If package B depends on package A, changes to A must trigger CI for both A and B
 
 Example workflow strategy:
-```
+
+```text
 Monorepo CI strategy:
 - Task runner: turbo (detected)
 - Trigger: path filters per package + shared paths trigger all
@@ -113,6 +116,7 @@ Monorepo CI strategy:
 ### Step 2: COMPARE
 
 Compare CI/CD table in CONVENTIONS.md against 5-bundle master list:
+
 - Check Bundle column for "configured" vs "not configured"
 - Scan `.github/workflows/` for existing workflow files
 - Build list of missing bundles in priority order
@@ -142,6 +146,7 @@ Generate workflow file(s) for the selected bundle.
 **Monorepo workflow generation** (when `monorepo: true`):
 
 - **With task runner (turbo/nx)**: Use the task runner as the build orchestrator. It handles per-package execution, caching, and dependency ordering automatically.
+
   ```yaml
   # Example: turbo-based quality workflow
   jobs:
@@ -150,7 +155,9 @@ Generate workflow file(s) for the selected bundle.
         - run: pnpm install
         - run: pnpm turbo run lint typecheck
   ```
+
 - **Without task runner**: Use path filters per package to trigger targeted jobs, plus a shared trigger for common files.
+
   ```yaml
   # Example: path-filtered triggers
   on:
@@ -160,7 +167,9 @@ Generate workflow file(s) for the selected bundle.
         - 'packages/shared/**'    # shared dependency
         - '.github/workflows/**'  # workflow changes
   ```
+
 - **Mixed stacks**: Use matrix strategy to run language-specific jobs per package.
+
   ```yaml
   # Example: matrix for mixed stacks
   strategy:
@@ -173,6 +182,7 @@ Generate workflow file(s) for the selected bundle.
           lang: python
           commands: "ruff check . && pytest"
   ```
+
 - **Cross-package dependencies**: Changes to shared packages (type: library) must trigger CI for all dependent packages. Map these via workspace config or the `packages` array in state.json.
 
 **Single-repo**: Generate standard single-target workflows.
@@ -187,12 +197,14 @@ Generate workflow file(s) for the selected bundle.
 | Go | gofmt -d, golangci-lint | go test | govulncheck |
 
 **Database migration testing** (when migration tool detected in CONVENTIONS.md):
+
 - Add DB service to integration workflow (PostgreSQL, MySQL, etc. matching project's DB type)
 - Migration validation steps: run all migrations from scratch, run down migrations (verify rollback), run up again (verify idempotency)
 - Optionally run seed script to verify seed data loads against fresh schema
 - Scope: Add to Integration bundle workflow (`.github/workflows/integration.yml`)
 
 **Deployment workflow** (when Operations bundle is selected):
+
 - Create `.github/workflows/deploy.yml` triggered on push to main (after tests pass)
 - If `/infra` has configured a deploy target (webhook, Git-based, or platform integration), wire it into the workflow
 - Add a post-deploy smoke test step: `curl -f https://[production-url]/health` (or equivalent health endpoint)
@@ -217,11 +229,13 @@ Trigger and monitor CI:
 **If `--pr` specified or open PRs detected:**
 
 1. Check PR CI status:
+
    ```bash
    gh pr checks <number>
    ```
 
 2. Get PR review comments:
+
    ```bash
    gh pr view <number> --json reviews,comments
    ```
@@ -232,11 +246,13 @@ Trigger and monitor CI:
    - Unresolved review threads
 
 **If CI fails due to billing/usage limits** (see Billing Failures above):
+
 - Run the workflow's steps locally (lint, test, build, etc.) to validate
 - If local runs pass, treat as validated and continue to Step 7
 
 **If still running after 3 minutes:**
-```
+
+```text
 CI still running. Validate locally and proceed.
 ```
 
@@ -250,6 +266,7 @@ CI still running. Validate locally and proceed.
 4. Commit, push, re-poll
 
 **For each category:**
+
 - **Lint/format errors**: Run local tools with fix flag, commit
 - **Type errors**: Attempt fix, verify locally first
 - **Test failures**: Attempt fix, run locally to verify
@@ -258,6 +275,7 @@ CI still running. Validate locally and proceed.
 **For PR review comments** (when `--pr` or PRs detected):
 
 1. Fetch review comments:
+
    ```bash
    gh api repos/{owner}/{repo}/pulls/{number}/comments
    ```
@@ -274,6 +292,7 @@ CI still running. Validate locally and proceed.
    - Reply to confirm resolution (if possible via API)
 
 **Review comment categories:**
+
 - **Code style**: Apply formatting/naming changes
 - **Logic issues**: Fix bugs or improve implementation
 - **Missing tests**: Add requested test cases
@@ -307,7 +326,7 @@ Update `.spec_system/CONVENTIONS.md` CI/CD table:
 
 ### Step 8: REPORT
 
-```
+```text
 REPORT
 - Added: Code Quality workflow
 - File: .github/workflows/quality.yml
@@ -321,7 +340,8 @@ Required setup (if any):
 ```
 
 **For PRs** (when `--pr` or PRs addressed):
-```
+
+```text
 REPORT
 - PR #42: "Add user authentication"
 - CI Status: All checks passing (was: 3 failing)
@@ -332,7 +352,8 @@ REPORT
 ```
 
 **For monorepos:**
-```
+
+```text
 [apps/web] Quality: passing | Test: 2 failures
 [apps/api] Quality: passing | Test: passing
 ```
@@ -347,7 +368,7 @@ REPORT
 
 ## Dry Run Output
 
-```
+```text
 PIPELINE PREVIEW (DRY RUN)
 
 Repository: monorepo (Turborepo)
@@ -372,7 +393,8 @@ Run without --dry-run to apply.
 ```
 
 **With `--pr 42`:**
-```
+
+```text
 PIPELINE PREVIEW (DRY RUN) - PR #42
 
 PR: #42 "Add user authentication"
@@ -401,7 +423,7 @@ When a workflow requires secrets:
 2. Document required secrets in REPORT
 3. Workflow will fail until secrets configured
 
-```
+```text
 Required setup:
 1. Add CODECOV_TOKEN to repository secrets
 2. Add SLACK_WEBHOOK_URL for failure notifications
@@ -410,4 +432,3 @@ Workflows will fail until secrets are configured.
 ```
 
 Do NOT attempt to create or manage secrets.
-

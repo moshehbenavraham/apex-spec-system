@@ -14,7 +14,7 @@ Use maximum thinking budget for this prompt.
 
 ## Usage
 
-```
+```text
 /qimpl <work-file>
 ```
 
@@ -48,6 +48,7 @@ Use maximum thinking budget for this prompt.
 ### 1. Load the work file
 
 Read the work file provided by the user. Identify:
+
 - The goal(s) of the session
 - Any prior progress or context from previous sessions
 - Any notes, constraints, or implementation guidance
@@ -64,6 +65,7 @@ approach accordingly.
 ### 3. Implement
 
 Execute the work described in the work file. Follow these principles:
+
 - Work through items methodically, one at a time
 - Validate each change before moving to the next
 - If you encounter uncertainty about an API, library, or pattern, use web tools
@@ -73,6 +75,7 @@ Execute the work described in the work file. Follow these principles:
 ### 4. Monitor context consumption
 
 Keep a running awareness of resource usage:
+
 - **File reads**: Stop approaching 12
 - **Total tool calls**: Stop approaching 30
 - Whichever limit approaches first triggers the session wrap-up
@@ -82,6 +85,7 @@ When nearing the limit, proceed to Step 5 rather than pushing further.
 ### 5. Update the work file
 
 Before ending the session, update the work file with:
+
 - What was completed this session
 - What remains to be done
 - Current state of the implementation (what works, what is partial)
@@ -92,6 +96,7 @@ Before ending the session, update the work file with:
 ## Output
 
 Report to the user:
+
 - What was accomplished in this session
 - How much of the work file's goals were completed
 - Whether the session ended due to completion or context window discipline

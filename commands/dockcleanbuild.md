@@ -54,13 +54,15 @@ If no build step is apparent, skip this step and note it.
 ### 5. Rebuild Docker images from scratch
 
 First, build the primary Dockerfile:
-```
+
+```bash
 sudo docker compose build --no-cache
 ```
 
 If additional Dockerfiles exist (e.g., `Dockerfile.local`, `Dockerfile.dev`,
 `Dockerfile.production`), build each one:
-```
+
+```bash
 sudo docker build --no-cache -f <Dockerfile> -t <appropriate-tag> .
 ```
 
@@ -89,6 +91,7 @@ Report the number of images cleaned and space reclaimed.
 ## Output
 
 Provide a full report including:
+
 - Space reclaimed from cache and image cleanup
 - Containers stopped/removed
 - Build output for each Dockerfile (including ALL warnings, errors, notices)

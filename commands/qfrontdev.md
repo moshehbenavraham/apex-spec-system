@@ -17,7 +17,7 @@ Activate and use Plugin Skill (frontend-design:frontend-design) for design guida
 
 ## Usage
 
-```
+```text
 /qfrontdev <work-file>
 ```
 
@@ -25,6 +25,7 @@ Activate and use Plugin Skill (frontend-design:frontend-design) for design guida
   tracks progress (e.g., `docs/frontend/redesign-phase01.md`, `docs/frontend/audit.md`)
 
 The work file determines the mode of work. It might contain:
+
 - Implementation tasks to execute (session-by-session or phase-by-phase)
 - An audit scope to analyze
 - A plan to create or refine
@@ -88,6 +89,7 @@ Before considering any change complete, verify:
 ### 1. Orient
 
 Read the work file provided by the user. Identify:
+
 - The goal(s) of the session (implement, audit, plan, fix, document, refactor)
 - Any prior progress or context from previous sessions
 - The current phase/session to work on
@@ -99,6 +101,7 @@ docs, changelogs), read those too for full context.
 ### 2. Verify
 
 Before writing any code, verify the work file's claims against the actual codebase:
+
 - Do referenced files and components exist?
 - Do described patterns match reality?
 - Are documented APIs and props accurate?
@@ -112,18 +115,21 @@ code, not the docs.
 Work through the tasks defined in the work file. Follow these principles:
 
 **For implementation work:**
+
 - Work through sessions/tasks methodically, one at a time
 - Make small, deliberate, atomic changes
 - Validate each change before moving to the next
 - Apply the Quality Gate to every change
 
 **For audit work:**
+
 - Analyze every relevant file thoroughly -- do not skip or skim
 - Document file paths, line counts, and specific findings
 - Identify concrete refactoring opportunities with rationale
 - Prioritize findings by impact
 
 **For planning work:**
+
 - Assess current state gaps and pain points
 - Propose direction with rationale
 - Break work into context-window-safe sessions
@@ -131,11 +137,13 @@ Work through the tasks defined in the work file. Follow these principles:
 - Include verification criteria for each session
 
 **For fix/debug work:**
+
 - Investigate root cause, not just symptoms
 - Consider whether the issue signals deeper architectural problems
 - Fix the underlying cause, not just the surface manifestation
 
 **For documentation work:**
+
 - Verify every detail against the actual codebase
 - Do not trust existing docs -- they may be outdated
 - Write for the next engineer who has never seen this code
@@ -143,6 +151,7 @@ Work through the tasks defined in the work file. Follow these principles:
 ### 4. Monitor context consumption
 
 Keep a running awareness of resource usage:
+
 - **File reads**: Begin wrapping up when approaching 12
 - **Total tool calls**: Begin wrapping up when approaching 30
 - Whichever limit approaches first triggers the session wrap-up
@@ -152,6 +161,7 @@ When nearing the limit, proceed to Step 5 rather than pushing further.
 ### 5. Update the work file and wrap up
 
 Before ending the session, update the work file with:
+
 - What was completed this session
 - What remains to be done
 - Current state of the implementation (what works, what is partial)
@@ -165,6 +175,7 @@ If the work file references a changelog, update it too.
 ## Output
 
 Report to the user:
+
 - What was accomplished in this session
 - How much of the work file's goals were completed
 - Any issues, warnings, or quality concerns discovered

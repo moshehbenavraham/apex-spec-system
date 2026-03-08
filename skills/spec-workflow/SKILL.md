@@ -1,7 +1,7 @@
 ---
 name: Apex Spec Workflow
 description: This skill should be used when the user asks about "spec system", "session workflow", "createprd", "plansession", "implement session", "validate session", "phase build", "session scope", "task checklist", or when working in a project containing .spec_system/ directory. Provides guidance for specification-driven AI development workflows.
-version: 2.0.2-beta
+version: 2.0.3-beta
 ---
 
 # Apex Spec Workflow
@@ -22,7 +22,7 @@ The workflow has **3 distinct stages**:
 
 ### Stage 1: INITIALIZATION (One-Time Setup)
 
-```
+```text
 /initspec          ->  Set up spec system in project
       |
       v
@@ -41,7 +41,7 @@ The workflow has **3 distinct stages**:
 
 ### Stage 2: SESSIONS WORKFLOW (Repeat Until Phase Complete)
 
-```
+```text
 /plansession   ->  Analyze project, create spec + task checklist
       |
       v
@@ -59,7 +59,7 @@ The workflow has **3 distinct stages**:
 
 ### Stage 3: PHASE TRANSITION (After All Previous Phase's Sessions Are Complete)
 
-```
+```text
 /audit             ->  Local dev tooling (formatter, linter, types, tests, observability, hooks)
       |
       v
@@ -88,7 +88,7 @@ The workflow has **3 distinct stages**:
 
 Projects using this system follow this layout:
 
-```
+```text
 project/
 |-- .spec_system/               # All spec system files
 |   |-- state.json              # Project state tracking
@@ -114,7 +114,7 @@ project/
 
 Monorepo projects use the **same single `.spec_system/` at the repo root**. Sessions reference their target package in metadata (spec.md header and state.json), not in directory names.
 
-```
+```text
 monorepo-project/
 |-- .spec_system/               # Single spec system at repo root
 |   |-- state.json              # Includes monorepo flag + packages array
@@ -140,6 +140,7 @@ monorepo-project/
 ```
 
 Key differences from single-repo:
+
 - Session stubs gain optional `Package:` annotation
 - spec.md headers include `Package:` and `Package Stack:` fields
 - CONVENTIONS.md includes a Workspace Structure table
@@ -154,6 +155,7 @@ Key differences from single-repo:
 - `name`: lowercase-hyphenated description
 
 **Examples**:
+
 - `phase00-session01-project-setup`
 - `phase01-session03-user-authentication`
 - `phase02-session08b-refinements`
@@ -180,11 +182,12 @@ Key differences from single-repo:
 
 ### Task Format
 
-```
+```text
 - [ ] TNNN [SNNMM] [P] Action verb + what + where (`path/to/file`)
 ```
 
 Components:
+
 - `TNNN`: Sequential task ID (T001, T002, ...)
 - `[SNNMM]`: Session reference (S0103 = Phase 01, Session 03)
 - `[P]`: Optional parallelization marker
@@ -201,6 +204,7 @@ Components:
 ### Parallelization
 
 Mark tasks `[P]` when they:
+
 - Create independent files
 - Don't depend on each other's output
 - Can be done in any order
@@ -210,6 +214,7 @@ Mark tasks `[P]` when they:
 ### ASCII Encoding (Non-Negotiable)
 
 All files must use ASCII-only characters (0-127):
+
 - NO Unicode characters
 - NO emoji
 - NO smart quotes - use straight quotes (" ')
@@ -217,6 +222,7 @@ All files must use ASCII-only characters (0-127):
 - Unix LF line endings only (no CRLF)
 
 Validate with:
+
 ```bash
 file filename.txt        # Should show: ASCII text
 grep -P '[^\x00-\x7F]' filename.txt  # Should return nothing
@@ -316,12 +322,14 @@ Standalone helpers that operate outside the session workflow. They do not affect
 ### Scripts Directory
 
 Utility scripts are available at two locations:
+
 - **Plugin**: `${CLAUDE_PLUGIN_ROOT}/scripts/` (default, always up-to-date)
 - **Local**: `.spec_system/scripts/` (optional, for per-project customization)
 
 **Local scripts take precedence** - if `.spec_system/scripts/` exists, commands use local scripts instead of plugin scripts.
 
 Available scripts:
+
 - `analyze-project.sh` - Project state analysis (supports `--json` for structured output)
 - `check-prereqs.sh` - Environment and tool verification (supports `--json` for structured output)
 - `common.sh` - Shared functions
@@ -337,6 +345,7 @@ Commands use a **hybrid approach** for reliability:
 3. **Semantic Analysis** (Claude): Interprets PRD content, makes recommendations
 
 **Why this matters:**
+
 - Script output is deterministic - same input always gives same output
 - Eliminates risk of Claude misreading state.json
 - Tool verification catches missing dependencies BEFORE implementation starts
@@ -344,6 +353,7 @@ Commands use a **hybrid approach** for reliability:
 - Claude focuses on what it does best: understanding context and reasoning
 
 **analyze-project.sh JSON Output:**
+
 ```json
 {
   "project": "project-name",
@@ -367,6 +377,7 @@ Commands use a **hybrid approach** for reliability:
 For single-repo projects: `monorepo` is `null` or `false`, `packages` is `[]`, `active_package` is `null`, and `completed_sessions` uses the string array format.
 
 **check-prereqs.sh JSON Output:**
+
 ```json
 {
   "overall": "pass",
@@ -404,6 +415,7 @@ For single-repo projects: `monorepo` is `null` or `false`, `packages` is `[]`, `
 The `package` and `workspace` sections appear only when `--package` is used or monorepo is detected. The `database` section only appears when DB signals are detected in the project. For single-repo projects without databases, these sections are empty objects (`{}`).
 
 **Commands and their script usage:**
+
 | Command | analyze-project.sh | check-prereqs.sh |
 |---------|-------------------|------------------|
 | `/plansession` | State + candidates | - |

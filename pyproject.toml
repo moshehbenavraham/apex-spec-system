@@ -1,0 +1,28 @@
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+
+[tool.pylint.main]
+# Only lint the CLI module
+ignore-patterns = ["test_.*"]
+
+[tool.pylint."messages control"]
+# Disable checks that conflict with black or are too noisy for this project
+disable = [
+    "C0114",  # missing-module-docstring (has module docstring, but pylint wants more)
+    "C0115",  # missing-class-docstring
+    "C0301",  # line-too-long (black handles line length)
+    "R0801",  # duplicate-code
+    "R0903",  # too-few-public-methods
+    "W1203",  # logging-fstring-interpolation (project convention is f-strings)
+]
+
+[tool.pylint.format]
+max-line-length = 88
+
+[tool.pylint.design]
+max-args = 8
+max-locals = 20
+
+[tool.pylint.similarities]
+min-similarity-lines = 6

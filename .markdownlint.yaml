@@ -1,0 +1,36 @@
+# Markdownlint configuration for Apex Spec System
+# https://github.com/DavidAnson/markdownlint
+
+# MD003: Heading style - ATX only (# style)
+MD003:
+  style: "atx"
+
+# MD013: Line length - disabled (prose uses one-sentence-per-line)
+MD013: false
+
+# MD024: Allow duplicate headings in different sections
+MD024:
+  siblings_only: true
+
+# MD033: Allow inline HTML (used in some command specs)
+MD033: false
+
+# MD034: Bare URLs - disabled (command specs use URL templates)
+MD034: false
+
+# MD036: Emphasis as heading - disabled (intentional bold text used as labels)
+MD036: false
+
+# MD041: First line heading - disabled (files may start with frontmatter)
+MD041: false
+
+# MD060: Table column style - disabled (existing tables use compact style)
+MD060: false
+
+# MD046: Code block style - fenced only
+MD046:
+  style: "fenced"
+
+# MD048: Code fence style - backtick
+MD048:
+  style: "backtick"

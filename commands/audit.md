@@ -85,7 +85,8 @@ When `monorepo: true`, build a per-package tool matrix:
    - **Per-package**: When packages have different stacks (e.g., Python API + TypeScript frontend)
 
 Example package matrix:
-```
+
+```text
 Packages detected (monorepo: true):
 | Package | Path | Stack | Formatter | Linter | Types |
 |---------|------|-------|-----------|--------|-------|
@@ -97,6 +98,7 @@ Packages detected (monorepo: true):
 ### Step 2: COMPARE
 
 Compare Local Dev Tools table against 6-bundle master list:
+
 - For each bundle, check if Tool column has a value or shows "not configured" / "-"
 - Build list of missing bundles in priority order
 
@@ -123,6 +125,7 @@ Install and configure the single selected bundle missing.
 | Go | gofmt | golangci-lint | (built-in) | go test | log/slog | pre-commit |
 
 **Monorepo installation strategy** (when `monorepo: true`):
+
 - **Same stack across all packages**: Install and configure at repo root. One config file shared.
 - **Mixed stacks**: Install per-package. Each package gets its own config file in its directory.
 - **Git hooks**: Always install at repo root (hooks are repo-wide). Configure to run tools per-package via workspace commands (e.g., `pnpm -r run lint`, `turbo run lint`).
@@ -140,12 +143,14 @@ Install and configure the single selected bundle missing.
 **Purpose**: Set up structured logging with AI-friendly error capture.
 
 **For all languages, create:**
+
 1. `logs/` directory in project root
 2. Proper `logs/.gitignore` with content
 3. Logger configuration file (language-specific)
 4. Error handler that writes to `logs/last_error_<timestamp>.json`, ex: `logs/last_error_2025-01-01T12:00:00.000Z.json`
 
 **last_error.json schema** (AI-friendly structured error context):
+
 ```json
 {
   "timestamp": "2025-01-01T12:00:00.000Z",
@@ -175,6 +180,7 @@ Install and configure the single selected bundle missing.
 **Activation**: Only when database signals detected (docker-compose DB service, `.env` with `DATABASE_URL`/`DB_*`, migration tool config files, ORM in dependencies, vector DB in dependencies).
 
 **Steps:**
+
 1. Detect DB type and existing migration tool from project signals
 2. If no migration tool found, recommend one based on detected stack (prompt user to confirm)
 3. Verify migration tool is installed and configured
@@ -208,6 +214,7 @@ Run ALL configured tools (not just the new one):
 8. **Local dev startup** (if applicable): Verify the app starts locally (`docker compose up -d` or framework dev command), confirm it responds (e.g., `curl http://localhost:[port]`), then shut down. If no start command is known, skip.
 
 **Observability validation:**
+
 - Run logger initialization (language-specific)
 - Trigger test error to verify capture
 - Confirm `logs/` directory exists
@@ -215,6 +222,7 @@ Run ALL configured tools (not just the new one):
 - Confirm `logs/last_error_<timestamp>.json` is created with valid JSON
 
 **Database validation:**
+
 - Run migration tool's status/pending command to verify no drift
 - Run up migration, then down, then up again (verify reversibility)
 - Run seed script (verify idempotency -- run twice)
@@ -222,12 +230,14 @@ Run ALL configured tools (not just the new one):
 - If vector DB configured: verify extension/service is available
 
 **Local dev startup validation:**
+
 - If `docker-compose.yml` / `compose.yml` exists: run `docker compose config --quiet` (validate config), then `docker compose up -d`, wait for healthy, `curl` the dev URL, then `docker compose down`
 - If no compose file: use the framework's dev command (e.g., `npm run dev`, `python manage.py runserver`) in background, verify it binds to the expected port, then stop it
 - Record the working start command in CONVENTIONS.md Local Dev Tools table as `| Dev Server | [command] | [config] |`
 - **Monorepo**: Verify each deployable package starts independently
 
 **Monorepo validation** (when `monorepo: true`):
+
 - Run each configured tool **per package** using workspace commands or by changing into the package directory
 - Examples: `pnpm --filter web run lint`, `cd apps/api && ruff check .`, `turbo run typecheck`
 - Also run repo-root checks for root-level configs (e.g., root `tsconfig.json` references)
@@ -256,6 +266,7 @@ Filter out issues matching known-issues.md patterns - report separately as "Know
 If a new bundle was added, update `.spec_system/CONVENTIONS.md`:
 
 Update the Local Dev Tools table:
+
 ```markdown
 | Category | Tool | Config |
 |----------|------|--------|
@@ -263,6 +274,7 @@ Update the Local Dev Tools table:
 ```
 
 **Monorepo only**: Also update the Workspace Structure table with per-package tool status where stacks differ:
+
 ```markdown
 ## Workspace Structure
 
@@ -278,13 +290,15 @@ If the Workspace Structure table does not yet have tool columns, add them. If th
 ### Step 8: REPORT
 
 **For monorepos**, show per-package:
-```
+
+```text
 [apps/web] Formatter: 12 fixed | Linter: 3 remain
 [apps/api] Formatter: 8 fixed | Types: 2 errors
 ```
 
 **For single repos**:
-```
+
+```text
 REPORT
 - Added: Formatting (Ruff)
 - Config: ruff.toml created
@@ -301,7 +315,7 @@ REPORT
 
 ## Dry Run Output
 
-```
+```text
 AUDIT PREVIEW (DRY RUN)
 
 Repository: monorepo (Turborepo)
@@ -320,4 +334,3 @@ Would run: ruff format, ruff check, biome format, biome lint, mypy, tsc, pytest,
 
 Run without --dry-run to apply.
 ```
-

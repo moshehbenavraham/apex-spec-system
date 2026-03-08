@@ -19,26 +19,32 @@ Create the directory structure, phase PRD, and session stubs for a new phase. En
 ### 1. Assess Current State
 
 Read `.spec_system/state.json` and `.spec_system/PRD/` to understand:
+
 - What has been accomplished
 - Next sequential phase number
 - High-level objectives remaining
 
 If `.spec_system/CONSIDERATIONS.md` exists, review it for:
+
 - **Active Concerns** that should influence session ordering or scope
 - **Lessons Learned** (patterns to follow or avoid)
 - **Tool/Library Notes** relevant to this phase
 
 If `.spec_system/SECURITY-COMPLIANCE.md` exists, review it for:
+
 - **Open Findings** that should be addressed in this phase's sessions
 - **GDPR Status** that may affect data-handling session scope
 
 **Monorepo Checkpoint** (skip if `monorepo` is already `true` or `false`):
+
 - If the PRD references multiple packages/services but `state.json` has no `packages` array, alert the user:
-  ```
+
+  ```text
   Warning: PRD references multiple packages but monorepo is not configured.
   Consider running /createprd to detect and configure monorepo settings,
   or manually update state.json with monorepo: true and a packages array.
   ```
+
 - This is advisory only -- do not block phase creation
 
 ### 2. Create Phase Directory and PRD Markdown
@@ -196,6 +202,7 @@ For each session, create `session_NN_name.md` (use `snake_case` for name):
 **Monorepo package annotation** (only when `monorepo: true` in state.json):
 
 Add a `Package:` or `Packages:` line to the stub header, after the Session ID line:
+
 - Single-package session: `**Package**: apps/web`
 - Multi-package session: `**Packages**: apps/web, apps/api`
 - Cross-cutting or single-repo: omit the line entirely
@@ -237,16 +244,19 @@ Add the new phase to the Phases table in `.spec_system/PRD/PRD.md`. Also update 
 ## Phase Planning Guidelines
 
 ### Session Count
+
 - Typical phase: 4-8 sessions
 - Small phase: 2-3 sessions
 - Large phase: Consider splitting
 
 ### Session Sizing
+
 - Each session: 12-25 tasks
 - Each session: 2-4 hours
 - Single clear objective per session
 
 ### Dependency Management
+
 - Sessions within phase can depend on each other
 - Early sessions provide foundation
 - Later sessions build complexity
@@ -255,7 +265,7 @@ Add the new phase to the Phases table in `.spec_system/PRD/PRD.md`. Also update 
 
 Report to user:
 
-```
+```text
 Phase NN Created: Phase Name
 
 Structure:

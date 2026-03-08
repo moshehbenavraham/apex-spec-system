@@ -32,6 +32,7 @@ fi
 ```
 
 The JSON output includes:
+
 - `current_phase` - Current phase number
 - `completed_sessions` - List of completed session IDs
 - `monorepo` - true/false/null from state.json
@@ -39,6 +40,7 @@ The JSON output includes:
 - `active_package` - Resolved package context (null if not applicable)
 
 Also read:
+
 - `.spec_system/state.json` - Project state and phase/session progress
 - `.spec_system/PRD/PRD.md` - Product requirements for context
 
@@ -51,6 +53,7 @@ Check if a phase was recently completed:
 3. **Extract change manifest**: Build a list of files/directories created or modified during that phase
 
 **Phase-Focused Mode** (when a phase was just completed):
+
 - Prioritize documenting changes from the completed phase
 - Focus README updates on newly added packages/services
 - Update ARCHITECTURE.md with new components added in the phase
@@ -58,12 +61,14 @@ Check if a phase was recently completed:
 - **Monorepo**: Check which packages had sessions in the completed phase (use `completed_sessions` object format with `package` field). Focus per-package README updates on packages that changed.
 
 **Full Audit Mode** (initial setup, major milestones, or explicit request):
+
 - Audit all documentation comprehensively
 - Use when: first run, after multiple phases, or user requests full audit
 - **Monorepo**: Verify all packages have README files and that root documentation covers workspace structure
 
 Report the audit mode to the user before proceeding:
-```
+
+```text
 Audit Mode: Phase-Focused (Phase 01 just completed)
 Focus Areas:
 - apps/api/ (new - session 01-03)
@@ -87,7 +92,7 @@ Check for the presence and quality of standard documentation files.
 
 #### `/docs/` Directory
 
-```
+```text
 docs/
 |-- ARCHITECTURE.md        # System diagram, service relationships, tech stack
 |-- CODEOWNERS             # Who owns what
@@ -106,7 +111,7 @@ docs/
 
 Check for `README_<dirname>.md` in each significant directory:
 
-```
+```text
 apps/web/README_web.md           # Web app specifics
 apps/api/README_api.md           # API app specifics
 packages/shared/README_shared.md # Shared package usage
@@ -120,6 +125,7 @@ Pattern: `[parent]/[dirname]/README_[dirname].md`
 ### 4. Generate Audit Report
 
 Create a mental checklist of:
+
 - Missing files (need to create)
 - Stale files (need to update)
 - Redundant content (need to consolidate)
@@ -139,7 +145,7 @@ For each missing required file:
 
 #### README.md Template
 
-```markdown
+````markdown
 # [PROJECT_NAME]
 
 [One-line description of what this project does]
@@ -153,7 +159,7 @@ For each missing required file:
 
 ## Repository Structure
 
-```
+```text
 .
 |-- [dir1]/          # [Purpose]
 |-- [dir2]/          # [Purpose]
@@ -173,6 +179,7 @@ For each missing required file:
 - [Technology 2] - [Why]
 
 [MONOREPO ONLY - include when monorepo: true]
+
 ## Packages
 
 | Package | Path | Description | Stack |
@@ -185,7 +192,8 @@ For each missing required file:
 ## Project Status
 
 See [PRD](.spec_system/PRD/PRD.md) for current progress and roadmap.
-```
+
+````
 
 #### CONTRIBUTING.md Template
 
@@ -227,7 +235,7 @@ Use conventional commits:
 
 #### docs/ARCHITECTURE.md Template
 
-```markdown
+````markdown
 # Architecture
 
 ## System Overview
@@ -236,7 +244,7 @@ Use conventional commits:
 
 ## Dependency Graph
 
-```
+```text
 [Service A] --> [Service B] --> [Database]
      |
      v
@@ -287,7 +295,7 @@ Use conventional commits:
 [MONOREPO ONLY - include when monorepo: true]
 ## Package Dependencies
 
-```
+```text
 [Package A] --> [Package B (shared)]
 [Package C] --> [Package B (shared)]
 ```
@@ -303,7 +311,7 @@ Use conventional commits:
 ## Key Decisions
 
 See [Architecture Decision Records](docs/adr/) for detailed decision history.
-```
+````
 
 #### docs/onboarding.md Template
 
@@ -325,20 +333,20 @@ Zero-to-hero checklist for new developers.
 ```bash
 git clone [repo-url]
 cd [project-name]
-```
+```text
 
 ### 2. Install Dependencies
 
 ```bash
 [install command]
-```
+```text
 
 ### 3. Configure Environment
 
 ```bash
 cp .env.example .env
 # Edit .env with your values
-```
+```text
 
 ### 4. Required Secrets
 
@@ -351,7 +359,7 @@ cp .env.example .env
 
 ```bash
 [start command]
-```
+```text
 
 ### 6. Verify Setup
 
@@ -362,10 +370,13 @@ cp .env.example .env
 ## Common Issues
 
 ### [Issue 1]
+
 **Solution**: [Fix]
 
 ### [Issue 2]
+
 **Solution**: [Fix]
+
 ```
 
 #### docs/development.md Template
@@ -432,15 +443,18 @@ cp .env.example .env
 
 # Run with coverage
 [coverage command]
-```
+```text
 
 ## Debugging
 
 ### [Common scenario 1]
+
 [How to debug]
 
 ### [Common scenario 2]
+
 [How to debug]
+
 ```
 
 #### docs/environments.md Template
@@ -506,7 +520,7 @@ curl http://localhost:[port]/health
 
 ## CI/CD Pipeline
 
-```
+```text
 Push --> Build --> Test --> [Staging] --> [Production]
 ```
 
@@ -532,13 +546,13 @@ Push --> Build --> Test --> [Staging] --> [Production]
 
 ```bash
 [deploy command or "automatic via CI on push to main"]
-```
+```text
 
 ### Rollback
 
 ```bash
 [rollback command, e.g., platform revert, git revert + redeploy, previous image tag]
-```
+```text
 
 **When to rollback**: Health check fails post-deploy, error rate spikes, or critical bug reported.
 
@@ -556,6 +570,7 @@ Push --> Build --> Test --> [Staging] --> [Production]
 - Metrics: [Location]
 - Alerts: [Location]
 - Health: [health endpoint URL]
+
 ```
 
 #### docs/adr/0000-template.md (ADR Template)
@@ -641,12 +656,12 @@ Trade-offs, what this enables, what it prevents.
 ```bash
 # Install/import
 [import/install command]
-```
+```text
 
 ```typescript
 // Example usage
 [code example]
-```
+```text
 
 ## Run Commands
 
@@ -662,10 +677,13 @@ Trade-offs, what this enables, what it prevents.
 ## API Reference
 
 ### [Function/Class 1]
+
 [Brief description and signature]
 
 ### [Function/Class 2]
+
 [Brief description and signature]
+
 ```
 
 ### 6. Update Existing Documentation
@@ -686,6 +704,7 @@ For each existing documentation file:
 ### 7. Sync with Spec System Progress
 
 Cross-reference documentation with:
+
 - Completed sessions (should be documented)
 - Current phase objectives
 - Technical stack decisions
@@ -698,7 +717,8 @@ Ensure README and ARCHITECTURE reflect actual implemented state, not planned fut
 When in Phase-Focused Mode, use implementation-notes.md files as the primary source:
 
 1. **Read all implementation notes** for the completed phase:
-   ```
+
+   ```text
    .spec_system/specs/phaseNN-session*/implementation-notes.md
    ```
 
@@ -709,6 +729,7 @@ When in Phase-Focused Mode, use implementation-notes.md files as the primary sou
    - APIs added/changed (update API docs)
 
 3. **Prioritize documentation updates** based on change type:
+
    | Change Type | Documentation Action |
    |-------------|---------------------|
    | New package/service | Create README_<name>.md |
@@ -724,17 +745,20 @@ When in Phase-Focused Mode, use implementation-notes.md files as the primary sou
 For all documentation files:
 
 #### Accuracy
+
 - All commands work
 - All paths exist
 - All links valid
 - Version numbers current
 
 #### Conciseness
+
 - No redundant sections
 - No verbose explanations where a command suffices
 - No duplicate information across files
 
 #### Completeness
+
 - All required files present
 - All sections filled in (no TODO placeholders left)
 - Env var inventory complete
@@ -806,6 +830,7 @@ Recommend re-running `/documents` after:
 ### 10. Report to User
 
 Show:
+
 - Files created
 - Files updated
 - Current documentation coverage

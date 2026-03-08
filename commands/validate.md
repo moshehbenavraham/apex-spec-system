@@ -37,6 +37,7 @@ fi
 ```
 
 This returns structured JSON including:
+
 - `current_session` - The session to validate
 - `current_session_dir_exists` - Whether specs directory exists
 - `current_session_files` - Files already in the session directory
@@ -60,6 +61,7 @@ Store the resolved package path for use in Steps 3-5. A `null` package means thi
 ### 2. Read Session Files
 
 Using the `current_session` value from the script output, read all session documents:
+
 - `.spec_system/specs/[current-session]/spec.md` - Requirements
 - `.spec_system/specs/[current-session]/tasks.md` - Task checklist
 - `.spec_system/specs/[current-session]/implementation-notes.md` - Progress log
@@ -71,20 +73,26 @@ Using the `current_session` value from the script output, read all session docum
 ### 3. Run Validation Checks
 
 #### A. Task Completion
+
 Verify all tasks in tasks.md are marked `[x]`:
+
 - Count total tasks
 - Count completed tasks
 - List any incomplete tasks
 
 #### B. Deliverables Check
+
 From spec.md deliverables section:
+
 - Verify each file exists
 - Check file is non-empty
 - Note any missing files
 - **Monorepo**: File paths should be repo-root-relative (e.g., `apps/web/src/auth.ts`). Verify files are within the declared package scope (from Step 1a). Flag any deliverables outside the package boundary.
 
 #### C. ASCII Encoding Check
+
 For each deliverable file:
+
 ```bash
 # Check encoding
 file [filename]  # Should show: ASCII text
@@ -98,11 +106,14 @@ LC_ALL=C grep '[^[:print:][:space:]]' [filename]
 # Check for CRLF line endings
 grep -l $'\r' [filename]
 ```
+
 - Report any non-ASCII characters found
 - Report any CRLF line endings
 
 #### D. Test Verification
+
 Run the project's test suite:
+
 - Record total tests
 - Record passed/failed
 - Calculate coverage if available
@@ -110,6 +121,7 @@ Run the project's test suite:
 - **Monorepo**: When a package is resolved (Step 1a), run tests scoped to that package first (e.g., `cd apps/web && npm test`, or using workspace commands like `pnpm --filter web test`). Also run repo-root tests if they exist, since cross-package regressions matter.
 
 **CRITICAL -- NO "PRE-EXISTING" EXCUSE**: If ANY test fails, you MUST:
+
 1. Investigate the root cause -- determine whether the session's changes caused or contributed to the failure
 2. NEVER dismiss a failure as "pre-existing" or "environment issue" -- if tests passed before this session and fail now, THIS SESSION BROKE THEM
 3. FIX the failure before continuing validation. If you changed a Docker image, a dependency, a config file, or any shared code, failures in existing tests are YOUR responsibility
@@ -117,13 +129,17 @@ Run the project's test suite:
 5. If a failure is genuinely unrelated (e.g., flaky network test), you must PROVE it by showing the test also fails on the pre-session commit -- do not assume
 
 #### E. Success Criteria
+
 From spec.md success criteria:
+
 - Check each functional requirement
 - Verify testing requirements met
 - Confirm quality gates passed
 
 #### F. Conventions Compliance (if CONVENTIONS.md exists)
+
 Spot-check deliverables against project conventions:
+
 - **Naming**: Functions, variables, files follow naming conventions
 - **Structure**: Files are organized according to file structure conventions
 - **Error Handling**: Follows the project's error handling approach
@@ -138,6 +154,7 @@ Note: This is a spot-check, not exhaustive. Flag obvious violations only.
 Review **only files created or modified in this session** (use deliverables from spec.md and git diff against the pre-session commit). Skip files not touched by this session.
 
 **Security (OWASP Top 10 spot-check):**
+
 - **Injection**: SQL, command, LDAP injection vectors -- unsanitized user input in queries or shell calls
 - **Broken Auth**: Hardcoded credentials, API keys, tokens, or secrets in source code
 - **Sensitive Data Exposure**: Unencrypted PII in logs, error messages, or responses; secrets in plaintext config
@@ -146,6 +163,7 @@ Review **only files created or modified in this session** (use deliverables from
 - **Database Security** (if Database Layer conventions exist): Hardcoded connection strings (must use env vars), raw SQL with string concatenation (must use parameterized queries), missing down/rollback migrations, unencrypted sensitive columns (passwords, tokens, PII), unlimited connection pools, shared credentials between test and production
 
 **GDPR Compliance:**
+
 - **Data Collection**: Any new collection of personal data (names, emails, IPs, device IDs) must have a documented purpose and legal basis
 - **Consent**: If collecting user data, verify consent mechanism exists before data is stored
 - **Data Minimization**: Only the minimum necessary personal data is collected -- flag any over-collection
@@ -154,6 +172,7 @@ Review **only files created or modified in this session** (use deliverables from
 - **Third-Party Sharing**: If sending data to external services, verify the transfer is documented
 
 **Scope rules:**
+
 - This is a targeted review of session deliverables, not a full codebase audit
 - Flag **clear violations** only -- do not speculate about edge cases
 - If the session added no user-facing data handling, mark GDPR as N/A with a brief justification
@@ -177,6 +196,7 @@ Determine whether a BQC applies: does this session produce application code?
 | 5 | Contract alignment | Interface between components has shape mismatch, missing enum case, or schema drift |
 
 **Scoring**:
+
 - 0 violations: PASS
 - 1-2 low-severity (e.g., missing retry backoff on non-critical read path): WARN -- log but do not block
 - Any high-severity in top priorities: FAIL -- fix before passing
@@ -476,6 +496,7 @@ From spec.md:
 Update `.spec_system/state.json` based on validation result:
 
 **If PASS:**
+
 ```json
 {
   "current_session": "phaseNN-sessionNN-name",
@@ -490,6 +511,7 @@ Update `.spec_system/state.json` based on validation result:
 ```
 
 **If FAIL:**
+
 ```json
 {
   "next_session_history": [

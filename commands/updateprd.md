@@ -19,6 +19,7 @@ After successful validation, mark the session complete, update all tracking docu
 ### 1. Verify Validation Passed
 
 Read `.spec_system/specs/[current-session]/validation.md`:
+
 - Confirm overall result is PASS
 - If FAIL, instruct user to fix issues first
 
@@ -29,6 +30,7 @@ Also read `.spec_system/specs/[current-session]/spec.md` to extract the `Package
 Update `.spec_system/state.json`:
 
 **Single-repo** (or `monorepo: false/null`):
+
 ```json
 {
   "completed_sessions": [
@@ -53,6 +55,7 @@ Update `.spec_system/state.json`:
 ```
 
 **Monorepo** (`monorepo: true`): Use object form for `completed_sessions` and include `package` in history:
+
 ```json
 {
   "completed_sessions": [
@@ -74,11 +77,11 @@ Update `.spec_system/state.json`:
 - The `package` value comes from the session's spec.md `Package:` field (read in Step 1)
 - Use `null` for the package field in cross-cutting sessions
 - Phase completion: all sessions in the phase must be done, regardless of which packages they target
-```
 
 ### 3. Update Phase PRD
 
 Update `.spec_system/PRD/phase_NN/PRD_phase_NN.md`:
+
 - Mark session as Complete in Progress Tracker
 - Add completion date
 - Update progress percentage
@@ -164,6 +167,7 @@ Items for future sessions:
 ### 5. Check Phase Completion
 
 If this was the last session in the phase:
+
 - Update phase status to "complete" in state.json
 - Archive phase: move `.spec_system/PRD/phase_NN/` to `.spec_system/archive/phases/phase_NN/`
 - Update master `.spec_system/PRD/PRD.md`
@@ -182,12 +186,14 @@ Increment the project's patch version in standard version files. Check for these
 | `VERSION` | Plain version string | `1.2.3` -> `1.2.4` |
 
 **Version increment rules:**
+
 - Increment the **patch** version by default (X.Y.Z -> X.Y.Z+1)
 - If version has pre-release suffix (e.g., `-alpha`, `-beta`), preserve it
 - If no version file found, skip this step and note it in the report
 - **Monorepo**: Check the package directory first for a version file (e.g., `apps/web/package.json`), then fall back to the repo root version file. Increment whichever is found first. If both exist, increment the package version file only -- root version is managed separately.
 
 **Also update version in documentation** if the project follows the monorepo documentation standard (see `/documents`):
+
 - `README.md` - if it contains a version badge or version line
 - Any other files that reference the project version
 
@@ -196,7 +202,8 @@ Increment the project's patch version in standard version files. Check for these
 Commit and push ALL non-gitignored repo changes.  DO NOT add ANY attributions or co-authors!
 
 Commit message format:
-```
+
+```text
 Complete phaseNN-sessionNN-name: [brief description]
 
 - [key deliverable 1]
@@ -205,7 +212,8 @@ Complete phaseNN-sessionNN-name: [brief description]
 ```
 
 **Monorepo**: Include the package path in the commit message when applicable:
-```
+
+```text
 Complete phaseNN-sessionNN-name (apps/web): [brief description]
 
 - [key deliverable 1]
@@ -216,6 +224,7 @@ Complete phaseNN-sessionNN-name (apps/web): [brief description]
 ### 8. Report Completion
 
 Tell the user:
+
 - Session marked complete
 - Updated files list
 - Version change (old -> new)

@@ -13,7 +13,7 @@ Use maximum thinking budget for this prompt.
 
 ## Usage
 
-```
+```text
 /pullndoc <upstream-dir>
 ```
 
@@ -41,9 +41,11 @@ Use maximum thinking budget for this prompt.
 Change into the upstream directory provided by the user.
 
 Record the current HEAD commit hash:
-```
+
+```bash
 git rev-parse HEAD
 ```
+
 Save this as `$BEFORE_SHA`.
 
 Record the current branch name.
@@ -61,26 +63,30 @@ continue to subsequent steps.
 
 Run all three of these to build a complete picture:
 
-```
+```bash
 git log --oneline $BEFORE_SHA..$AFTER_SHA
 ```
+
 List every commit pulled in.
 
-```
+```bash
 git diff --stat $BEFORE_SHA..$AFTER_SHA
 ```
+
 Get the full file-level change summary.
 
-```
+```bash
 git diff $BEFORE_SHA..$AFTER_SHA
 ```
+
 Read the **complete diff** for every changed file. Do not skip or summarize any
 file. If the diff is very large, paginate through it completely.
 
 ### 4. Generate the documentation
 
 Create a markdown file at:
-```
+
+```text
 <upstream-dir>/docs/upstream-pull-<YYYY-MM-DD>.md
 ```
 
@@ -88,7 +94,7 @@ Create the `docs/` directory inside the upstream dir if it does not exist.
 
 Structure the document as follows:
 
-```
+```markdown
 # Upstream Pull -- <date>
 
 ## Summary
@@ -117,6 +123,7 @@ altered env vars, etc. State "None detected" if applicable.)
 ## Output
 
 The generated markdown file path is reported to the user along with a brief summary:
+
 - Number of commits pulled
 - Number of files changed
 - Whether any breaking changes were detected

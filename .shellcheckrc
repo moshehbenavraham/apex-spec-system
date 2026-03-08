@@ -1,0 +1,15 @@
+# ShellCheck configuration for Apex Spec System
+# https://www.shellcheck.net/wiki/
+
+# Default severity level: warning and above
+severity=warning
+
+# Default shell dialect
+shell=bash
+
+# Allow sourcing paths relative to the script location
+source-path=SCRIPTDIR
+
+# Disable specific checks project-wide:
+# SC1091: Not following sourced files (source paths vary by environment)
+disable=SC1091

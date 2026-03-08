@@ -52,6 +52,7 @@ The command accepts three input modes:
 **Mode B: File reference provided** -- The user provides a file path (design spec, exported Figma notes, wireframe descriptions). Read the file and use its contents as the source material.
 
 **Mode C: No source provided (autonomous)** -- The user runs `/createuxprd` with no additional input. Derive the entire UX PRD autonomously from:
+
 1. `.spec_system/PRD/PRD.md` (functional requirements, use cases, user personas)
 2. The existing codebase (if any UI code exists, infer patterns, routes, components)
 3. `state.json` project context (name, phase, tech stack)
@@ -61,6 +62,7 @@ In Mode C, do NOT ask clarifying questions. Make confident, opinionated decision
 **For Modes A and B only** -- if the source is sparse, ask 3-8 targeted questions covering:
 
 **Structural questions:**
+
 - Primary user flows (what are the critical paths?)
 - Screen/page inventory (what screens exist?)
 - Navigation structure (how do users move between screens?)
@@ -69,6 +71,7 @@ In Mode C, do NOT ask clarifying questions. Make confident, opinionated decision
 - Accessibility requirements (WCAG level? specific needs?)
 
 **Design identity questions** (ask when no visual design assets are provided):
+
 - Who are the real people using this? What is their emotional state when they arrive? (stressed founder at midnight? curious teenager? professional making high-stakes decisions?)
 - What should users FEEL? Define 2-3 emotional targets (e.g., "calm authority + subtle delight," "raw energy + controlled chaos," "intimate warmth + precision")
 - Is there a reference domain outside web design that fits the product's personality? (architecture, fashion editorial, scientific instruments, aerospace interfaces, museum exhibitions, vintage packaging, botanical illustrations...)
@@ -88,35 +91,41 @@ Check whether `.spec_system/PRD/PRD_UX.md` already exists.
 From the source material (Modes A/B) or PRD.md alone (Mode C), extract:
 
 **Design identity:**
+
 - **Emotional targets**: 2-3 feeling words that define the experience
 - **Aesthetic identity**: reference domain + era/movement + material metaphor
 - **Signature moment**: the ONE hero interaction worth screenshotting
 - **Micro-narrative arc**: Arrival -> Orientation -> Engagement -> Action -> Resolution
 
 **Structure and behavior:**
+
 - **User flows**: critical paths through the application
 - **Screen inventory**: every distinct screen/page/view
 - **Navigation structure**: how screens connect
 - **Interaction patterns**: forms, modals, notifications, real-time elements
 
 **Design system:**
+
 - **Color architecture**: dominant surface (60%), secondary (25%), accent (10%), signal (5%)
 - **Typography**: display font (personality carrier), body font (legible partner), monospace (if needed) -- with modular scale ratio
 - **Spacing scale**: consistent spacing values as a defined scale
 - **Elevation model**: how depth works (shadows, layers, blur, transparency, borders)
 
 **Motion and animation:**
+
 - **Entrance choreography**: how elements reveal on load and scroll
 - **Interaction feedback**: hover states, click responses, focus rings
 - **Scroll-driven moments**: transformations triggered by scroll position
 - **Performance budget**: 60fps target, max 3 simultaneous animations per viewport region
 
 **Responsive and accessibility:**
+
 - **Responsive strategy**: breakpoints, layout changes per context (not just shrinking)
 - **Accessibility**: WCAG targets, keyboard nav, screen reader needs, reduced-motion strategy
 - **Component patterns**: reusable UI patterns identified
 
 Important:
+
 - Derive flows from PRD.md use cases -- don't invent new ones
 - **Modes A/B**: If design details are missing, note them in Open Questions rather than guessing
 - **Mode C**: Make opinionated decisions for ALL sections -- do not leave Open Questions for things you can reasonably decide. Only list questions that genuinely require user input (e.g., brand colors already chosen, legal/compliance constraints)
@@ -163,11 +172,13 @@ Create `.spec_system/PRD/PRD_UX.md`:
 **Goal**: [What the user accomplishes]
 
 ```
+
 [Step 1] --> [Step 2] --> [Step 3] --> [Outcome]
      |
      v
   [Alt path] --> [Recovery]
-```
+
+```text
 
 **Happy path**: [Brief description]
 **Error states**: [Key error scenarios and recovery]
@@ -188,6 +199,7 @@ Create `.spec_system/PRD/PRD_UX.md`:
 ## 4. Navigation Structure
 
 ```
+
 [Root]
 |-- [Section 1]
 |   |-- [Screen A]
@@ -195,7 +207,8 @@ Create `.spec_system/PRD/PRD_UX.md`:
 |-- [Section 2]
 |   \-- [Screen C]
 \-- [Settings/Profile]
-```
+
+```text
 
 **Navigation pattern**: [tabs, sidebar, breadcrumb, etc.]
 **Deep linking**: [supported routes]
@@ -347,6 +360,7 @@ Palette character: [WARM or COOL? NATURAL or SYNTHETIC? LOUD or QUIET?]
 ```
 
 Notes:
+
 - Omit sections that have no content rather than leaving placeholders
 - Sections 1 (Design Brief), 6 (Motion), 7 (Layout), 10 (Design System), and 12 (Anti-Patterns) are optional for purely utilitarian interfaces (admin panels, internal CRUD tools) but recommended for any consumer-facing product
 - Keep flows as ASCII diagrams, not verbose prose
@@ -363,7 +377,7 @@ If checks fail, fix and re-check.
 
 ## Output
 
-```
+```text
 /createuxprd Complete!
 
 Created:
