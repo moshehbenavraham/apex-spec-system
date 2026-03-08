@@ -1,6 +1,6 @@
 # Apex Spec System
 
-**Version: 1.6.11-beta**
+**Version: 2.0.0-beta**
 
 A Claude Code plugin providing a specification-driven workflow system for AI-assisted development. Think Github Spec Kit (our source inspiration) simplified.
 
@@ -222,6 +222,12 @@ All files must use ASCII-only characters (0-127). No Unicode, emoji, or smart qu
 
 - [Usage Guidance](docs/GUIDANCE.md) - When to use, workflow modes, team patterns, monorepo guidance
 - [Production Walkthrough](docs/WALKTHROUGH.md) - Real-world examples (single-repo and monorepo)
+
+## Apex Infinite CLI
+
+The `apex-infinite-cli/` directory contains a standalone Python CLI that runs the entire Apex Spec System workflow autonomously in an infinite loop. A manager LLM decides which command to run next, executes Claude Code as a subprocess, logs the interaction to SQLite, and repeats -- no human intervention required unless the manager asks for help.
+
+Supports Grok, OpenAI, and Ollama as the manager LLM. See [apex-infinite-cli/README-apex-infinite-cli.md](apex-infinite-cli/README-apex-infinite-cli.md) for setup and usage.
 
 ## License
 

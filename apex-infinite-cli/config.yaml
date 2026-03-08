@@ -1,0 +1,18 @@
+# Choose active provider: ollama | grok | openai
+provider: grok
+
+providers:
+  ollama:
+    base_url: "http://localhost:11434/v1"
+    api_key: "ollama"
+    model: "llama3.1:70b"
+
+  grok:
+    base_url: "https://api.x.ai/v1"
+    api_key: "${XAI_API_KEY}"
+    model: "grok-4-1-fast-reasoning"
+
+  openai:
+    base_url: "https://api.openai.com/v1"
+    api_key: "${OPENAI_API_KEY}"
+    model: "gpt-4o"

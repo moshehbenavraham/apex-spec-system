@@ -11,4 +11,8 @@ README.md
 .claude-plugin/plugin.json
 skills/spec-workflow/SKILL.md
 
+## Apex Infinite CLI
+
+`apex-infinite-cli/` contains a standalone Python CLI that autonomously runs the full Apex Spec System workflow in an infinite loop -- a manager LLM decides which command to run next, executes Claude Code, logs the result, and repeats until the project is complete. Replaces the n8n "Apex Spec System Infinite" workflow. See `apex-infinite-cli/README-apex-infinite-cli.md`.
+
 # Details - See @skills/spec-workflow/SKILL.md
