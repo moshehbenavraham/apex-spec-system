@@ -18,6 +18,7 @@ from pathlib import Path
 
 import click
 import yaml
+from dotenv import load_dotenv
 from openai import OpenAI
 from rich.console import Console
 from rich.panel import Panel
@@ -434,6 +435,9 @@ def load_config(config_path, provider_override=None, model_override=None):
     if provider_name not in config["providers"]:
         console.print(f"[red]Unknown provider: {provider_name}[/red]")
         sys.exit(1)
+
+    # Load .env from same directory as config file
+    load_dotenv(path.parent / ".env")
 
     # Expand env vars in api_key
     provider_cfg = config["providers"][provider_name]

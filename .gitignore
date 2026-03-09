@@ -8,6 +8,35 @@
 /test_data/
 /EXAMPLE/
 
+# Secrets
+.env
+
 # Python
 __pycache__/
 *.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Testing / Coverage
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SQLite (apex-infinite-cli history is in ~/.apex-infinite/)
+*.db-journal

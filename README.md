@@ -1,6 +1,6 @@
 # Apex Spec System
 
-**Version: 2.0.3-beta**
+**Version: 2.0.4-beta**
 
 A Claude Code plugin providing a specification-driven workflow system for AI-assisted development. Think Github Spec Kit (our source inspiration) simplified.
 
