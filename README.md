@@ -4,6 +4,10 @@
 
 A Claude Code plugin providing a specification-driven workflow system for AI-assisted development. Think Github Spec Kit (our source inspiration) simplified.
 
+# NEW - Apex Spec System "Open"
+
+Open Skill (https://agentskills.io/home) version of this plugin: https://github.com/moshehbenavraham/apex-spec-system-open
+
 ## Overview
 
 The Apex Spec System breaks large projects into manageable, well-scoped implementation sessions that fit within AI context windows and human attention spans.
